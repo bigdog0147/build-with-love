@@ -2013,7 +2013,8 @@ function Investors() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
-                  href="#contact"
+                  href="/gigafactory3-investor-overview.pdf"
+                  download
                   className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
                   style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
                 >
