@@ -28,9 +28,6 @@ export function isRecoveryClaims(claims: Record<string, unknown>): {
   ok: boolean;
   reason?: string;
 } {
-  ok: boolean;
-  reason?: string;
-} {
   const nowSec = Math.floor(Date.now() / 1000);
 
   const exp = typeof claims.exp === "number" ? claims.exp : 0;
