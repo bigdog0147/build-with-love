@@ -2215,57 +2215,216 @@ function Leadership() {
   );
 }
 
-/* ---------- Contact ---------- */
+/* ---------- Contact & Global Offices ---------- */
 
+const OFFICES = [
+  {
+    region: "Asia-Pacific",
+    city: "Singapore",
+    role: "Global Headquarters",
+    address: "Neo District · Marina Bay",
+    tz: "GMT+8",
+    hours: "24 / 7 operations",
+  },
+  {
+    region: "Greater China",
+    city: "Shanghai",
+    role: "Manufacturing HQ",
+    address: "Lingang Special Area",
+    tz: "GMT+8",
+    hours: "Mon–Sat · 08:00–20:00",
+  },
+  {
+    region: "Europe",
+    city: "Berlin",
+    role: "European HQ",
+    address: "Mitte · Engineering Campus",
+    tz: "GMT+1",
+    hours: "Mon–Fri · 08:00–19:00",
+  },
+  {
+    region: "North America",
+    city: "Austin",
+    role: "AI & Silicon HQ",
+    address: "East Sixth · Research Campus",
+    tz: "GMT-6",
+    hours: "Mon–Fri · 08:00–19:00",
+  },
+  {
+    region: "Middle East",
+    city: "Abu Dhabi",
+    role: "Energy HQ",
+    address: "Masdar City",
+    tz: "GMT+4",
+    hours: "Sun–Thu · 08:00–18:00",
+  },
+  {
+    region: "Latin America",
+    city: "São Paulo",
+    role: "Regional HQ",
+    address: "Faria Lima Tower",
+    tz: "GMT-3",
+    hours: "Mon–Fri · 08:00–18:00",
+  },
+];
 
+const CONTACT_CHANNELS = [
+  { k: "Enterprise", v: "enterprise@gigafactory3.com" },
+  { k: "Investors", v: "ir@gigafactory3.com" },
+  { k: "Government", v: "gov@gigafactory3.com" },
+  { k: "Media", v: "press@gigafactory3.com" },
+  { k: "Careers", v: "careers@gigafactory3.com" },
+  { k: "Global desk", v: "+65 6800 3300" },
+];
 
 function Contact() {
   return (
-    <section id="contact" className="relative px-6 py-28">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:items-center">
-        <div>
-          <SectionHeader
-            eyebrow="Contact"
-            title="Speak with engineering."
-            desc="For enterprise, government and institutional inquiries."
-            align="left"
-          />
-          <div className="mt-8 space-y-4 text-sm">
-            {[
-              ["Global Headquarters", "Neo District · Singapore"],
-              ["Enterprise", "enterprise@gigafactory3.com"],
-              ["Investors", "ir@gigafactory3.com"],
-              ["Media", "press@gigafactory3.com"],
-            ].map(([k, v]) => (
-              <div key={k} className="flex items-start justify-between border-b border-border pb-4">
-                <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{k}</div>
-                <div>{v}</div>
+    <section id="contact" className="relative overflow-hidden px-6 py-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(1000px 500px at 10% 100%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Contact & Global Offices"
+          title="Speak with engineering."
+          desc="For enterprise, government and institutional inquiries — across every time zone we operate in."
+        />
+
+        {/* Form + channels */}
+        <div className="mt-14 grid gap-6 lg:grid-cols-12">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="rounded-3xl border border-border p-8 glass lg:col-span-7"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+              Request a briefing
+            </div>
+            <h3 className="mt-3 font-display text-2xl sm:text-3xl">
+              Confidential inquiry
+            </h3>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <Field label="Full name" placeholder="Ada Lovelace" />
+              <Field label="Company / Institution" placeholder="Organization" />
+              <Field label="Email" type="email" placeholder="you@company.com" />
+              <Field label="Country" placeholder="Country / Region" />
+              <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
+              <Field label="Message" placeholder="Tell us about your requirements" full textarea />
+            </div>
+            <button
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
+              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+            >
+              Submit inquiry <ArrowRight className="h-4 w-4" />
+            </button>
+            <p className="mt-4 text-xs text-muted-foreground">
+              All submissions are reviewed by our regional partnerships team within one business day.
+            </p>
+          </form>
+
+          <div className="grid gap-4 lg:col-span-5">
+            <div
+              className="rounded-3xl border border-border p-8 glass"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Direct channels
+              </div>
+              <h3 className="mt-3 font-display text-2xl">Route your request</h3>
+              <ul className="mt-6 divide-y divide-border">
+                {CONTACT_CHANNELS.map((c) => (
+                  <li key={c.k} className="flex items-center justify-between py-3 text-sm">
+                    <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {c.k}
+                    </span>
+                    <span className="text-foreground">{c.v}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div
+              className="flex items-center gap-4 rounded-3xl border border-border p-6 glass"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <span
+                className="grid h-11 w-11 place-items-center rounded-xl border border-border bg-white/5"
+              >
+                <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
+              </span>
+              <div>
+                <div className="text-sm">Secure & sovereign inquiries</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  PGP-encrypted channels available on request for government partners.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Global offices */}
+        <div className="mt-16">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Global offices
+              </div>
+              <h3 className="mt-3 font-display text-3xl sm:text-4xl">
+                Present in every region we operate.
+              </h3>
+            </div>
+            <a
+              href="#network"
+              className="hidden items-center gap-2 rounded-full border border-border px-5 py-2.5 text-xs uppercase tracking-[0.22em] text-foreground transition hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] hover:text-[var(--gold)] sm:inline-flex"
+            >
+              View network <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {OFFICES.map((o) => (
+              <div
+                key={o.city}
+                className="group relative overflow-hidden rounded-2xl border border-border p-6 glass transition hover:-translate-y-0.5 hover:border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)]"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    {o.region}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {o.tz}
+                  </div>
+                </div>
+                <div className="mt-5 font-display text-2xl">{o.city}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {o.role}
+                </div>
+                <div className="mt-6 space-y-1 text-sm text-muted-foreground">
+                  <div>{o.address}</div>
+                  <div className="text-xs">{o.hours}</div>
+                </div>
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 -bottom-px h-px opacity-0 transition group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, var(--gold), transparent)",
+                  }}
+                />
               </div>
             ))}
           </div>
         </div>
-
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className="rounded-2xl border border-border p-6 glass md:p-8"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Full name" placeholder="Ada Lovelace" />
-            <Field label="Company" placeholder="Institution" />
-            <Field label="Email" type="email" placeholder="you@company.com" full />
-            <Field label="Message" placeholder="Tell us about your requirements" full textarea />
-          </div>
-          <button
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
-            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-          >
-            Request a briefing <ArrowRight className="h-4 w-4" />
-          </button>
-        </form>
       </div>
     </section>
   );
 }
+
 
 function Field({
   label,
