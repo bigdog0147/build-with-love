@@ -846,6 +846,7 @@ function ForgotPasswordForm({ switchToSignIn }: { switchToSignIn: () => void }) 
   }
 
   if (sent) {
+    const masked = maskEmail(email);
     return (
       <div
         className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
@@ -863,13 +864,23 @@ function ForgotPasswordForm({ switchToSignIn }: { switchToSignIn: () => void }) 
             <Mail className="h-8 w-8 text-primary-foreground" />
           </div>
           <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
-            Reset link sent
+            Request received
           </div>
           <h2 className="mt-3 font-display text-3xl sm:text-4xl">Check your inbox</h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            If an account exists for{" "}
-            <span className="text-foreground">{email}</span>, we've sent a secure link
-            to reset your password. The link will expire shortly for your safety.
+
+          <div
+            className="mx-auto mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground"
+            title="Only a masked version of the email is shown. This protects your privacy and never reveals whether an account exists."
+          >
+            <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
+            <span className="uppercase tracking-[0.18em]">Reset for</span>
+            <span className="font-mono text-foreground">{masked}</span>
+          </div>
+
+          <p className="mt-4 text-sm text-muted-foreground">
+            If an account matches that address, a secure reset link is on its way.
+            For your privacy, we show the same confirmation whether or not an
+            account exists. The link will expire shortly for your safety.
           </p>
           <button
             onClick={switchToSignIn}
