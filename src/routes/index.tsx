@@ -689,24 +689,49 @@ function CinematicBand() {
 
 
 function Metrics() {
-  const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
   return (
     <section className="relative border-y border-border bg-[color-mix(in_oklab,var(--surface)_60%,transparent)] px-6 py-20">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3 lg:grid-cols-6">
-        {metrics.map((m: Metric) => (
-          <Counter
-            key={m.id}
-            value={m.value}
-            suffix={m.suffix}
-            label={m.label}
-            decimals={m.decimals}
-            sub={m.sub ?? undefined}
-          />
-        ))}
+        <Suspense fallback={<MetricsSkeleton />}>
+          <MetricsList />
+        </Suspense>
       </div>
     </section>
   );
 }
+
+function MetricsList() {
+  const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
+  return (
+    <>
+      {metrics.map((m: Metric) => (
+        <Counter
+          key={m.id}
+          value={m.value}
+          suffix={m.suffix}
+          label={m.label}
+          decimals={m.decimals}
+          sub={m.sub ?? undefined}
+        />
+      ))}
+    </>
+  );
+}
+
+function MetricsSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="text-center">
+          <div className="mx-auto h-10 w-28 rounded-md skeleton-block gf-shimmer sm:h-12" />
+          <div className="mx-auto mt-3 h-3 w-20 rounded skeleton-block gf-shimmer" />
+          <div className="mx-auto mt-2 h-2 w-14 rounded skeleton-block gf-shimmer opacity-70" />
+        </div>
+      ))}
+    </>
+  );
+}
+
 
 function Counter({
   value,
