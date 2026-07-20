@@ -1,0 +1,276 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/reset-password")({
+  component: ResetPasswordPage,
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Reset Password — Gigafactory 3" },
+      {
+        name: "description",
+        content: "Choose a new password for your Gigafactory 3 member account.",
+      },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
+});
+
+function ResetPasswordPage() {
+  const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+  const [validLink, setValidLink] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  // Supabase parses the recovery token from the URL hash and creates a
+  // temporary session with a PASSWORD_RECOVERY event. Wait for it before
+  // allowing the user to submit a new password.
+  useEffect(() => {
+    let cancelled = false;
+
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+    const hashError = params.get("error_description") || params.get("error");
+    if (hashError) {
+      setLinkError(decodeURIComponent(hashError));
+      setReady(true);
+      return;
+    }
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+        setValidLink(true);
+        setReady(true);
+      }
+    });
+
+    // Fallback: if session already exists (page opened directly after redirect)
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (data.session) {
+        setValidLink(true);
+      }
+      setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const pwError =
+    password.length > 0 && password.length < 8 ? "At least 8 characters" : null;
+  const confirmError =
+    confirm.length > 0 && confirm !== password ? "Passwords do not match" : null;
+  const canSubmit =
+    validLink && password.length >= 8 && confirm === password && !loading;
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      // Sign out so the user must log in with the new password (also
+      // invalidates the recovery session).
+      await supabase.auth.signOut();
+      setDone(true);
+      setTimeout(() => navigate({ to: "/auth", replace: true }), 2200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update password");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto flex min-h-screen max-w-xl flex-col items-stretch justify-center px-6 py-10">
+        <Link to="/" className="mb-8 inline-flex items-center gap-3 self-start">
+          <div
+            className="grid h-10 w-10 place-items-center rounded-lg"
+            style={{ background: "var(--gradient-gold)" }}
+          >
+            <Diamond className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div>
+            <div className="font-display text-lg leading-none">Gigafactory 3</div>
+            <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+              Global Network
+            </div>
+          </div>
+        </Link>
+
+        {!ready ? (
+          <div className="grid place-items-center py-20 text-muted-foreground">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--gold)]" />
+          </div>
+        ) : done ? (
+          <SuccessPanel />
+        ) : linkError || !validLink ? (
+          <InvalidLinkPanel message={linkError} />
+        ) : (
+          <div>
+            <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
+              Secure recovery
+            </div>
+            <h1 className="mt-2 font-display text-3xl sm:text-4xl">Choose a new password</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Pick a strong password you haven't used elsewhere. You'll be signed
+              out of all sessions and asked to sign in again.
+            </p>
+
+            <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+                  New password
+                </span>
+                <div className="relative">
+                  <input
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw((s) => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                  >
+                    {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {pwError && (
+                  <span className="mt-1 block text-[11px] text-[var(--danger)]">{pwError}</span>
+                )}
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+                  Confirm password
+                </span>
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="Repeat new password"
+                  autoComplete="new-password"
+                  className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60"
+                />
+                {confirmError && (
+                  <span className="mt-1 block text-[11px] text-[var(--danger)]">{confirmError}</span>
+                )}
+              </label>
+
+              {error && (
+                <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                style={{
+                  background: "var(--gradient-gold)",
+                  boxShadow: canSubmit ? "var(--shadow-glow)" : undefined,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Updating password…
+                  </>
+                ) : (
+                  <>
+                    Update password
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+
+              <p className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--gold)]" />
+                Encrypted in transit · Recovery token expires shortly
+              </p>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SuccessPanel() {
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+      style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+    >
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-40 blur-3xl"
+        style={{ background: "var(--gradient-gold)" }}
+      />
+      <div className="relative">
+        <div
+          className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          <CheckCircle2 className="h-8 w-8 text-primary-foreground" />
+        </div>
+        <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+          Password updated
+        </div>
+        <h2 className="mt-3 font-display text-3xl">You're all set</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Redirecting you to sign in with your new password…
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function InvalidLinkPanel({ message }: { message: string | null }) {
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+      style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+    >
+      <div className="relative">
+        <div className="text-xs uppercase tracking-[0.28em] text-[var(--danger)]">
+          Link expired or invalid
+        </div>
+        <h2 className="mt-3 font-display text-3xl">Recovery link cannot be used</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {message ??
+            "This password reset link has expired or has already been used. Request a new one to continue."}
+        </p>
+        <Link
+          to="/auth"
+          className="mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          Request a new link
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
