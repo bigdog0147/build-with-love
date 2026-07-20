@@ -465,7 +465,7 @@ function InvalidLinkPanel({
             "This password reset link has expired or has already been used. Request a new one to continue."}
         </p>
 
-        {(maskedRecovery || maskedTyped) && (
+        {displayedMasked && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -476,11 +476,12 @@ function InvalidLinkPanel({
                   <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
                   <span className="uppercase tracking-[0.18em]">Reset for</span>
                   <span className="font-mono text-foreground">
-                    {maskedRecovery ?? maskedTyped}
+                    {displayedMasked}
                   </span>
                   <Info className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                 </div>
               </TooltipTrigger>
+
               <TooltipContent
                 id="masked-email-tooltip"
                 side="bottom"
