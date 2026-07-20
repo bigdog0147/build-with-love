@@ -747,57 +747,106 @@ function Counter({
   );
 }
 
-/* ---------- Technology ---------- */
+/* ---------- Core Technologies ---------- */
 
-const TECH = [
+const CORE_TECH = [
   {
     icon: Cpu,
-    tag: "AI Platform",
+    tag: "Artificial Intelligence",
     title: "Industrial foundation models",
-    body: "A unified AI platform for perception, control and optimization across every cell, line and site.",
+    body: "A unified AI stack for perception, control, forecasting and generative engineering across every cell, line and site.",
+    stat: "180B",
+    statLabel: "Parameters trained on industrial telemetry",
   },
   {
     icon: Bot,
-    tag: "Robotics Division",
+    tag: "Robotics",
     title: "Cellular robotic systems",
-    body: "Modular robotic cells with sub-millimetre precision and adaptive coordination at fleet scale.",
+    body: "Modular robotic cells with sub-millimetre precision, adaptive coordination and closed-loop learning at fleet scale.",
+    stat: "0.08mm",
+    statLabel: "Repeatable positioning tolerance",
+  },
+  {
+    icon: Factory,
+    tag: "Advanced Manufacturing",
+    title: "Autonomous gigafactories",
+    body: "Lights-out production campuses coordinated by a real-time digital twin — from raw material to finished system.",
+    stat: "24/7",
+    statLabel: "Continuous autonomous operation",
   },
   {
     icon: BatteryCharging,
     tag: "Battery Systems",
     title: "Cell-to-grid architecture",
     body: "Next-generation battery chemistries with integrated thermal, safety and lifecycle intelligence.",
+    stat: "1.4 TWh",
+    statLabel: "Annual storage capacity deployed",
   },
   {
     icon: Atom,
     tag: "Semiconductors",
     title: "Advanced node manufacturing",
     body: "Deep-UV lithography lines producing power, sensing and edge-inference silicon in-house.",
+    stat: "3nm",
+    statLabel: "Leading-node production capability",
   },
   {
     icon: Network,
-    tag: "Autonomous Networks",
-    title: "Self-orchestrating industry",
+    tag: "Industrial Automation",
+    title: "Self-orchestrating networks",
     body: "Continent-scale production networks that plan, adapt and route autonomously in real time.",
+    stat: "90 s",
+    statLabel: "Capacity re-planning cadence",
+  },
+  {
+    icon: Sparkles,
+    tag: "Digital Twin Systems",
+    title: "Photoreal factory simulation",
+    body: "Physics-accurate twins of every facility — used for design, control synthesis and predictive operations.",
+    stat: "1.2 ms",
+    statLabel: "Cell-to-twin synchronization",
   },
 ];
 
 function Technology() {
+  const [active, setActive] = useState(0);
+  const featured = CORE_TECH[active];
+  const FeaturedIcon = featured.icon;
+
   return (
-    <section id="technology" className="relative px-6 py-28">
+    <section id="technology" className="relative px-6 py-32">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
-          eyebrow="Technology"
-          title="Five platforms. One engineered future."
-          desc="Every product is developed vertically — from silicon and software to robotics and renewable power."
+          eyebrow="Core Technologies"
+          title="Seven platforms. One engineered future."
+          desc="Every layer of the stack is developed vertically — from silicon and software to robotics, energy and orchestration."
         />
-        <div className="mt-14 space-y-4">
-          {TECH.map(({ icon: Icon, tag, title, body }, i) => (
+
+        {/* Featured showcase */}
+        <div className="mt-16 grid gap-8 lg:grid-cols-12">
+          {/* Feature card */}
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border p-8 glass lg:col-span-7 lg:p-12"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
             <div
-              key={title}
-              className="group grid gap-6 rounded-2xl border border-border p-6 glass transition-colors hover:border-[var(--gold)]/40 md:grid-cols-[minmax(0,1fr)_2fr_auto] md:items-center md:p-8"
-            >
-              <div className="flex items-center gap-4">
+              aria-hidden
+              className="absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-40 blur-3xl"
+              style={{ background: "var(--gradient-gold)" }}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, oklch(1 0 0 / 40%) 1px, transparent 1px), linear-gradient(to bottom, oklch(1 0 0 / 40%) 1px, transparent 1px)",
+                backgroundSize: "48px 48px",
+                maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
+              }}
+            />
+
+            <div className="relative">
+              <div className="flex items-center gap-3">
                 <div
                   className="grid h-12 w-12 place-items-center rounded-xl"
                   style={{
@@ -805,31 +854,102 @@ function Technology() {
                     color: "var(--gold)",
                   }}
                 >
-                  <Icon className="h-5 w-5" />
+                  <FeaturedIcon className="h-5 w-5" />
                 </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                    0{i + 1} · {tag}
-                  </div>
-                  <div className="mt-1 font-display text-xl">{title}</div>
+                <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                  0{active + 1} · {featured.tag}
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground md:pl-8 md:border-l md:border-border">
-                {body}
-              </p>
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-1 text-sm text-[var(--gold)] transition-transform group-hover:translate-x-0.5"
+
+              <h3
+                key={featured.title}
+                className="mt-6 font-display text-3xl leading-tight animate-fade-in sm:text-4xl lg:text-5xl"
               >
-                Learn more <ArrowRight className="h-4 w-4" />
-              </a>
+                {featured.title}
+              </h3>
+              <p
+                key={featured.body}
+                className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground animate-fade-in"
+              >
+                {featured.body}
+              </p>
+
+              <div className="mt-10 flex flex-wrap items-end gap-10">
+                <div>
+                  <div className="font-display text-5xl gold-text sm:text-6xl">
+                    {featured.stat}
+                  </div>
+                  <div className="mt-2 max-w-[16rem] text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {featured.statLabel}
+                  </div>
+                </div>
+                <a
+                  href="#contact"
+                  className="ml-auto inline-flex items-center gap-2 rounded-xl border border-border bg-background/40 px-5 py-3 text-sm backdrop-blur-md transition-colors hover:border-[var(--gold)]/50"
+                >
+                  Technical brief <ArrowUpRight className="h-4 w-4" />
+                </a>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Selector list */}
+          <div className="lg:col-span-5">
+            <ul className="grid gap-2">
+              {CORE_TECH.map((t, i) => {
+                const Icon = t.icon;
+                const isActive = i === active;
+                return (
+                  <li key={t.tag}>
+                    <button
+                      onClick={() => setActive(i)}
+                      className={`group flex w-full items-center gap-4 rounded-xl border px-4 py-4 text-left transition-all ${
+                        isActive
+                          ? "border-[var(--gold)]/60 bg-background/60"
+                          : "border-border bg-background/20 hover:border-[var(--gold)]/30 hover:bg-background/40"
+                      }`}
+                    >
+                      <div
+                        className="grid h-10 w-10 flex-none place-items-center rounded-lg"
+                        style={{
+                          background: isActive
+                            ? "var(--gradient-gold)"
+                            : "color-mix(in oklab, var(--gold) 10%, transparent)",
+                          color: isActive
+                            ? "var(--primary-foreground)"
+                            : "var(--gold)",
+                        }}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                          0{i + 1}
+                        </div>
+                        <div className="mt-0.5 truncate font-display text-base">
+                          {t.tag}
+                        </div>
+                      </div>
+                      <ArrowRight
+                        className={`h-4 w-4 flex-none transition-all ${
+                          isActive
+                            ? "text-[var(--gold)] translate-x-0.5"
+                            : "text-muted-foreground opacity-0 group-hover:opacity-100"
+                        }`}
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
   );
 }
+
+
 
 /* ---------- Manufacturing ---------- */
 
