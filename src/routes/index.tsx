@@ -179,9 +179,10 @@ function LandingPage() {
         <Industries />
 
 
-
         <Investors />
+        <Leadership />
         <Contact />
+
       </main>
 
       <Footer />
@@ -2047,7 +2048,176 @@ function Investors() {
   );
 }
 
+/* ---------- Leadership ---------- */
+
+const LEADERSHIP = [
+  {
+    initials: "AR",
+    name: "Dr. Adira Ramanathan",
+    role: "Chair & Chief Executive Officer",
+    bio: "Founder of Gigafactory 3. Previously led planetary-scale AI infrastructure programs and advanced-manufacturing systems at three trillion-dollar operators.",
+    tags: ["Strategy", "AI systems", "Industrial scale"],
+  },
+  {
+    initials: "KS",
+    name: "Kenji Sato",
+    role: "Chief Technology Officer",
+    bio: "Architect of GF3 Intelligence and our foundation-model platform. 20+ years across silicon design, autonomous robotics and edge inference.",
+    tags: ["Silicon", "Foundation models", "Robotics"],
+  },
+  {
+    initials: "MA",
+    name: "Dr. Mara Okafor",
+    role: "President, Manufacturing Ecosystem",
+    bio: "Operates our global campus network — from Shanghai to Berlin — with a focus on lights-out production, yield engineering and industrial safety.",
+    tags: ["Operations", "Yield", "Safety"],
+  },
+  {
+    initials: "LV",
+    name: "Lars Vogel",
+    role: "President, Energy & Infrastructure",
+    bio: "Leads grid-scale storage, microgrid autonomy and modular civil infrastructure. Ex-utility CTO with 8+ GW of firm renewables deployed.",
+    tags: ["Energy", "Grid", "Civil systems"],
+  },
+  {
+    initials: "SP",
+    name: "Sofía Pereira",
+    role: "Chief Financial Officer",
+    bio: "Steers capital allocation, project finance and investor relations across a multi-continent industrial portfolio and $4.2B annual R&D program.",
+    tags: ["Capital", "Governance", "IR"],
+  },
+  {
+    initials: "AN",
+    name: "Amir Nazari",
+    role: "Chief Research Officer",
+    bio: "Directs 32 research labs across materials, silicon, bio-industrial and orbital programs. Holds 140+ granted patents.",
+    tags: ["Materials", "Photonics", "Bio-industrial"],
+  },
+];
+
+const BOARD = [
+  "Former U.S. Under Secretary of Energy",
+  "Chair, European Industrial Policy Council",
+  "Ex-CEO, top-3 global semiconductor foundry",
+  "Managing Partner, sovereign infrastructure fund",
+  "Chair, International AI Safety Institute",
+  "Former CEO, tier-1 aerospace prime",
+];
+
+function Leadership() {
+  return (
+    <section id="leadership" className="relative overflow-hidden px-6 py-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background:
+            "radial-gradient(900px 480px at 85% 10%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Leadership"
+          title="Engineers, operators and scientists."
+          desc="An executive team drawn from the most demanding industrial, technology and government programs in the world."
+        />
+
+        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {LEADERSHIP.map((p) => (
+            <article
+              key={p.name}
+              className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border p-7 glass transition hover:-translate-y-1 hover:border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)]"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="grid h-14 w-14 place-items-center rounded-2xl border border-border font-display text-lg text-[var(--gold)]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, color-mix(in oklab, var(--gold) 18%, transparent), transparent)",
+                  }}
+                >
+                  {p.initials}
+                </div>
+                <div>
+                  <div className="font-display text-lg leading-tight">{p.name}</div>
+                  <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-[var(--gold)]">
+                    {p.role}
+                  </div>
+                </div>
+              </div>
+              <p className="mt-6 text-sm leading-relaxed text-muted-foreground">{p.bio}</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {p.tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-border/80 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 -bottom-px h-px opacity-0 transition group-hover:opacity-100"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent, var(--gold), transparent)",
+                }}
+              />
+            </article>
+          ))}
+        </div>
+
+        {/* Board */}
+        <div
+          className="mt-16 overflow-hidden rounded-3xl border border-border p-8 glass sm:p-10"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Board of Directors
+              </div>
+              <h3 className="mt-3 font-display text-3xl sm:text-4xl">
+                Governance built for global scale.
+              </h3>
+              <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+                An independent board of former heads of state, industrial CEOs and scientific
+                leaders — chartered to uphold engineering integrity, safety and long-term value.
+              </p>
+            </div>
+            <a
+              href="#investors"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-xs uppercase tracking-[0.22em] text-foreground transition hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] hover:text-[var(--gold)]"
+            >
+              Governance overview <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {BOARD.map((b) => (
+              <li
+                key={b}
+                className="flex items-start gap-3 rounded-2xl border border-border bg-white/[0.02] p-4 text-sm text-muted-foreground"
+              >
+                <span
+                  className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--gold)]"
+                  style={{ boxShadow: "0 0 10px var(--gold)" }}
+                />
+                {b}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Contact ---------- */
+
+
 
 function Contact() {
   return (
