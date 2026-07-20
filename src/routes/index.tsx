@@ -18,6 +18,10 @@ import {
   X,
 } from "lucide-react";
 import { getMetrics, type Metric } from "@/lib/metrics.functions";
+import facilityAerial from "@/assets/facility-aerial.jpg.asset.json";
+import roboticsLine from "@/assets/robotics-line.jpg.asset.json";
+import productionLine from "@/assets/production-line.jpg.asset.json";
+import facilityExterior from "@/assets/facility-exterior.jpg.asset.json";
 
 const metricsQueryOptions = queryOptions({
   queryKey: ["metrics"],
@@ -156,7 +160,9 @@ function LandingPage() {
       <main id="top" className="relative">
         <Hero />
         <Highlights />
+        <CinematicBand />
         <Metrics />
+
         <Technology />
         <Manufacturing />
         <Industries />
@@ -259,10 +265,31 @@ function Logo() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-[100svh] items-center px-6 pt-32">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-32">
+      {/* Cinematic backdrop */}
+      <div aria-hidden className="absolute inset-0 -z-0">
+        <img
+          src={roboticsLine.url}
+          alt=""
+          className="h-full w-full object-cover opacity-[0.35]"
+          style={{ transform: "scale(1.05)", filter: "grayscale(60%) contrast(1.05)" }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.14 0.01 250 / 0.4) 0%, oklch(0.10 0.01 250 / 0.85) 55%, oklch(0.08 0.01 250) 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 mix-blend-overlay opacity-40"
+          style={{ background: "radial-gradient(ellipse at 70% 30%, var(--gold) 0%, transparent 55%)" }}
+        />
+      </div>
+
       <div className="mx-auto grid w-full max-w-7xl gap-16 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-muted-foreground backdrop-blur-md">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--gold)]" />
             Intelligent Industry · Est. 2026
           </span>
@@ -286,7 +313,7 @@ function Hero() {
             </a>
             <a
               href="#investors"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm hover:border-[var(--gold)]/50"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/40 px-5 py-3 text-sm backdrop-blur-md hover:border-[var(--gold)]/50"
             >
               Investor Presentation
               <ArrowUpRight className="h-4 w-4" />
@@ -310,6 +337,11 @@ function Hero() {
         <div className="lg:col-span-5">
           <HeroVisual />
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+        Scroll
       </div>
     </section>
   );
@@ -452,7 +484,38 @@ function Highlights() {
   );
 }
 
+/* ---------- Cinematic band ---------- */
+
+function CinematicBand() {
+  return (
+    <section className="relative h-[70vh] w-full overflow-hidden">
+      <img
+        src={facilityAerial.url}
+        alt="Gigafactory 3 global facility"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ filter: "grayscale(20%) contrast(1.05) brightness(0.85)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, oklch(0.10 0.01 250) 0%, transparent 25%, transparent 70%, oklch(0.10 0.01 250) 100%)",
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-16 mx-auto max-w-7xl px-6">
+        <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+          Operational · 47 countries
+        </div>
+        <h3 className="mt-3 max-w-3xl font-display text-4xl leading-tight text-white sm:text-5xl">
+          A single intelligent factory, <span className="gold-text">continental in scale.</span>
+        </h3>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Metrics ---------- */
+
 
 function Metrics() {
   const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
@@ -646,59 +709,30 @@ function Manufacturing() {
         </div>
 
         <div className="relative aspect-square rounded-3xl border border-border glass overflow-hidden">
-          <svg viewBox="0 0 400 400" className="h-full w-full">
-            <defs>
-              <radialGradient id="rg" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="transparent" />
-              </radialGradient>
-            </defs>
-            <circle cx="200" cy="200" r="160" fill="url(#rg)" />
-            {[60, 100, 140, 180].map((r, i) => (
-              <circle
-                key={r}
-                cx="200"
-                cy="200"
-                r={r}
-                fill="none"
-                stroke="oklch(1 0 0 / 10%)"
-                strokeDasharray={i % 2 ? "2 6" : "0"}
-              />
-            ))}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const a = (i / 12) * Math.PI * 2;
-              const x = 200 + Math.cos(a) * 180;
-              const y = 200 + Math.sin(a) * 180;
-              return (
-                <line
-                  key={i}
-                  x1="200"
-                  y1="200"
-                  x2={x}
-                  y2={y}
-                  stroke="oklch(1 0 0 / 6%)"
-                />
-              );
-            })}
-            {[
-              [200, 40],
-              [340, 140],
-              [320, 300],
-              [140, 340],
-              [60, 200],
-            ].map(([x, y], i) => (
-              <g key={i}>
-                <circle cx={x} cy={y} r="6" fill="var(--gold)">
-                  <animate attributeName="opacity" values="1;0.3;1" dur={`${2 + i}s`} repeatCount="indefinite" />
-                </circle>
-                <circle cx={x} cy={y} r="14" fill="none" stroke="var(--gold)" strokeOpacity="0.3" />
-              </g>
-            ))}
-            <circle cx="200" cy="200" r="10" fill="oklch(0.72 0.19 245)" />
-          </svg>
+          <img
+            src={productionLine.url}
+            alt="Autonomous production line"
+            className="absolute inset-0 h-full w-full object-cover opacity-70"
+            style={{ filter: "grayscale(30%) contrast(1.05)" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, transparent 40%, oklch(0.10 0.01 250 / 0.85) 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-40 blur-3xl"
+            style={{ background: "var(--gradient-gold)" }}
+          />
           <div className="absolute bottom-4 left-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
             <div className="text-muted-foreground">Live network</div>
             <div className="font-display">24 sites synchronised</div>
+          </div>
+          <div className="absolute right-4 top-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
+            <div className="text-[var(--gold)] text-[10px] uppercase tracking-[0.28em]">Cell 07 · Live</div>
+            <div className="mt-1 font-display">99.98% uptime</div>
           </div>
         </div>
       </div>
