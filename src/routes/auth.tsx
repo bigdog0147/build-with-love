@@ -219,10 +219,10 @@ const initialReg: RegState = {
 };
 
 function RegisterForm({
-  onSuccess,
+  onPendingVerification,
   switchToSignIn,
 }: {
-  onSuccess: (name: string) => void;
+  onPendingVerification: (email: string) => void;
   switchToSignIn: () => void;
 }) {
   const [f, setF] = useState<RegState>(initialReg);
@@ -270,21 +270,17 @@ function RegisterForm({
         },
       });
       if (error) throw error;
-      // Ensure session established (auto-confirm is enabled)
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) {
-        await supabase.auth.signInWithPassword({
-          email: f.email,
-          password: f.password,
-        });
-      }
-      onSuccess(f.firstName || f.username || "there");
+      // Email verification required — sign out any provisional session and
+      // route the user to the verification screen.
+      await supabase.auth.signOut();
+      onPendingVerification(f.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
   }
+
 
   async function handleGoogle() {
     setError(null);
