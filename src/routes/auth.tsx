@@ -57,7 +57,7 @@ const COUNTRIES = [
   "Other",
 ];
 
-type Mode = "sign-up" | "sign-in";
+type Mode = "sign-up" | "sign-in" | "forgot-password";
 
 function AuthPage() {
   const navigate = useNavigate();
