@@ -175,7 +175,9 @@ function LandingPage() {
         <Manufacturing />
         <AIPlatform />
         <GigafactoryNetwork />
+        <ResearchInnovation />
         <Industries />
+
 
 
         <Investors />
