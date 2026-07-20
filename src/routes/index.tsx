@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -16,9 +17,17 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { getMetrics, type Metric } from "@/lib/metrics.functions";
+
+const metricsQueryOptions = queryOptions({
+  queryKey: ["metrics"],
+  queryFn: () => getMetrics(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(metricsQueryOptions),
   head: () => ({
     meta: [
       { title: "Gigafactory 3 — Engineering Tomorrow's Intelligent Infrastructure" },
@@ -445,21 +454,20 @@ function Highlights() {
 
 /* ---------- Metrics ---------- */
 
-const METRICS = [
-  { label: "Global Facilities", value: 24, suffix: "+" },
-  { label: "AI Systems Deployed", value: 1860, suffix: "" },
-  { label: "Manufacturing Capacity", value: 3.6, suffix: "M", decimals: 1, sub: "units / yr" },
-  { label: "Research Projects", value: 412, suffix: "" },
-  { label: "Countries Served", value: 47, suffix: "" },
-  { label: "Enterprise Partners", value: 320, suffix: "+" },
-];
-
 function Metrics() {
+  const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
   return (
     <section className="relative border-y border-border bg-[color-mix(in_oklab,var(--surface)_60%,transparent)] px-6 py-20">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3 lg:grid-cols-6">
-        {METRICS.map((m) => (
-          <Counter key={m.label} {...m} />
+        {metrics.map((m: Metric) => (
+          <Counter
+            key={m.id}
+            value={m.value}
+            suffix={m.suffix}
+            label={m.label}
+            decimals={m.decimals}
+            sub={m.sub ?? undefined}
+          />
         ))}
       </div>
     </section>
