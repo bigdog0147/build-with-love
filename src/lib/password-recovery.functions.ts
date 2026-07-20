@@ -20,9 +20,11 @@ const passwordSchema = z
 
 const inputSchema = z.object({ password: passwordSchema });
 
+export { passwordSchema, RECOVERY_MAX_AGE_SECONDS };
+
 type AmrEntry = { method?: string; timestamp?: number };
 
-function isRecoveryClaims(claims: Record<string, unknown>): {
+export function isRecoveryClaims(claims: Record<string, unknown>): {
   ok: boolean;
   reason?: string;
 } {
