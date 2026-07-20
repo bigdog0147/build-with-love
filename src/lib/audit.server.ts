@@ -72,7 +72,7 @@ export async function recordAuditEvent(params: {
       user_agent: userAgent,
       success: params.success ?? true,
       reason: params.reason ?? null,
-      metadata: params.metadata ?? {},
+      metadata: (params.metadata ?? {}) as never,
     });
   } catch {
     // Audit logging must never break the primary flow.
