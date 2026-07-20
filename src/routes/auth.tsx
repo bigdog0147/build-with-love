@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Mail,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
