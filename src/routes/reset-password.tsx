@@ -4,26 +4,16 @@ import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Info, Loader2, Mail, Sh
 import { supabase } from "@/integrations/supabase/client";
 import { updatePasswordFromRecovery } from "@/lib/password-recovery.functions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  clearRecoveryHint,
+  maskEmail,
+  readRecoveryHint,
+  saveRecoveryHint,
+} from "@/lib/recovery-hint";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
 
-function maskEmail(raw: string): string {
-  const email = raw.trim().toLowerCase();
-  const at = email.indexOf("@");
-  if (at < 1 || at === email.length - 1) return email;
-  const local = email.slice(0, at);
-  const domain = email.slice(at + 1);
-  const maskPart = (s: string) => {
-    if (s.length <= 2) return s[0] + "•";
-    if (s.length <= 4) return s[0] + "•••" + s[s.length - 1];
-    return s[0] + "•".repeat(Math.min(6, s.length - 2)) + s[s.length - 1];
-  };
-  const dot = domain.lastIndexOf(".");
-  const maskedDomain =
-    dot > 0 ? maskPart(domain.slice(0, dot)) + domain.slice(dot) : maskPart(domain);
-  return maskPart(local) + "@" + maskedDomain;
-}
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
