@@ -456,6 +456,19 @@ function InvalidLinkPanel({
             "This password reset link has expired or has already been used. Request a new one to continue."}
         </p>
 
+        {(maskedRecovery || maskedTyped) && (
+          <div
+            className="mx-auto mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground"
+            title="Only a masked hint is shown to protect account privacy"
+          >
+            <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
+            <span className="uppercase tracking-[0.18em]">Reset for</span>
+            <span className="font-mono text-foreground">
+              {maskedRecovery ?? maskedTyped}
+            </span>
+          </div>
+        )}
+
         <form onSubmit={resend} className="mx-auto mt-8 max-w-sm space-y-3 text-left" noValidate>
           <label className="block">
             <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
