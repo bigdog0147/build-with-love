@@ -363,8 +363,14 @@ function SuccessPanel() {
   );
 }
 
-function InvalidLinkPanel({ message }: { message: string | null }) {
-  const [email, setEmail] = useState("");
+function InvalidLinkPanel({
+  message,
+  recoveryEmail,
+}: {
+  message: string | null;
+  recoveryEmail: string | null;
+}) {
+  const [email, setEmail] = useState(recoveryEmail ?? "");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -372,6 +378,8 @@ function InvalidLinkPanel({ message }: { message: string | null }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const maskedTyped = emailValid ? maskEmail(email) : null;
+  const maskedRecovery = recoveryEmail ? maskEmail(recoveryEmail) : null;
 
   useEffect(() => {
     function tick() {
