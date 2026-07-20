@@ -2318,6 +2318,15 @@ const CONTACT_CHANNELS = [
 ];
 
 function Contact() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "submitting") return;
+    setStatus("submitting");
+    setTimeout(() => setStatus("success"), 1100);
+  };
+
   return (
     <section id="contact" className="relative overflow-hidden px-6 py-32">
       <div
@@ -2338,7 +2347,8 @@ function Contact() {
         {/* Form + channels */}
         <div className="mt-14 grid gap-6 lg:grid-cols-12">
           <form
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={onSubmit}
+            aria-busy={status === "submitting"}
             className="rounded-3xl border border-border p-8 glass lg:col-span-7"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
@@ -2348,24 +2358,67 @@ function Contact() {
             <h3 className="mt-3 font-display text-2xl sm:text-3xl">
               Confidential inquiry
             </h3>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <Field label="Full name" placeholder="Ada Lovelace" />
-              <Field label="Company / Institution" placeholder="Organization" />
-              <Field label="Email" type="email" placeholder="you@company.com" />
-              <Field label="Country" placeholder="Country / Region" />
-              <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
-              <Field label="Message" placeholder="Tell us about your requirements" full textarea />
-            </div>
-            <button
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
-              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-            >
-              Submit inquiry <ArrowRight className="h-4 w-4" />
-            </button>
-            <p className="mt-4 text-xs text-muted-foreground">
-              All submissions are reviewed by our regional partnerships team within one business day.
-            </p>
+
+            {status === "success" ? (
+              <div
+                role="status"
+                className="mt-8 flex items-start gap-4 rounded-2xl border border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_6%,transparent)] p-6 animate-fade-in"
+              >
+                <CheckCircle2 className="mt-0.5 h-6 w-6 text-[var(--gold)]" />
+                <div>
+                  <div className="font-display text-lg">Inquiry received.</div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    A partnerships lead in your region will be in touch within one business day.
+                    Reference forwarded to the appropriate desk.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStatus("idle")}
+                    className="mt-4 text-xs uppercase tracking-[0.24em] text-[var(--gold)] hover:underline"
+                  >
+                    Submit another inquiry
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <fieldset
+                  disabled={status === "submitting"}
+                  className={`mt-8 grid gap-4 sm:grid-cols-2 transition-opacity ${
+                    status === "submitting" ? "opacity-60" : "opacity-100"
+                  }`}
+                >
+                  <Field label="Full name" placeholder="Ada Lovelace" />
+                  <Field label="Company / Institution" placeholder="Organization" />
+                  <Field label="Email" type="email" placeholder="you@company.com" />
+                  <Field label="Country" placeholder="Country / Region" />
+                  <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
+                  <Field label="Message" placeholder="Tell us about your requirements" full textarea />
+                </fieldset>
+                <button
+                  type="submit"
+                  disabled={status === "submitting"}
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-80"
+                  style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+                >
+                  {status === "submitting" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 gf-spin" />
+                      Transmitting securely…
+                    </>
+                  ) : (
+                    <>
+                      Submit inquiry <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+                <p className="mt-4 text-xs text-muted-foreground">
+                  All submissions are reviewed by our regional partnerships team within one business day.
+                </p>
+              </>
+            )}
           </form>
+
 
           <div className="grid gap-4 lg:col-span-5">
             <div
