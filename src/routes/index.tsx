@@ -484,7 +484,38 @@ function Highlights() {
   );
 }
 
+/* ---------- Cinematic band ---------- */
+
+function CinematicBand() {
+  return (
+    <section className="relative h-[70vh] w-full overflow-hidden">
+      <img
+        src={facilityAerial.url}
+        alt="Gigafactory 3 global facility"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ filter: "grayscale(20%) contrast(1.05) brightness(0.85)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, oklch(0.10 0.01 250) 0%, transparent 25%, transparent 70%, oklch(0.10 0.01 250) 100%)",
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-16 mx-auto max-w-7xl px-6">
+        <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+          Operational · 47 countries
+        </div>
+        <h3 className="mt-3 max-w-3xl font-display text-4xl leading-tight text-white sm:text-5xl">
+          A single intelligent factory, <span className="gold-text">continental in scale.</span>
+        </h3>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Metrics ---------- */
+
 
 function Metrics() {
   const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
