@@ -263,10 +263,31 @@ function Logo() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-[100svh] items-center px-6 pt-32">
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-32">
+      {/* Cinematic backdrop */}
+      <div aria-hidden className="absolute inset-0 -z-0">
+        <img
+          src={roboticsLine.url}
+          alt=""
+          className="h-full w-full object-cover opacity-[0.35]"
+          style={{ transform: "scale(1.05)", filter: "grayscale(60%) contrast(1.05)" }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.14 0.01 250 / 0.4) 0%, oklch(0.10 0.01 250 / 0.85) 55%, oklch(0.08 0.01 250) 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 mix-blend-overlay opacity-40"
+          style={{ background: "radial-gradient(ellipse at 70% 30%, var(--gold) 0%, transparent 55%)" }}
+        />
+      </div>
+
       <div className="mx-auto grid w-full max-w-7xl gap-16 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-muted-foreground backdrop-blur-md">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--gold)]" />
             Intelligent Industry · Est. 2026
           </span>
@@ -290,7 +311,7 @@ function Hero() {
             </a>
             <a
               href="#investors"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm hover:border-[var(--gold)]/50"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/40 px-5 py-3 text-sm backdrop-blur-md hover:border-[var(--gold)]/50"
             >
               Investor Presentation
               <ArrowUpRight className="h-4 w-4" />
@@ -314,6 +335,11 @@ function Hero() {
         <div className="lg:col-span-5">
           <HeroVisual />
         </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+        Scroll
       </div>
     </section>
   );
