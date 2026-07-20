@@ -953,66 +953,194 @@ function Technology() {
 
 /* ---------- Manufacturing ---------- */
 
+const ECOSYSTEM_STAGES = [
+  {
+    n: "01",
+    tag: "Ingest",
+    title: "Raw materials & precision inputs",
+    body: "Automated intake, spectral inspection and traceable material genealogy from the first gram to the finished system.",
+  },
+  {
+    n: "02",
+    tag: "Fabricate",
+    title: "Robotic cellular production",
+    body: "Multi-arm robotic cells synchronised at millisecond cadence, orchestrated by autonomous scheduling and vision AI.",
+  },
+  {
+    n: "03",
+    tag: "Assemble",
+    title: "Adaptive assembly at scale",
+    body: "Reconfigurable lines that switch product mix in minutes — the same floor builds vehicles, energy systems or robotics.",
+  },
+  {
+    n: "04",
+    tag: "Validate",
+    title: "Closed-loop quality intelligence",
+    body: "Every unit inspected by industrial vision AI and physics-based twin comparison before it leaves the line.",
+  },
+  {
+    n: "05",
+    tag: "Deliver",
+    title: "Integrated global logistics",
+    body: "Autonomous inland networks, port operations and last-mile fleets, coordinated from the same control plane.",
+  },
+];
+
+const ECOSYSTEM_STATS = [
+  { k: "24", v: "Interconnected sites", d: "Across 4 continents" },
+  { k: "< 90 s", v: "Re-planning cadence", d: "Global capacity optimizer" },
+  { k: "99.98%", v: "Line uptime", d: "Trailing 12 months" },
+  { k: "0", v: "Landfill waste", d: "Closed material loops" },
+];
+
 function Manufacturing() {
   return (
-    <section id="manufacturing" className="relative px-6 py-28">
-      <div className="mx-auto grid max-w-7xl gap-16 lg:grid-cols-2 lg:items-center">
-        <div>
-          <SectionHeader
-            eyebrow="Manufacturing"
-            title="Lights-out gigafactories, engineered to scale."
-            desc="Fully autonomous production campuses coordinated by a real-time digital twin — from raw material to finished system."
-            align="left"
-          />
-          <ul className="mt-8 space-y-4 text-sm text-muted-foreground">
-            {[
-              "Sub-second telemetry across every actuator and sensor",
-              "Closed-loop quality inspection powered by industrial vision AI",
-              "Adaptive scheduling that re-plans capacity every 90 seconds",
-              "Zero-waste material flows with on-site renewable generation",
-            ].map((s) => (
-              <li key={s} className="flex items-start gap-3">
-                <span
-                  className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full"
-                  style={{ background: "var(--gold)", boxShadow: "0 0 10px var(--gold)" }}
-                />
-                {s}
-              </li>
+    <section id="manufacturing" className="relative px-6 py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Manufacturing Ecosystem"
+          title="One continuous system, from raw material to finished product."
+          desc="Every gigafactory operates as a node inside a single intelligent manufacturing ecosystem — coordinated in real time by our AI platform."
+        />
+
+        {/* Cinematic image + overlay */}
+        <div className="mt-14 grid gap-8 lg:grid-cols-12">
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border lg:col-span-7"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <img
+              src={productionLine.url}
+              alt="Autonomous production line"
+              className="aspect-[4/3] w-full object-cover"
+              style={{ filter: "grayscale(35%) contrast(1.05) brightness(0.9)" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent 30%, oklch(0.08 0.01 250 / 0.9) 100%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-40 blur-3xl"
+              style={{ background: "var(--gradient-gold)" }}
+            />
+            <div className="absolute inset-x-6 bottom-6">
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Cell 07 · Live telemetry
+              </div>
+              <div className="mt-1 font-display text-2xl text-white sm:text-3xl">
+                12,480 <span className="text-lg text-muted-foreground">units / hr</span>
+              </div>
+              <div className="mt-3 h-1 w-56 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full w-4/5" style={{ background: "var(--gradient-gold)" }} />
+              </div>
+            </div>
+
+            <div className="absolute right-6 top-6 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
+              <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                Digital twin
+              </div>
+              <div className="mt-1 font-display">1.2 ms sync</div>
+            </div>
+          </div>
+
+          {/* KPI panel */}
+          <div className="grid grid-cols-2 gap-3 lg:col-span-5">
+            {ECOSYSTEM_STATS.map((s) => (
+              <div
+                key={s.v}
+                className="rounded-2xl border border-border p-6 glass backdrop-blur"
+              >
+                <div className="font-display text-3xl gold-text">{s.k}</div>
+                <div className="mt-2 text-sm text-foreground">{s.v}</div>
+                <div className="mt-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {s.d}
+                </div>
+              </div>
             ))}
-          </ul>
+            <div className="col-span-2 rounded-2xl border border-border p-6 glass backdrop-blur">
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {[
+                  "Sub-second telemetry across every actuator and sensor",
+                  "Closed-loop vision-AI quality inspection",
+                  "Adaptive scheduling re-plans capacity every 90 seconds",
+                  "Zero-waste flows with on-site renewable generation",
+                ].map((s) => (
+                  <li key={s} className="flex items-start gap-3">
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ background: "var(--gold)", boxShadow: "0 0 10px var(--gold)" }}
+                    />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <div className="relative aspect-square rounded-3xl border border-border glass overflow-hidden">
-          <img
-            src={productionLine.url}
-            alt="Autonomous production line"
-            className="absolute inset-0 h-full w-full object-cover opacity-70"
-            style={{ filter: "grayscale(30%) contrast(1.05)" }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, transparent 40%, oklch(0.10 0.01 250 / 0.85) 100%)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-40 blur-3xl"
-            style={{ background: "var(--gradient-gold)" }}
-          />
-          <div className="absolute bottom-4 left-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
-            <div className="text-muted-foreground">Live network</div>
-            <div className="font-display">24 sites synchronised</div>
+        {/* Ecosystem pipeline */}
+        <div className="mt-20">
+          <div className="mb-8 flex items-end justify-between gap-6">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                The pipeline
+              </div>
+              <h3 className="mt-3 font-display text-2xl sm:text-3xl">
+                Five coordinated stages, one autonomous flow.
+              </h3>
+            </div>
+            <a
+              href="#contact"
+              className="hidden items-center gap-2 rounded-xl border border-border bg-background/40 px-4 py-2 text-sm backdrop-blur-md hover:border-[var(--gold)]/50 md:inline-flex"
+            >
+              Request site tour <ArrowUpRight className="h-4 w-4" />
+            </a>
           </div>
-          <div className="absolute right-4 top-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
-            <div className="text-[var(--gold)] text-[10px] uppercase tracking-[0.28em]">Cell 07 · Live</div>
-            <div className="mt-1 font-display">99.98% uptime</div>
+
+          <div className="relative">
+            {/* connector line */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-0 right-0 top-8 hidden h-px lg:block"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 45%, transparent), transparent)",
+              }}
+            />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {ECOSYSTEM_STAGES.map((s) => (
+                <div
+                  key={s.n}
+                  className="group relative rounded-2xl border border-border p-6 glass transition-all hover:-translate-y-1 hover:border-[var(--gold)]/50"
+                >
+                  <div
+                    className="grid h-10 w-10 place-items-center rounded-full font-display text-sm"
+                    style={{
+                      background: "var(--gradient-gold)",
+                      color: "var(--primary-foreground)",
+                      boxShadow: "var(--shadow-glow)",
+                    }}
+                  >
+                    {s.n}
+                  </div>
+                  <div className="mt-5 text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    {s.tag}
+                  </div>
+                  <div className="mt-2 font-display text-lg leading-snug">{s.title}</div>
+                  <p className="mt-3 text-sm text-muted-foreground">{s.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 /* ---------- Industries ---------- */
 
