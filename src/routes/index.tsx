@@ -1151,7 +1151,12 @@ function TechnologyGrid() {
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.body}</p>
 
                   <a
-                    href="#contact"
+                    href={`#${t.target}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      smoothScrollTo(t.target);
+                      history.replaceState(null, "", `#${t.target}`);
+                    }}
                     className="mt-6 inline-flex items-center gap-1.5 text-sm text-[var(--gold)] transition-transform duration-300 hover:translate-x-0.5"
                   >
                     {t.cta} <ArrowRight className="h-4 w-4" />
