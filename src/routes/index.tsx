@@ -166,7 +166,9 @@ function LandingPage() {
 
         <Technology />
         <Manufacturing />
+        <AIPlatform />
         <Industries />
+
         <Investors />
         <Contact />
       </main>
@@ -1142,7 +1144,194 @@ function Manufacturing() {
 }
 
 
+/* ---------- AI Platform ---------- */
+
+const AI_MODULES = [
+  {
+    tag: "Perception",
+    title: "Industrial vision & sensing",
+    body: "Real-time fusion of camera, LiDAR, spectral and acoustic streams — 4M inferences per second per site.",
+    metric: "4M/s",
+  },
+  {
+    tag: "Control",
+    title: "Autonomous cell orchestration",
+    body: "Closed-loop reinforcement learning controllers coordinating thousands of actuators at millisecond cadence.",
+    metric: "0.9 ms",
+  },
+  {
+    tag: "Forecast",
+    title: "Predictive engineering",
+    body: "Physics-informed models forecasting yield, wear and demand across every line, weeks in advance.",
+    metric: "> 98%",
+  },
+  {
+    tag: "Generate",
+    title: "Generative design & code",
+    body: "Foundation models that generate part geometry, control code and process recipes from engineering intent.",
+    metric: "180B",
+  },
+];
+
+const AI_STACK = [
+  {
+    layer: "Applications",
+    body: "Vision, control, forecasting, generative engineering, natural-language operations.",
+  },
+  {
+    layer: "Foundation models",
+    body: "GF3-Industrial · 180B parameters, trained on 40+ years of industrial telemetry.",
+  },
+  {
+    layer: "Data platform",
+    body: "Real-time feature store, digital-twin fabric and closed-loop feedback pipelines.",
+  },
+  {
+    layer: "Compute",
+    body: "In-house edge inference silicon paired with sovereign, liquid-cooled AI campuses.",
+  },
+];
+
+function AIPlatform() {
+  return (
+    <section id="ai" className="relative overflow-hidden px-6 py-32">
+      {/* section backdrop */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, oklch(1 0 0 / 40%) 1px, transparent 1px), linear-gradient(to bottom, oklch(1 0 0 / 40%) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+          }}
+        />
+        <div
+          className="absolute left-1/2 top-1/3 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full opacity-20 blur-3xl"
+          style={{ background: "var(--gradient-electric)" }}
+        />
+      </div>
+
+      <div className="mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="AI Platform"
+          title="The intelligence layer for global industry."
+          desc="GF3 Intelligence is our proprietary AI platform — a unified stack of foundation models, control systems and data fabric that runs every factory, product and network we build."
+        />
+
+        {/* Hero panel: stack + live console */}
+        <div className="mt-16 grid gap-8 lg:grid-cols-12">
+          {/* Stack visualization */}
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border p-8 glass lg:col-span-7 lg:p-10"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+              GF3 Intelligence · Platform stack
+            </div>
+            <h3 className="mt-4 font-display text-3xl leading-tight sm:text-4xl">
+              A single vertically integrated <span className="gold-text">AI stack.</span>
+            </h3>
+
+            <div className="mt-10 space-y-3">
+              {AI_STACK.map((s, i) => (
+                <div
+                  key={s.layer}
+                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-xl border border-border bg-background/30 p-4 transition-colors hover:border-[var(--gold)]/40"
+                  style={{
+                    opacity: 1 - i * 0.06,
+                  }}
+                >
+                  <div
+                    className="grid h-8 w-8 place-items-center rounded-md font-display text-xs"
+                    style={{
+                      background: "color-mix(in oklab, var(--gold) 15%, transparent)",
+                      color: "var(--gold)",
+                    }}
+                  >
+                    L{4 - i}
+                  </div>
+                  <div>
+                    <div className="font-display text-base">{s.layer}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{s.body}</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--gold)]" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Live console */}
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border glass lg:col-span-5"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="flex items-center gap-2 border-b border-border px-5 py-3">
+              <span className="h-2 w-2 rounded-full bg-[var(--gold)] shadow-[0_0_10px_var(--gold)]" />
+              <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                GF3-Industrial · live console
+              </div>
+              <div className="ml-auto text-[10px] text-muted-foreground/70">us-east · 04:12:07</div>
+            </div>
+            <div className="p-5 font-mono text-[12px] leading-relaxed text-muted-foreground">
+              <div>
+                <span className="text-[var(--gold)]">$</span> gf3 infer --cell=07 --stream
+              </div>
+              <div className="mt-2">→ perception.fusion   <span className="text-foreground">ok</span>  <span className="text-muted-foreground/70">0.42ms</span></div>
+              <div>→ control.policy      <span className="text-foreground">ok</span>  <span className="text-muted-foreground/70">0.31ms</span></div>
+              <div>→ twin.sync           <span className="text-foreground">ok</span>  <span className="text-muted-foreground/70">1.18ms</span></div>
+              <div className="mt-3 text-foreground">
+                yield forecast · <span className="gold-text font-display">98.7%</span> · +0.4% vs base
+              </div>
+              <div className="mt-1 text-foreground">
+                anomalies detected · <span className="gold-text font-display">0</span> across 12,480 units/hr
+              </div>
+              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-full w-[92%]" style={{ background: "var(--gradient-gold)" }} />
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                <span>Model load</span>
+                <span>92%</span>
+              </div>
+
+              <div className="mt-5 flex items-center gap-2 text-[var(--gold)]">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="text-[10px] uppercase tracking-[0.28em]">Autonomous mode</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Capability grid */}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {AI_MODULES.map((m) => (
+            <div
+              key={m.tag}
+              className="group relative overflow-hidden rounded-2xl border border-border p-6 glass transition-all hover:-translate-y-1 hover:border-[var(--gold)]/50"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                  {m.tag}
+                </div>
+                <div className="font-display text-lg gold-text">{m.metric}</div>
+              </div>
+              <div className="mt-4 font-display text-lg leading-snug">{m.title}</div>
+              <p className="mt-2 text-sm text-muted-foreground">{m.body}</p>
+              <div
+                className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-0 transition-opacity group-hover:opacity-100"
+                style={{ background: "var(--gradient-gold)" }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Industries ---------- */
+
+
 
 const INDUSTRIES = [
   { icon: Factory, name: "Manufacturing" },
