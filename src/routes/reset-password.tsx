@@ -368,12 +368,17 @@ function SuccessPanel() {
 
 function InvalidLinkPanel({
   message,
-  recoveryEmail,
+  maskedHint,
+  onHintChange,
 }: {
   message: string | null;
-  recoveryEmail: string | null;
+  maskedHint: string | null;
+  onHintChange: (masked: string | null) => void;
 }) {
-  const [email, setEmail] = useState(recoveryEmail ?? "");
+  // We don't prefill the raw email — the persisted hint is only masked. The
+  // user retypes it to trigger a resend, and any newly-typed valid address
+  // updates the persisted hint so it stays consistent going forward.
+  const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -382,7 +387,8 @@ function InvalidLinkPanel({
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const maskedTyped = emailValid ? maskEmail(email) : null;
-  const maskedRecovery = recoveryEmail ? maskEmail(recoveryEmail) : null;
+  const displayedMasked = maskedHint ?? maskedTyped;
+
 
   useEffect(() => {
     function tick() {
