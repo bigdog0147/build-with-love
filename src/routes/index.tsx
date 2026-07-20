@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -16,9 +17,17 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { getMetrics, type Metric } from "@/lib/metrics.functions";
+
+const metricsQueryOptions = queryOptions({
+  queryKey: ["metrics"],
+  queryFn: () => getMetrics(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
+  loader: ({ context }) => context.queryClient.ensureQueryData(metricsQueryOptions),
   head: () => ({
     meta: [
       { title: "Gigafactory 3 — Engineering Tomorrow's Intelligent Infrastructure" },
