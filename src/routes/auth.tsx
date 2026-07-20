@@ -62,12 +62,22 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("sign-up");
   const [welcome, setWelcome] = useState<{ name: string } | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session && !welcome) navigate({ to: "/dashboard", replace: true });
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
+      if (!user) return;
+      const confirmed =
+        Boolean(user.email_confirmed_at) ||
+        Boolean((user as { confirmed_at?: string }).confirmed_at);
+      if (confirmed && !welcome && !pendingEmail) {
+        navigate({ to: "/dashboard", replace: true });
+      } else if (!confirmed && !pendingEmail) {
+        setPendingEmail(user.email ?? "");
+      }
     });
-  }, [navigate, welcome]);
+  }, [navigate, welcome, pendingEmail]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -90,20 +100,30 @@ function AuthPage() {
               </div>
             </Link>
 
-            {welcome ? (
+            {pendingEmail ? (
+              <VerifyEmailScreen
+                email={pendingEmail}
+                onBack={async () => {
+                  await supabase.auth.signOut();
+                  setPendingEmail(null);
+                  setMode("sign-in");
+                }}
+              />
+            ) : welcome ? (
               <WelcomeScreen
                 name={welcome.name}
                 onContinue={() => navigate({ to: "/dashboard", replace: true })}
               />
             ) : mode === "sign-up" ? (
               <RegisterForm
-                onSuccess={(name) => setWelcome({ name })}
+                onPendingVerification={(email) => setPendingEmail(email)}
                 switchToSignIn={() => setMode("sign-in")}
               />
             ) : (
               <SignInForm
                 switchToSignUp={() => setMode("sign-up")}
                 onSignedIn={() => navigate({ to: "/dashboard", replace: true })}
+                onNeedsVerification={(email) => setPendingEmail(email)}
               />
             )}
           </div>
