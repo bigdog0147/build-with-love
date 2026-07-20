@@ -15,6 +15,9 @@ import {
   GraduationCap,
   Leaf,
   Lightbulb,
+  Loader2,
+  CheckCircle2,
+
   Menu,
   Network,
   Rocket,
