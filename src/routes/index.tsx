@@ -1331,7 +1331,429 @@ function AIPlatform() {
   );
 }
 
+/* ---------- Gigafactory Network ---------- */
+
+type SiteStatus = "operational" | "commissioning" | "planned";
+
+const NETWORK_SITES: {
+  id: string;
+  name: string;
+  region: string;
+  x: number; // % of viewbox
+  y: number;
+  status: SiteStatus;
+  capacity: string;
+  output: string;
+  uptime: string;
+  since: string;
+  focus: string;
+}[] = [
+  {
+    id: "gf-01",
+    name: "Campus 01 · Global HQ",
+    region: "Asia-Pacific",
+    x: 78,
+    y: 46,
+    status: "operational",
+    capacity: "1.4 TWh / yr",
+    output: "12,480 units/hr",
+    uptime: "99.98%",
+    since: "2026",
+    focus: "AI · Robotics · Semiconductors",
+  },
+  {
+    id: "gf-02",
+    name: "Campus 02 · North Sea",
+    region: "Europe",
+    x: 48,
+    y: 32,
+    status: "operational",
+    capacity: "980 GWh / yr",
+    output: "8,240 units/hr",
+    uptime: "99.94%",
+    since: "2027",
+    focus: "Battery · Clean energy",
+  },
+  {
+    id: "gf-03",
+    name: "Campus 03 · Sonoran",
+    region: "North America",
+    x: 20,
+    y: 42,
+    status: "operational",
+    capacity: "1.1 TWh / yr",
+    output: "10,100 units/hr",
+    uptime: "99.96%",
+    since: "2027",
+    focus: "Robotics · Advanced manufacturing",
+  },
+  {
+    id: "gf-04",
+    name: "Campus 04 · Atacama",
+    region: "South America",
+    x: 30,
+    y: 72,
+    status: "commissioning",
+    capacity: "620 GWh / yr",
+    output: "3,120 units/hr",
+    uptime: "97.10%",
+    since: "2028",
+    focus: "Solar · Storage",
+  },
+  {
+    id: "gf-05",
+    name: "Campus 05 · Rift Valley",
+    region: "Africa",
+    x: 55,
+    y: 62,
+    status: "commissioning",
+    capacity: "480 GWh / yr",
+    output: "2,140 units/hr",
+    uptime: "96.20%",
+    since: "2028",
+    focus: "Grid · Infrastructure",
+  },
+  {
+    id: "gf-06",
+    name: "Campus 06 · Pilbara",
+    region: "Oceania",
+    x: 84,
+    y: 72,
+    status: "planned",
+    capacity: "1.6 TWh / yr",
+    output: "—",
+    uptime: "—",
+    since: "2029",
+    focus: "Battery · Materials",
+  },
+];
+
+const STATUS_STYLES: Record<
+  SiteStatus,
+  { label: string; color: string; ring: string; text: string }
+> = {
+  operational: {
+    label: "Operational",
+    color: "var(--gold)",
+    ring: "0 0 0 6px color-mix(in oklab, var(--gold) 20%, transparent)",
+    text: "text-[var(--gold)]",
+  },
+  commissioning: {
+    label: "Commissioning",
+    color: "oklch(0.78 0.16 220)",
+    ring: "0 0 0 6px color-mix(in oklab, oklch(0.78 0.16 220) 25%, transparent)",
+    text: "text-foreground",
+  },
+  planned: {
+    label: "Planned",
+    color: "oklch(0.65 0.02 250)",
+    ring: "0 0 0 6px color-mix(in oklab, oklch(0.65 0.02 250) 25%, transparent)",
+    text: "text-muted-foreground",
+  },
+};
+
+function GigafactoryNetwork() {
+  const [activeId, setActiveId] = useState(NETWORK_SITES[0].id);
+  const active = NETWORK_SITES.find((s) => s.id === activeId) ?? NETWORK_SITES[0];
+
+  const counts = {
+    operational: NETWORK_SITES.filter((s) => s.status === "operational").length,
+    commissioning: NETWORK_SITES.filter((s) => s.status === "commissioning").length,
+    planned: NETWORK_SITES.filter((s) => s.status === "planned").length,
+  };
+
+  return (
+    <section id="network" className="relative overflow-hidden px-6 py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Gigafactory Network"
+          title="One intelligent grid. Continental in scale."
+          desc="Six flagship campuses across four continents — synchronised by a single autonomous control plane."
+        />
+
+        {/* Network legend / rollup */}
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              { k: "Operational", v: counts.operational, s: "operational" as SiteStatus },
+              { k: "Commissioning", v: counts.commissioning, s: "commissioning" as SiteStatus },
+              { k: "Planned 2028–2030", v: counts.planned, s: "planned" as SiteStatus },
+            ]
+          ).map((r) => {
+            const st = STATUS_STYLES[r.s];
+            return (
+              <div
+                key={r.k}
+                className="flex items-center gap-4 rounded-2xl border border-border p-5 glass"
+              >
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{ background: st.color, boxShadow: `0 0 12px ${st.color}` }}
+                />
+                <div>
+                  <div className="font-display text-2xl">{r.v}</div>
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {r.k}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex items-center gap-4 rounded-2xl border border-border p-5 glass">
+            <Globe2 className="h-5 w-5 text-[var(--gold)]" />
+            <div>
+              <div className="font-display text-2xl gold-text">47</div>
+              <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                Countries served
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Map + detail panel */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-12">
+          {/* Map */}
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border p-6 glass lg:col-span-8"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Global control plane · Live
+              </div>
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--gold)]" />
+                Sync 1.2 ms
+              </div>
+            </div>
+
+            <div className="relative mt-4 aspect-[16/9] w-full">
+              {/* Grid backdrop */}
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, oklch(1 0 0 / 8%) 1px, transparent 1px), linear-gradient(to bottom, oklch(1 0 0 / 8%) 1px, transparent 1px)",
+                  backgroundSize: "40px 40px",
+                  maskImage:
+                    "radial-gradient(ellipse at center, black 55%, transparent 90%)",
+                }}
+              />
+              {/* Stylised world map */}
+              <svg
+                viewBox="0 0 1000 500"
+                className="absolute inset-0 h-full w-full"
+                aria-hidden
+              >
+                <defs>
+                  <radialGradient id="glowGold" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0" />
+                  </radialGradient>
+                  <linearGradient id="linkGrad" x1="0" x2="1">
+                    <stop offset="0%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0.05" />
+                    <stop offset="50%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="oklch(0.72 0.19 245)" stopOpacity="0.05" />
+                  </linearGradient>
+                </defs>
+
+                {/* Continents (abstract dotted shapes) */}
+                {Array.from({ length: 220 }).map((_, i) => {
+                  const x = (i * 53) % 1000;
+                  const y = (i * 97) % 500;
+                  // rough continental mask
+                  const inLand =
+                    (x > 120 && x < 340 && y > 120 && y < 380) ||
+                    (x > 440 && x < 580 && y > 100 && y < 320) ||
+                    (x > 700 && x < 900 && y > 130 && y < 360) ||
+                    (x > 260 && x < 400 && y > 320 && y < 460) ||
+                    (x > 500 && x < 640 && y > 280 && y < 430) ||
+                    (x > 800 && x < 920 && y > 320 && y < 420);
+                  if (!inLand) return null;
+                  return (
+                    <circle
+                      key={i}
+                      cx={x}
+                      cy={y}
+                      r={1.6}
+                      fill="oklch(1 0 0 / 22%)"
+                    />
+                  );
+                })}
+
+                {/* Connection lines between operational sites */}
+                {NETWORK_SITES.filter((s) => s.status !== "planned").map((a, i, arr) =>
+                  arr.slice(i + 1).map((b) => (
+                    <line
+                      key={`${a.id}-${b.id}`}
+                      x1={a.x * 10}
+                      y1={a.y * 5}
+                      x2={b.x * 10}
+                      y2={b.y * 5}
+                      stroke="url(#linkGrad)"
+                      strokeWidth={
+                        a.id === active.id || b.id === active.id ? 1.4 : 0.7
+                      }
+                      opacity={a.id === active.id || b.id === active.id ? 0.9 : 0.35}
+                    />
+                  ))
+                )}
+              </svg>
+
+              {/* Site markers (HTML for interactivity) */}
+              {NETWORK_SITES.map((s) => {
+                const st = STATUS_STYLES[s.status];
+                const isActive = s.id === active.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => setActiveId(s.id)}
+                    aria-label={`${s.name} — ${st.label}`}
+                    className="group absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${s.x}%`, top: `${s.y}%` }}
+                  >
+                    <span
+                      className="block h-3 w-3 rounded-full transition-all"
+                      style={{
+                        background: st.color,
+                        boxShadow: isActive
+                          ? `0 0 0 8px color-mix(in oklab, ${st.color} 28%, transparent), 0 0 22px ${st.color}`
+                          : st.ring,
+                      }}
+                    />
+                    {s.status === "operational" && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 -m-1 rounded-full"
+                        style={{
+                          boxShadow: `0 0 0 2px color-mix(in oklab, ${st.color} 45%, transparent)`,
+                          animation: "ping 2.4s cubic-bezier(0,0,0.2,1) infinite",
+                        }}
+                      />
+                    )}
+                    <span
+                      className={`pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md border border-border bg-background/80 px-2 py-1 text-[10px] uppercase tracking-[0.2em] backdrop-blur transition-opacity ${
+                        isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      }`}
+                    >
+                      {s.id.toUpperCase()}
+                    </span>
+                  </button>
+                );
+              })}
+
+              <style>{`
+                @keyframes ping {
+                  0% { transform: scale(1); opacity: .7; }
+                  80%,100% { transform: scale(2.4); opacity: 0; }
+                }
+              `}</style>
+            </div>
+
+            {/* Status legend */}
+            <div className="mt-4 flex flex-wrap items-center gap-5 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+              {(Object.keys(STATUS_STYLES) as SiteStatus[]).map((k) => (
+                <div key={k} className="flex items-center gap-2">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      background: STATUS_STYLES[k].color,
+                      boxShadow: `0 0 8px ${STATUS_STYLES[k].color}`,
+                    }}
+                  />
+                  {STATUS_STYLES[k].label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Detail panel */}
+          <div
+            className="relative overflow-hidden rounded-3xl border border-border glass lg:col-span-4"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="border-b border-border p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                  {active.region}
+                </div>
+                <div
+                  className="flex items-center gap-2 rounded-full border border-border bg-background/40 px-2.5 py-1 text-[10px] uppercase tracking-[0.22em]"
+                  style={{ color: STATUS_STYLES[active.status].color }}
+                >
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{
+                      background: STATUS_STYLES[active.status].color,
+                      boxShadow: `0 0 8px ${STATUS_STYLES[active.status].color}`,
+                    }}
+                  />
+                  {STATUS_STYLES[active.status].label}
+                </div>
+              </div>
+              <h3 className="mt-3 font-display text-2xl leading-tight">{active.name}</h3>
+              <div className="mt-1 text-xs text-muted-foreground">{active.focus}</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-px bg-border">
+              {[
+                { k: "Capacity", v: active.capacity },
+                { k: "Live output", v: active.output },
+                { k: "Uptime (30d)", v: active.uptime },
+                { k: "Online since", v: active.since },
+              ].map((row) => (
+                <div key={row.k} className="bg-background/60 p-5">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {row.k}
+                  </div>
+                  <div className="mt-1 font-display text-lg">{row.v}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6">
+              <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                Live telemetry
+              </div>
+              <div className="mt-3 space-y-2">
+                {[
+                  { k: "Grid load", w: "82%" },
+                  { k: "Robotic fleet", w: "94%" },
+                  { k: "AI inference", w: "71%" },
+                ].map((b) => (
+                  <div key={b.k}>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>{b.k}</span>
+                      <span className="text-foreground">{b.w}</span>
+                    </div>
+                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full transition-all duration-500"
+                        style={{ width: b.w, background: "var(--gradient-gold)" }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <a
+                href="#contact"
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background/40 px-4 py-3 text-sm backdrop-blur-md transition-colors hover:border-[var(--gold)]/50"
+              >
+                Request site briefing <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Industries ---------- */
+
+
 
 
 
