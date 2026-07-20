@@ -179,9 +179,10 @@ function LandingPage() {
         <Industries />
 
 
-
         <Investors />
+        <Leadership />
         <Contact />
+
       </main>
 
       <Footer />
