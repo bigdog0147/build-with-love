@@ -1,60 +1,266 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Diamond } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Diamond,
+  Eye,
+  EyeOff,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import roboticsLine from "@/assets/robotics-line.jpg.asset.json";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({
     meta: [
-      { title: "Sign in — Gigafactory 3 Private Bank" },
-      { name: "description", content: "Access your private banking cockpit." },
+      { title: "Join the Gigafactory 3 Network — Register" },
+      {
+        name: "description",
+        content:
+          "Create your Gigafactory 3 account to access research, technology insights, project updates and personalized dashboard features.",
+      },
     ],
   }),
 });
 
+const INTEREST_OPTIONS = [
+  "Artificial Intelligence",
+  "Robotics",
+  "Manufacturing",
+  "Renewable Energy",
+  "Digital Finance",
+  "Research Updates",
+] as const;
+
+const COUNTRIES = [
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "Singapore",
+  "China",
+  "Japan",
+  "South Korea",
+  "India",
+  "Australia",
+  "Canada",
+  "Brazil",
+  "South Africa",
+  "Other",
+];
+
+type Mode = "sign-up" | "sign-in";
+
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [mode, setMode] = useState<Mode>("sign-up");
+  const [welcome, setWelcome] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (data.session && !welcome) navigate({ to: "/dashboard", replace: true });
     });
-  }, [navigate]);
+  }, [navigate, welcome]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="grid min-h-screen lg:grid-cols-2">
+        <LeftPanel />
+        <div className="relative flex items-center justify-center px-6 py-10 sm:px-10">
+          <div className="w-full max-w-xl">
+            <Link to="/" className="mb-8 inline-flex items-center gap-3">
+              <div
+                className="grid h-10 w-10 place-items-center rounded-lg"
+                style={{ background: "var(--gradient-gold)" }}
+              >
+                <Diamond className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <div className="font-display text-lg leading-none">Gigafactory 3</div>
+                <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                  Global Network
+                </div>
+              </div>
+            </Link>
+
+            {welcome ? (
+              <WelcomeScreen
+                name={welcome.name}
+                onContinue={() => navigate({ to: "/dashboard", replace: true })}
+              />
+            ) : mode === "sign-up" ? (
+              <RegisterForm
+                onSuccess={(name) => setWelcome({ name })}
+                switchToSignIn={() => setMode("sign-in")}
+              />
+            ) : (
+              <SignInForm
+                switchToSignUp={() => setMode("sign-up")}
+                onSignedIn={() => navigate({ to: "/dashboard", replace: true })}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LeftPanel() {
+  return (
+    <div className="relative hidden overflow-hidden lg:block">
+      <img
+        src={roboticsLine.url}
+        alt="AI-powered manufacturing campus"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(140deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.85) 100%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -left-24 top-1/3 h-96 w-96 rounded-full opacity-30 blur-3xl"
+        style={{ background: "var(--gradient-gold)" }}
+      />
+      <div className="relative z-10 flex h-full flex-col justify-between p-12">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
+          Membership
+        </div>
+        <div>
+          <h2 className="gold-text font-display text-5xl leading-tight sm:text-6xl">
+            Shape Tomorrow With Us
+          </h2>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-white/75">
+            Join a growing community exploring advanced technology, engineering
+            innovation, and future industrial solutions across AI, robotics,
+            manufacturing and clean energy.
+          </p>
+          <ul className="mt-8 space-y-3 text-sm text-white/70">
+            {[
+              "Personalized research feed and bookmarks",
+              "Early access to technology briefings",
+              "Invitations to engineering talks and webinars",
+            ].map((line) => (
+              <li key={line} className="flex items-center gap-3">
+                <CheckCircle2 className="h-4 w-4 text-[var(--gold)]" />
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/50">
+          <ShieldCheck className="h-3.5 w-3.5 text-[var(--gold)]" />
+          Secure enrollment · Encrypted in transit
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Registration ---------------- */
+
+interface RegState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  country: string;
+  organization: string;
+  username: string;
+  password: string;
+  confirm: string;
+  interests: string[];
+  terms: boolean;
+}
+
+const initialReg: RegState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  country: "",
+  organization: "",
+  username: "",
+  password: "",
+  confirm: "",
+  interests: [],
+  terms: false,
+};
+
+function RegisterForm({
+  onSuccess,
+  switchToSignIn,
+}: {
+  onSuccess: (name: string) => void;
+  switchToSignIn: () => void;
+}) {
+  const [f, setF] = useState<RegState>(initialReg);
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const errors = useMemo(() => validate(f), [f]);
+  const isValid = Object.keys(errors).length === 0;
+
+  function update<K extends keyof RegState>(k: K, v: RegState[K]) {
+    setF((s) => ({ ...s, [k]: v }));
+  }
+
+  function toggleInterest(name: string) {
+    setF((s) => ({
+      ...s,
+      interests: s.interests.includes(name)
+        ? s.interests.filter((i) => i !== name)
+        : [...s.interests, name],
+    }));
+  }
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setNotice(null);
+    if (!isValid) return;
     setLoading(true);
+    setError(null);
     try {
-      if (mode === "sign-up") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { full_name: name || email.split("@")[0] },
+      const { error } = await supabase.auth.signUp({
+        email: f.email,
+        password: f.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            first_name: f.firstName,
+            last_name: f.lastName,
+            full_name: `${f.firstName} ${f.lastName}`.trim(),
+            phone: f.phone,
+            country: f.country,
+            organization: f.organization,
+            username: f.username,
+            interests: f.interests,
           },
+        },
+      });
+      if (error) throw error;
+      // Ensure session established (auto-confirm is enabled)
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        await supabase.auth.signInWithPassword({
+          email: f.email,
+          password: f.password,
         });
-        if (error) throw error;
-        setNotice("Check your inbox to confirm your account, then sign in.");
-        setMode("sign-in");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/dashboard", replace: true });
       }
+      onSuccess(f.firstName || f.username || "there");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -65,149 +271,455 @@ function AuthPage() {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (result.error) {
-      setError(result.error.message ?? "Google sign-in failed");
-      return;
-    }
-    if (result.redirected) return;
-    navigate({ to: "/dashboard", replace: true });
+    if (result.error) setError(result.error.message ?? "Google sign-in failed");
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground">
+    <div>
+      <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
+        Join the network
+      </div>
+      <h1 className="mt-2 font-display text-3xl sm:text-4xl">
+        Create your account
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Access research, technology insights, project updates and personalized
+        dashboard features.
+      </p>
+
+      <button
+        onClick={handleGoogle}
+        className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
+      >
+        <GoogleIcon />
+        Continue with Google
+      </button>
+
+      <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        or register with email
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <form onSubmit={submit} className="space-y-6" noValidate>
+        <Section title="Personal information">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="First name" error={errors.firstName}>
+              <Input
+                value={f.firstName}
+                onChange={(v) => update("firstName", v)}
+                placeholder="Elena"
+                autoComplete="given-name"
+              />
+            </Field>
+            <Field label="Last name" error={errors.lastName}>
+              <Input
+                value={f.lastName}
+                onChange={(v) => update("lastName", v)}
+                placeholder="Marchetti"
+                autoComplete="family-name"
+              />
+            </Field>
+            <Field label="Email address" error={errors.email}>
+              <Input
+                type="email"
+                value={f.email}
+                onChange={(v) => update("email", v)}
+                placeholder="you@company.com"
+                autoComplete="email"
+              />
+            </Field>
+            <Field label="Mobile number" error={errors.phone}>
+              <Input
+                type="tel"
+                value={f.phone}
+                onChange={(v) => update("phone", v)}
+                placeholder="+1 555 000 0000"
+                autoComplete="tel"
+              />
+            </Field>
+            <Field label="Country" error={errors.country}>
+              <select
+                value={f.country}
+                onChange={(e) => update("country", e.target.value)}
+                className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
+              >
+                <option value="">Select country</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Organization (optional)">
+              <Input
+                value={f.organization}
+                onChange={(v) => update("organization", v)}
+                placeholder="Acme Industrial Group"
+                autoComplete="organization"
+              />
+            </Field>
+          </div>
+        </Section>
+
+        <Section title="Account details">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Username" error={errors.username}>
+              <Input
+                value={f.username}
+                onChange={(v) => update("username", v.toLowerCase())}
+                placeholder="elena.m"
+                autoComplete="username"
+              />
+            </Field>
+            <div className="hidden sm:block" />
+            <Field label="Password" error={errors.password}>
+              <div className="relative">
+                <Input
+                  type={showPw ? "text" : "password"}
+                  value={f.password}
+                  onChange={(v) => update("password", v)}
+                  placeholder="At least 8 characters"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                  aria-label={showPw ? "Hide password" : "Show password"}
+                >
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </Field>
+            <Field label="Confirm password" error={errors.confirm}>
+              <Input
+                type={showPw ? "text" : "password"}
+                value={f.confirm}
+                onChange={(v) => update("confirm", v)}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+              />
+            </Field>
+          </div>
+        </Section>
+
+        <Section title="Interests">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {INTEREST_OPTIONS.map((name) => {
+              const active = f.interests.includes(name);
+              return (
+                <label
+                  key={name}
+                  className={
+                    "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors " +
+                    (active
+                      ? "border-[var(--gold)]/70 bg-[var(--gold)]/10"
+                      : "border-border bg-[var(--surface)] hover:border-[var(--gold)]/40")
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleInterest(name)}
+                    className="h-4 w-4 accent-[var(--gold)]"
+                  />
+                  {name}
+                </label>
+              );
+            })}
+          </div>
+        </Section>
+
+        <label className="flex items-start gap-3 text-xs text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={f.terms}
+            onChange={(e) => update("terms", e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[var(--gold)]"
+          />
+          <span>
+            I agree to the{" "}
+            <a href="#" className="text-[var(--gold)] hover:underline">
+              Terms of Use
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-[var(--gold)] hover:underline">
+              Privacy Policy
+            </a>
+            .
+          </span>
+        </label>
+        {errors.terms && (
+          <div className="text-xs text-[var(--danger)]">{errors.terms}</div>
+        )}
+
+        {error && (
+          <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={!isValid || loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground transition-all disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            background: "var(--gradient-gold)",
+            boxShadow: isValid ? "var(--shadow-glow)" : undefined,
+          }}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Creating account…
+            </>
+          ) : (
+            <>
+              Create account
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
+
+        <div className="text-center text-xs text-muted-foreground">
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={switchToSignIn}
+            className="text-[var(--gold)] hover:underline"
+          >
+            Sign in
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function validate(f: RegState): Partial<Record<keyof RegState, string>> {
+  const e: Partial<Record<keyof RegState, string>> = {};
+  if (f.firstName.trim().length < 2) e.firstName = "Required";
+  if (f.lastName.trim().length < 2) e.lastName = "Required";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = "Enter a valid email";
+  if (f.phone.replace(/\D/g, "").length < 6) e.phone = "Enter a valid phone";
+  if (!f.country) e.country = "Select a country";
+  if (!/^[a-z0-9_.-]{3,24}$/.test(f.username))
+    e.username = "3–24 chars: letters, numbers, . _ -";
+  if (f.password.length < 8) e.password = "At least 8 characters";
+  if (f.confirm !== f.password) e.confirm = "Passwords do not match";
+  if (!f.terms) e.terms = "You must accept the terms";
+  return e;
+}
+
+/* ---------------- Sign In ---------------- */
+
+function SignInForm({
+  switchToSignUp,
+  onSignedIn,
+}: {
+  switchToSignUp: () => void;
+  onSignedIn: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      onSignedIn();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setError(null);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) setError(result.error.message ?? "Google sign-in failed");
+  }
+
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
+        Member sign in
+      </div>
+      <h1 className="mt-2 font-display text-3xl sm:text-4xl">Welcome back</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Access your dashboard, research library and technology briefings.
+      </p>
+
+      <button
+        onClick={handleGoogle}
+        className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
+      >
+        <GoogleIcon />
+        Continue with Google
+      </button>
+
+      <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        or use email
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <form onSubmit={submit} className="space-y-4">
+        <Field label="Email">
+          <Input type="email" value={email} onChange={setEmail} placeholder="you@company.com" />
+        </Field>
+        <Field label="Password">
+          <Input
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="••••••••"
+          />
+        </Field>
+
+        {error && (
+          <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {loading ? "Signing in…" : "Sign in"}
+        </button>
+
+        <div className="text-center text-xs text-muted-foreground">
+          New to Gigafactory 3?{" "}
+          <button
+            type="button"
+            onClick={switchToSignUp}
+            className="text-[var(--gold)] hover:underline"
+          >
+            Create an account
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ---------------- Welcome ---------------- */
+
+function WelcomeScreen({
+  name,
+  onContinue,
+}: {
+  name: string;
+  onContinue: () => void;
+}) {
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+      style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+    >
       <div
-        className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-40 blur-3xl"
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-40 blur-3xl"
         style={{ background: "var(--gradient-gold)" }}
       />
-      <div
-        className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full opacity-30 blur-3xl"
-        style={{ background: "var(--gradient-electric)" }}
-      />
-      <div className="relative mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-        <Link to="/" className="mb-10 flex items-center gap-3">
-          <div
-            className="grid h-10 w-10 place-items-center rounded-lg"
-            style={{ background: "var(--gradient-gold)" }}
-          >
-            <Diamond className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="font-display text-lg leading-none">Gigafactory 3</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              Private Bank
-            </div>
-          </div>
-        </Link>
-
+      <div className="relative">
         <div
-          className="rounded-2xl border border-border p-8"
-          style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+          className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
         >
-          <h1 className="font-display text-3xl">
-            {mode === "sign-in" ? "Welcome back" : "Open your account"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "sign-in"
-              ? "Access your portfolio, wallets and cards."
-              : "A dashboard tailored to your holdings will be provisioned instantly."}
-          </p>
-
-          <button
-            onClick={handleGoogle}
-            className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </button>
-
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            or
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {mode === "sign-up" && (
-              <Field label="Full name">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Elena Marchetti"
-                  className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-                />
-              </Field>
-            )}
-            <Field label="Email">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@bank.com"
-                className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-            </Field>
-            <Field label="Password">
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-            </Field>
-
-            {error && (
-              <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
-                {error}
-              </div>
-            )}
-            {notice && (
-              <div className="rounded-lg border border-[var(--success)]/30 bg-[var(--success)]/10 px-3 py-2 text-xs text-[var(--success)]">
-                {notice}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
-              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-            >
-              {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-xs text-muted-foreground">
-            {mode === "sign-in" ? "New here?" : "Already have an account?"}{" "}
-            <button
-              onClick={() => {
-                setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-                setError(null);
-                setNotice(null);
-              }}
-              className="text-[var(--gold)] hover:underline"
-            >
-              {mode === "sign-in" ? "Open an account" : "Sign in"}
-            </button>
-          </div>
+          <Sparkles className="h-8 w-8 text-primary-foreground" />
         </div>
+        <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+          Welcome to Gigafactory 3
+        </div>
+        <h2 className="mt-3 font-display text-4xl">Hello, {name}.</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Your account has been created successfully. Continue to your
+          personalized dashboard to explore research, technology updates and
+          upcoming events.
+        </p>
+        <button
+          onClick={onContinue}
+          className="mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          Go to dashboard
+          <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+/* ---------------- UI primitives ---------------- */
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-3 text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
         {label}
       </span>
       {children}
+      {error && <span className="mt-1 block text-[11px] text-[var(--danger)]">{error}</span>}
     </label>
+  );
+}
+
+function Input({
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+}: {
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  autoComplete?: string;
+}) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      autoComplete={autoComplete}
+      className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60"
+    />
   );
 }
 
