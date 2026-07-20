@@ -75,11 +75,19 @@ export const updatePasswordFromRecovery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data, context }) => {
-    const verdict = isRecoveryClaims(
-      context.claims as unknown as Record<string, unknown>,
-    );
+    const { recordAuditEvent } = await import("@/lib/audit.server");
+    const claims = context.claims as unknown as Record<string, unknown>;
+    const email = typeof claims.email === "string" ? claims.email : null;
+
+    const verdict = isRecoveryClaims(claims);
     if (!verdict.ok) {
-      // 401-shaped error — client shows "link expired" panel.
+      await recordAuditEvent({
+        eventType: "recovery_rejected",
+        email,
+        userId: context.userId,
+        success: false,
+        reason: verdict.reason ?? "Invalid recovery session",
+      });
       throw new Error(`Unauthorized: ${verdict.reason ?? "Invalid recovery session"}`);
     }
 
@@ -87,9 +95,22 @@ export const updatePasswordFromRecovery = createServerFn({ method: "POST" })
       password: data.password,
     });
     if (error) {
-      // Surface Supabase's own strength / reuse errors without leaking internals.
+      await recordAuditEvent({
+        eventType: "recovery_rejected",
+        email,
+        userId: context.userId,
+        success: false,
+        reason: error.message || "updateUser failed",
+      });
       throw new Error(error.message || "Could not update password");
     }
+
+    await recordAuditEvent({
+      eventType: "password_updated",
+      email,
+      userId: context.userId,
+      success: true,
+    });
 
     // Invalidate every session for this user, including the recovery one.
     await context.supabase.auth.signOut({ scope: "global" });
