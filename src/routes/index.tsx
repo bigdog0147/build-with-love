@@ -1762,49 +1762,226 @@ function GigafactoryNetwork() {
 
 /* ---------- Industries ---------- */
 
-
-
-
-
 const INDUSTRIES = [
-  { icon: Factory, name: "Manufacturing" },
-  { icon: BatteryCharging, name: "Energy" },
-  { icon: Sparkles, name: "Aerospace" },
-  { icon: Network, name: "Logistics" },
-  { icon: Globe2, name: "Smart Cities" },
-  { icon: Atom, name: "Infrastructure" },
-  { icon: Cpu, name: "Government" },
-  { icon: Leaf, name: "Sustainability" },
+  {
+    id: "manufacturing",
+    icon: Factory,
+    name: "Manufacturing",
+    tag: "Discrete & process",
+    lead: "Autonomous production for the world's most demanding factories.",
+    body:
+      "Turnkey lights-out lines for automotive, electronics and heavy industry — orchestrated by GF3 Intelligence and continuously optimised for yield.",
+    stats: [
+      { k: "Yield uplift", v: "+18%" },
+      { k: "Downtime", v: "-64%" },
+    ],
+    uses: ["Automotive assembly", "Electronics SMT", "Heavy machinery"],
+  },
+  {
+    id: "energy",
+    icon: BatteryCharging,
+    name: "Energy",
+    tag: "Generation & storage",
+    lead: "Continental-scale clean generation, storage and dispatch.",
+    body:
+      "Grid-forming inverters, iron-air storage and autonomous microgrid controllers keep utilities and hyperscale operators firm on renewables.",
+    stats: [
+      { k: "Storage online", v: "8.4 GWh" },
+      { k: "Firm renewable", v: "94%" },
+    ],
+    uses: ["Utility storage", "Data-center firming", "Industrial microgrids"],
+  },
+  {
+    id: "aerospace",
+    icon: Rocket,
+    name: "Aerospace",
+    tag: "Air & orbital",
+    lead: "Advanced structures, propulsion and orbital infrastructure.",
+    body:
+      "Composite airframes, hypersonic thermal systems and reusable launch structures machined to sub-100 micron tolerances at gigafactory volume.",
+    stats: [
+      { k: "Tolerance", v: "0.08 mm" },
+      { k: "Payload cadence", v: "Weekly" },
+    ],
+    uses: ["Reusable launch", "Satellite platforms", "Hypersonic systems"],
+  },
+  {
+    id: "logistics",
+    icon: Network,
+    name: "Logistics",
+    tag: "Autonomous supply",
+    lead: "AI-orchestrated ports, warehouses and long-haul corridors.",
+    body:
+      "Autonomous ground fleets, robotic sortation and predictive routing eliminate bottlenecks across intercontinental supply chains.",
+    stats: [
+      { k: "Throughput", v: "+42%" },
+      { k: "On-time SLA", v: "99.6%" },
+    ],
+    uses: ["Smart ports", "Robotic warehousing", "Autonomous fleet"],
+  },
+  {
+    id: "cities",
+    icon: Globe2,
+    name: "Smart Cities",
+    tag: "Urban intelligence",
+    lead: "Sensing, mobility and energy stacks for the next century of cities.",
+    body:
+      "City-scale digital twins integrate mobility, grid and utility telemetry — reducing emissions and unlocking real-time responsive infrastructure.",
+    stats: [
+      { k: "Emissions cut", v: "-31%" },
+      { k: "Traffic time", v: "-22%" },
+    ],
+    uses: ["Digital twin cities", "Adaptive mobility", "Urban microgrids"],
+  },
+  {
+    id: "infrastructure",
+    icon: Atom,
+    name: "Infrastructure",
+    tag: "Civil & industrial",
+    lead: "Engineered infrastructure delivered as an integrated system.",
+    body:
+      "Pre-engineered modular substations, water treatment and telecom cores that ship, install and commission months faster than traditional builds.",
+    stats: [
+      { k: "Time to online", v: "-58%" },
+      { k: "Modular sites", v: "1,240+" },
+    ],
+    uses: ["Modular substations", "Water systems", "Telecom cores"],
+  },
+  {
+    id: "government",
+    icon: ShieldCheck,
+    name: "Government",
+    tag: "Sovereign platforms",
+    lead: "Sovereign AI, secure compute and mission-critical systems.",
+    body:
+      "Air-gapped inference clusters, secure sensor networks and autonomous logistics purpose-built for defence, intelligence and civil agencies.",
+    stats: [
+      { k: "Clearance grade", v: "Tier-1" },
+      { k: "Sovereign clusters", v: "17" },
+    ],
+    uses: ["Sovereign AI", "Border sensing", "Mission logistics"],
+  },
+  {
+    id: "sustainability",
+    icon: Leaf,
+    name: "Sustainability",
+    tag: "Circular systems",
+    lead: "Closed-loop materials, water and energy across every gigafactory.",
+    body:
+      "In-house recycling of batteries, silicon and rare metals — with every campus targeting net-zero operations and water-positive discharge by 2030.",
+    stats: [
+      { k: "Water recycled", v: "96%" },
+      { k: "Battery recovery", v: "98%" },
+    ],
+    uses: ["Battery recycling", "Water reuse", "Circular alloys"],
+  },
 ];
 
 function Industries() {
+  const [activeId, setActiveId] = useState(INDUSTRIES[0].id);
+  const active = INDUSTRIES.find((i) => i.id === activeId) ?? INDUSTRIES[0];
+  const ActiveIcon = active.icon;
+
   return (
-    <section id="industries" className="relative px-6 py-28">
+    <section id="industries" className="relative overflow-hidden px-6 py-32">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
-          eyebrow="Industries"
+          eyebrow="Industries Served"
           title="Deployed where the stakes are highest."
+          desc="Governments, Fortune 500 operators and frontier innovators run production systems on Gigafactory 3 platforms."
         />
-        <div className="mt-14 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-          {INDUSTRIES.map(({ icon: Icon, name }) => (
-            <div
-              key={name}
-              className="flex items-center gap-3 rounded-xl border border-border bg-[var(--surface)] px-4 py-5 transition-all hover:-translate-y-0.5 hover:border-[var(--gold)]/40"
-            >
-              <div
-                className="grid h-9 w-9 place-items-center rounded-lg"
-                style={{ background: "color-mix(in oklab, var(--gold) 12%, transparent)", color: "var(--gold)" }}
+
+        {/* Tabs */}
+        <div className="mt-14 flex flex-wrap gap-2">
+          {INDUSTRIES.map(({ id, icon: Icon, name }) => {
+            const on = id === activeId;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveId(id)}
+                className={`group inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                  on
+                    ? "border-[color:color-mix(in_oklab,var(--gold)_70%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_10%,transparent)] text-[var(--gold)]"
+                    : "border-border text-muted-foreground hover:border-[color:color-mix(in_oklab,var(--gold)_40%,transparent)] hover:text-foreground"
+                }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
+                {name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active panel */}
+        <div
+          key={active.id}
+          className="mt-8 grid animate-fade-in gap-6 overflow-hidden rounded-3xl border border-border p-8 glass lg:grid-cols-12 lg:p-10"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div className="lg:col-span-7">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-xl border border-border bg-white/5">
+                <ActiveIcon className="h-5 w-5 text-[var(--gold)]" />
+              </span>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                  {active.tag}
+                </div>
+                <div className="font-display text-2xl">{active.name}</div>
               </div>
-              <div className="text-sm">{name}</div>
             </div>
-          ))}
+            <h3 className="mt-8 font-display text-3xl leading-tight sm:text-4xl">
+              {active.lead}
+            </h3>
+            <p className="mt-4 max-w-2xl text-muted-foreground">{active.body}</p>
+
+            <div className="mt-8 flex flex-wrap gap-2">
+              {active.uses.map((u) => (
+                <span
+                  key={u}
+                  className="rounded-full border border-border/80 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
+                >
+                  {u}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="grid h-full gap-4 sm:grid-cols-2">
+              {active.stats.map((s) => (
+                <div
+                  key={s.k}
+                  className="flex flex-col justify-between rounded-2xl border border-border bg-white/[0.02] p-6"
+                >
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                    {s.k}
+                  </div>
+                  <div className="mt-6 font-display text-4xl gold-text">{s.v}</div>
+                </div>
+              ))}
+              <a
+                href="#contact"
+                className="group flex items-center justify-between rounded-2xl border border-border bg-white/[0.02] p-6 transition hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] sm:col-span-2"
+              >
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    Talk to our team
+                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {active.name} deployments & partnerships
+                  </div>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-[var(--gold)] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 /* ---------- Investors ---------- */
 
