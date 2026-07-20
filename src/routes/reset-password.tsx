@@ -42,7 +42,10 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null);
+  // Masked hint persisted across refreshes/navigation so the badge stays
+  // consistent even if the recovery session isn't (yet) present. We only
+  // ever hold the masked form in React state.
+  const [maskedHint, setMaskedHint] = useState<string | null>(() => readRecoveryHint());
 
   // Supabase parses the recovery token from the URL hash and creates a
   // temporary session with a PASSWORD_RECOVERY event. Wait for it before
@@ -59,9 +62,15 @@ function ResetPasswordPage() {
       return;
     }
 
+    const rememberEmail = (email?: string | null) => {
+      if (!email) return;
+      const masked = saveRecoveryHint(email);
+      if (masked) setMaskedHint(masked);
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
-      if (session?.user?.email) setRecoveryEmail(session.user.email);
+      rememberEmail(session?.user?.email);
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setValidLink(true);
         setReady(true);
@@ -71,7 +80,7 @@ function ResetPasswordPage() {
     // Fallback: if session already exists (page opened directly after redirect)
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
-      if (data.session?.user?.email) setRecoveryEmail(data.session.user.email);
+      rememberEmail(data.session?.user?.email);
       if (data.session) {
         setValidLink(true);
       }
@@ -83,6 +92,7 @@ function ResetPasswordPage() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
 
   const checks = [
     { id: "len", label: "At least 12 characters", ok: password.length >= 12 },
