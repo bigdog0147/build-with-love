@@ -2318,14 +2318,61 @@ const CONTACT_CHANNELS = [
   { k: "Global desk", v: "+65 6800 3300" },
 ];
 
+const contactSchema = z.object({
+  name: z.string().trim().min(2, "Please enter your full name").max(100, "Max 100 characters"),
+  company: z.string().trim().min(2, "Company or institution is required").max(120, "Max 120 characters"),
+  email: z.string().trim().email("Enter a valid email").max(255, "Max 255 characters"),
+  country: z.string().trim().min(2, "Country or region is required").max(80, "Max 80 characters"),
+  interest: z.string().trim().min(3, "Tell us your area of interest").max(160, "Max 160 characters"),
+  message: z.string().trim().min(10, "Please provide at least 10 characters").max(1000, "Max 1000 characters"),
+});
+type ContactValues = z.infer<typeof contactSchema>;
+type ContactField = keyof ContactValues;
+
+const CONTACT_INITIAL: ContactValues = {
+  name: "", company: "", email: "", country: "", interest: "", message: "",
+};
+
 function Contact() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [values, setValues] = useState<ContactValues>(CONTACT_INITIAL);
+  const [touched, setTouched] = useState<Record<ContactField, boolean>>({
+    name: false, company: false, email: false, country: false, interest: false, message: false,
+  });
+
+  const parsed = useMemo(() => contactSchema.safeParse(values), [values]);
+  const errors: Partial<Record<ContactField, string>> = useMemo(() => {
+    if (parsed.success) return {};
+    const out: Partial<Record<ContactField, string>> = {};
+    for (const issue of parsed.error.issues) {
+      const k = issue.path[0] as ContactField;
+      if (!out[k]) out[k] = issue.message;
+    }
+    return out;
+  }, [parsed]);
+
+  const isValid = parsed.success;
+
+  const setField = (k: ContactField) => (v: string) =>
+    setValues((prev) => ({ ...prev, [k]: v }));
+  const markTouched = (k: ContactField) => () =>
+    setTouched((prev) => ({ ...prev, [k]: true }));
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (status === "submitting") return;
+    if (!isValid) {
+      setTouched({ name: true, company: true, email: true, country: true, interest: true, message: true });
+      return;
+    }
     setStatus("submitting");
     setTimeout(() => setStatus("success"), 1100);
+  };
+
+  const reset = () => {
+    setValues(CONTACT_INITIAL);
+    setTouched({ name: false, company: false, email: false, country: false, interest: false, message: false });
+    setStatus("idle");
   };
 
   return (
@@ -2350,6 +2397,7 @@ function Contact() {
           <form
             onSubmit={onSubmit}
             aria-busy={status === "submitting"}
+            noValidate
             className="rounded-3xl border border-border p-8 glass lg:col-span-7"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
@@ -2374,7 +2422,7 @@ function Contact() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setStatus("idle")}
+                    onClick={reset}
                     className="mt-4 text-xs uppercase tracking-[0.24em] text-[var(--gold)] hover:underline"
                   >
                     Submit another inquiry
@@ -2389,17 +2437,18 @@ function Contact() {
                     status === "submitting" ? "opacity-60" : "opacity-100"
                   }`}
                 >
-                  <Field label="Full name" placeholder="Ada Lovelace" />
-                  <Field label="Company / Institution" placeholder="Organization" />
-                  <Field label="Email" type="email" placeholder="you@company.com" />
-                  <Field label="Country" placeholder="Country / Region" />
-                  <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
-                  <Field label="Message" placeholder="Tell us about your requirements" full textarea />
+                  <Field name="name" label="Full name" placeholder="Ada Lovelace" value={values.name} onChange={setField("name")} onBlur={markTouched("name")} error={touched.name ? errors.name : undefined} maxLength={100} required />
+                  <Field name="company" label="Company / Institution" placeholder="Organization" value={values.company} onChange={setField("company")} onBlur={markTouched("company")} error={touched.company ? errors.company : undefined} maxLength={120} required />
+                  <Field name="email" label="Email" type="email" placeholder="you@company.com" value={values.email} onChange={setField("email")} onBlur={markTouched("email")} error={touched.email ? errors.email : undefined} maxLength={255} required />
+                  <Field name="country" label="Country" placeholder="Country / Region" value={values.country} onChange={setField("country")} onBlur={markTouched("country")} error={touched.country ? errors.country : undefined} maxLength={80} required />
+                  <Field name="interest" label="Interest" placeholder="AI, robotics, energy, infrastructure…" value={values.interest} onChange={setField("interest")} onBlur={markTouched("interest")} error={touched.interest ? errors.interest : undefined} maxLength={160} full required />
+                  <Field name="message" label="Message" placeholder="Tell us about your requirements" value={values.message} onChange={setField("message")} onBlur={markTouched("message")} error={touched.message ? errors.message : undefined} maxLength={1000} full textarea required />
                 </fieldset>
                 <button
                   type="submit"
-                  disabled={status === "submitting"}
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-80"
+                  disabled={status === "submitting" || !isValid}
+                  aria-disabled={status === "submitting" || !isValid}
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
                   style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
                 >
                   {status === "submitting" ? (
@@ -2414,11 +2463,15 @@ function Contact() {
                   )}
                 </button>
                 <p className="mt-4 text-xs text-muted-foreground">
-                  All submissions are reviewed by our regional partnerships team within one business day.
+                  {isValid
+                    ? "All submissions are reviewed by our regional partnerships team within one business day."
+                    : "Complete all fields to enable submission. All inquiries are reviewed within one business day."}
                 </p>
               </>
             )}
           </form>
+
+
 
 
           <div className="grid gap-4 lg:col-span-5">
