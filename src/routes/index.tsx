@@ -2048,215 +2048,350 @@ const INDUSTRIES = [
   {
     id: "manufacturing",
     icon: Factory,
-    name: "Manufacturing",
-    tag: "Discrete & process",
-    lead: "Autonomous production for the world's most demanding factories.",
-    body:
-      "Turnkey lights-out lines for automotive, electronics and heavy industry — orchestrated by GF3 Intelligence and continuously optimised for yield.",
-    stats: [
-      { k: "Yield uplift", v: "+18%" },
-      { k: "Downtime", v: "-64%" },
-    ],
-    uses: ["Automotive assembly", "Electronics SMT", "Heavy machinery"],
+    name: "Advanced Manufacturing",
+    image: "Modern automated production facility",
+    desc: "Smart manufacturing powered by AI, robotics, digital twins and intelligent production systems.",
+    accent: "from-amber-500/30 to-transparent",
   },
   {
     id: "energy",
     icon: BatteryCharging,
     name: "Energy",
-    tag: "Generation & storage",
-    lead: "Continental-scale clean generation, storage and dispatch.",
-    body:
-      "Grid-forming inverters, iron-air storage and autonomous microgrid controllers keep utilities and hyperscale operators firm on renewables.",
-    stats: [
-      { k: "Storage online", v: "8.4 GWh" },
-      { k: "Firm renewable", v: "94%" },
-    ],
-    uses: ["Utility storage", "Data-center firming", "Industrial microgrids"],
+    image: "Renewable energy infrastructure",
+    desc: "Solutions supporting clean energy, storage technologies and intelligent power management.",
+    accent: "from-emerald-500/25 to-transparent",
+  },
+  {
+    id: "transportation",
+    icon: Zap,
+    name: "Transportation",
+    image: "Electric mobility and logistics",
+    desc: "Technology that supports next-generation transportation systems and intelligent mobility.",
+    accent: "from-sky-500/25 to-transparent",
   },
   {
     id: "aerospace",
     icon: Rocket,
     name: "Aerospace",
-    tag: "Air & orbital",
-    lead: "Advanced structures, propulsion and orbital infrastructure.",
-    body:
-      "Composite airframes, hypersonic thermal systems and reusable launch structures machined to sub-100 micron tolerances at gigafactory volume.",
-    stats: [
-      { k: "Tolerance", v: "0.08 mm" },
-      { k: "Payload cadence", v: "Weekly" },
-    ],
-    uses: ["Reusable launch", "Satellite platforms", "Hypersonic systems"],
+    image: "Satellites, launch systems, engineering",
+    desc: "Advanced engineering concepts supporting aerospace innovation and future infrastructure.",
+    accent: "from-indigo-500/25 to-transparent",
   },
   {
-    id: "logistics",
+    id: "robotics",
+    icon: Bot,
+    name: "Robotics",
+    image: "Industrial robotic arms",
+    desc: "Autonomous robotic systems designed to improve precision, safety and productivity.",
+    accent: "from-orange-500/25 to-transparent",
+  },
+  {
+    id: "digital",
     icon: Network,
-    name: "Logistics",
-    tag: "Autonomous supply",
-    lead: "AI-orchestrated ports, warehouses and long-haul corridors.",
-    body:
-      "Autonomous ground fleets, robotic sortation and predictive routing eliminate bottlenecks across intercontinental supply chains.",
-    stats: [
-      { k: "Throughput", v: "+42%" },
-      { k: "On-time SLA", v: "99.6%" },
-    ],
-    uses: ["Smart ports", "Robotic warehousing", "Autonomous fleet"],
+    name: "Digital Infrastructure",
+    image: "Data centres and cloud systems",
+    desc: "Scalable digital infrastructure supporting secure industrial operations and connected technologies.",
+    accent: "from-cyan-500/25 to-transparent",
+  },
+  {
+    id: "ai",
+    icon: Brain,
+    name: "Artificial Intelligence",
+    image: "Neural network visualization",
+    desc: "AI solutions that improve automation, predictive analysis and operational intelligence.",
+    accent: "from-fuchsia-500/25 to-transparent",
   },
   {
     id: "cities",
     icon: Globe2,
     name: "Smart Cities",
-    tag: "Urban intelligence",
-    lead: "Sensing, mobility and energy stacks for the next century of cities.",
-    body:
-      "City-scale digital twins integrate mobility, grid and utility telemetry — reducing emissions and unlocking real-time responsive infrastructure.",
-    stats: [
-      { k: "Emissions cut", v: "-31%" },
-      { k: "Traffic time", v: "-22%" },
-    ],
-    uses: ["Digital twin cities", "Adaptive mobility", "Urban microgrids"],
-  },
-  {
-    id: "infrastructure",
-    icon: Atom,
-    name: "Infrastructure",
-    tag: "Civil & industrial",
-    lead: "Engineered infrastructure delivered as an integrated system.",
-    body:
-      "Pre-engineered modular substations, water treatment and telecom cores that ship, install and commission months faster than traditional builds.",
-    stats: [
-      { k: "Time to online", v: "-58%" },
-      { k: "Modular sites", v: "1,240+" },
-    ],
-    uses: ["Modular substations", "Water systems", "Telecom cores"],
-  },
-  {
-    id: "government",
-    icon: ShieldCheck,
-    name: "Government",
-    tag: "Sovereign platforms",
-    lead: "Sovereign AI, secure compute and mission-critical systems.",
-    body:
-      "Air-gapped inference clusters, secure sensor networks and autonomous logistics purpose-built for defence, intelligence and civil agencies.",
-    stats: [
-      { k: "Clearance grade", v: "Tier-1" },
-      { k: "Sovereign clusters", v: "17" },
-    ],
-    uses: ["Sovereign AI", "Border sensing", "Mission logistics"],
-  },
-  {
-    id: "sustainability",
-    icon: Leaf,
-    name: "Sustainability",
-    tag: "Circular systems",
-    lead: "Closed-loop materials, water and energy across every gigafactory.",
-    body:
-      "In-house recycling of batteries, silicon and rare metals — with every campus targeting net-zero operations and water-positive discharge by 2030.",
-    stats: [
-      { k: "Water recycled", v: "96%" },
-      { k: "Battery recovery", v: "98%" },
-    ],
-    uses: ["Battery recycling", "Water reuse", "Circular alloys"],
+    image: "Future city skyline",
+    desc: "Integrated technologies designed for connected urban infrastructure and sustainable development.",
+    accent: "from-teal-500/25 to-transparent",
   },
 ];
 
-function Industries() {
-  const [activeId, setActiveId] = useState(INDUSTRIES[0].id);
-  const active = INDUSTRIES.find((i) => i.id === activeId) ?? INDUSTRIES[0];
-  const ActiveIcon = active.icon;
+const REGIONS: Record<string, { name: string; industries: string; cx: number; cy: number }> = {
+  na: {
+    name: "North America",
+    industries: "AI research, aerospace engineering, advanced manufacturing and digital infrastructure.",
+    cx: 220,
+    cy: 210,
+  },
+  eu: {
+    name: "Europe",
+    industries: "Precision robotics, clean energy systems, mobility platforms and industrial software.",
+    cx: 500,
+    cy: 195,
+  },
+  af: {
+    name: "Africa",
+    industries: "Renewable energy, smart infrastructure and next-generation logistics networks.",
+    cx: 525,
+    cy: 350,
+  },
+  me: {
+    name: "Middle East",
+    industries: "Sovereign AI platforms, smart cities and large-scale energy transition projects.",
+    cx: 590,
+    cy: 275,
+  },
+  ap: {
+    name: "Asia-Pacific",
+    industries: "Gigafactory manufacturing, semiconductor systems, robotics and connected mobility.",
+    cx: 780,
+    cy: 285,
+  },
+};
 
+function IndustryCard({ industry, index }: { industry: (typeof INDUSTRIES)[number]; index: number }) {
+  const Icon = industry.icon;
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${index * 60}ms` }}
+      className={`group relative overflow-hidden rounded-3xl border border-border p-7 glass transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[color:color-mix(in_oklab,var(--gold)_55%,transparent)] ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${industry.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
+      />
+      <div
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: "var(--gradient-gold)" }}
+      />
+
+      <div className="relative flex items-start justify-between">
+        <span className="grid h-12 w-12 place-items-center rounded-xl border border-border bg-white/5 transition group-hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)]">
+          <Icon className="h-5 w-5 text-[var(--gold)]" />
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          0{(INDUSTRIES.findIndex((i) => i.id === industry.id) + 1).toString()}
+        </span>
+      </div>
+
+      <h3 className="relative mt-6 font-display text-2xl leading-tight">{industry.name}</h3>
+      <div className="relative mt-1 text-[10px] uppercase tracking-[0.24em] text-[var(--gold)]/80">
+        {industry.image}
+      </div>
+      <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">{industry.desc}</p>
+
+      <div className="relative mt-6 flex items-center justify-between">
+        <a
+          href="#contact"
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-foreground/80 opacity-0 transition group-hover:opacity-100"
+        >
+          Learn More
+          <ArrowUpRight className="h-3.5 w-3.5 text-[var(--gold)]" />
+        </a>
+        <span className="h-px w-16 bg-gradient-to-r from-[var(--gold)]/60 to-transparent opacity-0 transition group-hover:opacity-100" />
+      </div>
+    </div>
+  );
+}
+
+function WorldMap() {
+  const [hover, setHover] = useState<string | null>(null);
+  const active = hover ? REGIONS[hover] : null;
+
+  const regionShape = (id: string, d: string) => (
+    <path
+      key={id}
+      d={d}
+      onMouseEnter={() => setHover(id)}
+      onMouseLeave={() => setHover(null)}
+      className={`cursor-pointer transition-all duration-300 ${
+        hover === id
+          ? "fill-[color:color-mix(in_oklab,var(--gold)_35%,transparent)] stroke-[var(--gold)]"
+          : "fill-white/[0.04] stroke-white/20 hover:fill-white/[0.08]"
+      }`}
+      strokeWidth={1}
+    />
+  );
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border p-6 glass md:p-10">
+      <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+        <div className="relative">
+          <svg viewBox="0 0 1000 500" className="h-auto w-full">
+            {/* stylized continent blobs (decorative) */}
+            {regionShape(
+              "na",
+              "M120,120 C200,90 280,110 320,160 C350,220 300,290 240,300 C170,315 110,260 100,210 C95,175 100,140 120,120 Z",
+            )}
+            {regionShape(
+              "eu",
+              "M430,140 C500,120 560,140 580,180 C590,220 550,250 500,255 C450,260 410,225 420,180 C423,165 425,150 430,140 Z",
+            )}
+            {regionShape(
+              "af",
+              "M470,270 C540,260 590,300 590,370 C585,430 520,455 470,430 C420,405 430,325 450,290 C455,282 462,275 470,270 Z",
+            )}
+            {regionShape(
+              "me",
+              "M560,230 C610,220 645,245 640,285 C630,315 590,320 565,300 C545,285 545,255 560,230 Z",
+            )}
+            {regionShape(
+              "ap",
+              "M680,200 C780,180 870,220 890,290 C890,360 800,390 720,370 C640,350 620,275 660,225 C666,215 672,208 680,200 Z",
+            )}
+
+            {Object.entries(REGIONS).map(([id, r]) => (
+              <g key={id} pointerEvents="none">
+                <circle
+                  cx={r.cx}
+                  cy={r.cy}
+                  r={hover === id ? 8 : 5}
+                  className="fill-[var(--gold)] transition-all"
+                />
+                <circle
+                  cx={r.cx}
+                  cy={r.cy}
+                  r={hover === id ? 18 : 12}
+                  className="fill-[var(--gold)]/20 transition-all"
+                />
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        <div className="flex flex-col justify-between rounded-2xl border border-border bg-white/[0.02] p-6">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+              Global Impact
+            </div>
+            <h4 className="mt-3 font-display text-2xl">
+              {active ? active.name : "Hover a region"}
+            </h4>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground min-h-[80px]">
+              {active
+                ? active.industries
+                : "Gigafactory 3 partners with organisations across five continents to deliver intelligent industrial platforms tailored to each region."}
+            </p>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            {Object.entries(REGIONS).map(([id, r]) => (
+              <button
+                key={id}
+                onMouseEnter={() => setHover(id)}
+                onMouseLeave={() => setHover(null)}
+                className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition ${
+                  hover === id
+                    ? "border-[var(--gold)] text-[var(--gold)]"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {r.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Industries() {
   return (
     <section id="industries" className="relative overflow-hidden px-6 py-32">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
-          eyebrow="Industries Served"
-          title="Deployed where the stakes are highest."
-          desc="Governments, Fortune 500 operators and frontier innovators run production systems on Gigafactory 3 platforms."
+          eyebrow="Industries We Empower"
+          title="Engineered for the industries defining tomorrow."
+          desc="Our technologies are designed to support industries that define the future of the global economy through intelligent engineering, automation and sustainable innovation."
         />
 
-        {/* Tabs */}
-        <div className="mt-14 flex flex-wrap gap-2">
-          {INDUSTRIES.map(({ id, icon: Icon, name }) => {
-            const on = id === activeId;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveId(id)}
-                className={`group inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition ${
-                  on
-                    ? "border-[color:color-mix(in_oklab,var(--gold)_70%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_10%,transparent)] text-[var(--gold)]"
-                    : "border-border text-muted-foreground hover:border-[color:color-mix(in_oklab,var(--gold)_40%,transparent)] hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {name}
-              </button>
-            );
-          })}
+        <div className="mt-10 grid gap-6 rounded-3xl border border-border p-8 glass md:grid-cols-2 md:p-10">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.28em] text-[var(--gold)]">
+              Every industry is evolving
+            </div>
+            <h3 className="mt-3 font-display text-3xl leading-tight md:text-4xl">
+              Platforms that move entire industries forward.
+            </h3>
+          </div>
+          <p className="self-center text-muted-foreground">
+            Gigafactory 3 develops advanced technology platforms that help organisations modernise operations, increase efficiency and prepare for the next generation of industrial transformation.
+          </p>
         </div>
 
-        {/* Active panel */}
+        {/* Industry grid */}
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {INDUSTRIES.map((industry, i) => (
+            <IndustryCard key={industry.id} industry={industry} index={i} />
+          ))}
+        </div>
+
+        {/* Parallax banner */}
         <div
-          key={active.id}
-          className="mt-8 grid animate-fade-in gap-6 overflow-hidden rounded-3xl border border-border p-8 glass lg:grid-cols-12 lg:p-10"
+          className="relative mt-20 overflow-hidden rounded-3xl border border-border"
           style={{ boxShadow: "var(--shadow-card)" }}
         >
-          <div className="lg:col-span-7">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl border border-border bg-white/5">
-                <ActiveIcon className="h-5 w-5 text-[var(--gold)]" />
-              </span>
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
-                  {active.tag}
-                </div>
-                <div className="font-display text-2xl">{active.name}</div>
+          <div
+            className="h-[420px] w-full bg-cover bg-center bg-fixed md:h-[520px]"
+            style={{ backgroundImage: `url(${facilityAerial.url})` }}
+            aria-label="Modern futuristic industrial campus"
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, oklch(0 0 0 / 60%) 0%, oklch(0 0 0 / 40%) 40%, oklch(0 0 0 / 85%) 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 opacity-70"
+            style={{
+              background:
+                "radial-gradient(600px 300px at 20% 80%, oklch(0.82 0.14 85 / 25%), transparent 60%)",
+            }}
+          />
+          <div className="absolute inset-0 flex items-end p-8 md:p-14">
+            <div className="max-w-3xl">
+              <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Global Vision
               </div>
-            </div>
-            <h3 className="mt-8 font-display text-3xl leading-tight sm:text-4xl">
-              {active.lead}
-            </h3>
-            <p className="mt-4 max-w-2xl text-muted-foreground">{active.body}</p>
-
-            <div className="mt-8 flex flex-wrap gap-2">
-              {active.uses.map((u) => (
-                <span
-                  key={u}
-                  className="rounded-full border border-border/80 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
-                >
-                  {u}
-                </span>
-              ))}
+              <h3 className="mt-4 font-display text-4xl leading-[1.05] md:text-6xl">
+                Building solutions for the <span className="gold-text">industries of tomorrow</span>.
+              </h3>
+              <p className="mt-5 max-w-xl text-muted-foreground">
+                From continental grids to orbital infrastructure — Gigafactory 3 designs the systems that will power the next century of human progress.
+              </p>
             </div>
           </div>
+        </div>
 
-          <div className="lg:col-span-5">
-            <div className="grid h-full gap-4 sm:grid-cols-2">
-              {active.stats.map((s) => (
-                <div
-                  key={s.k}
-                  className="flex flex-col justify-between rounded-2xl border border-border bg-white/[0.02] p-6"
-                >
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                    {s.k}
-                  </div>
-                  <div className="mt-6 font-display text-4xl gold-text">{s.v}</div>
-                </div>
-              ))}
-              <a
-                href="#contact"
-                className="group flex items-center justify-between rounded-2xl border border-border bg-white/[0.02] p-6 transition hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] sm:col-span-2"
-              >
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
-                    Talk to our team
-                  </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {active.name} deployments & partnerships
-                  </div>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-[var(--gold)] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </a>
-            </div>
+        {/* Global impact map */}
+        <div className="mt-20">
+          <SectionHeader
+            eyebrow="Global Impact"
+            title="Presence across five continents."
+            desc="Explore the regions where Gigafactory 3 technologies are deployed and the industries we support in each."
+          />
+          <div className="mt-10">
+            <WorldMap />
           </div>
         </div>
       </div>
