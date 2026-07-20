@@ -114,15 +114,23 @@ function ResetPasswordPage() {
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      // Sign out so the user must log in with the new password (also
-      // invalidates the recovery session).
+      // Server-side path: validates recovery-session freshness, amr, and
+      // password strength before calling updateUser + global signOut.
+      await updatePasswordFromRecovery({ data: { password } });
+      // Make sure the local session is cleared even if the server-side
+      // global signOut didn't propagate to this tab yet.
       await supabase.auth.signOut();
       setDone(true);
       setTimeout(() => navigate({ to: "/auth", replace: true }), 2200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update password");
+      const message = err instanceof Error ? err.message : "Could not update password";
+      // Recovery-session rejection → surface the expired-link panel.
+      if (/^Unauthorized/i.test(message)) {
+        setLinkError(message.replace(/^Unauthorized:\s*/i, ""));
+        setValidLink(false);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
