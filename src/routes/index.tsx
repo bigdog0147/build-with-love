@@ -1015,38 +1015,56 @@ const TECH_GRID = [
     tag: "Artificial Intelligence",
     body: "Developing intelligent systems capable of predictive analytics, industrial automation, computer vision, and autonomous decision support to improve efficiency across manufacturing and infrastructure.",
     cta: "Learn more",
+    target: "ai",
   },
   {
     icon: Bot,
     tag: "Robotics & Automation",
     body: "Designing autonomous robotic platforms and precision automation systems that improve safety, productivity, and manufacturing accuracy.",
     cta: "Explore robotics",
+    target: "manufacturing",
   },
   {
     icon: Factory,
     tag: "Advanced Manufacturing",
     body: "Building digitally connected production environments powered by AI, intelligent sensors, and next-generation manufacturing technologies.",
     cta: "View platform",
+    target: "manufacturing",
   },
   {
     icon: Zap,
     tag: "Renewable Energy Systems",
     body: "Creating intelligent energy solutions designed to improve sustainability, optimize power management, and support resilient industrial operations.",
     cta: "Discover energy",
+    target: "technology",
   },
   {
     icon: CircuitBoard,
     tag: "Industrial Software",
     body: "Developing digital platforms that connect machines, facilities, and operational data to enable intelligent industrial management.",
     cta: "View software",
+    target: "ai",
   },
   {
     icon: FlaskConical,
     tag: "Research & Innovation",
     body: "Driving continuous innovation through research programs exploring future technologies, engineering breakthroughs, and emerging industrial solutions.",
     cta: "Research center",
+    target: "research",
   },
 ];
+
+function smoothScrollTo(id: string) {
+  if (typeof document === "undefined") return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.remove("gf-section-flash");
+  // force reflow so animation replays
+  void (el as HTMLElement).offsetWidth;
+  el.classList.add("gf-section-flash");
+  window.setTimeout(() => el.classList.remove("gf-section-flash"), 1600);
+}
 
 const TECH_STATS = [
   { value: 12, suffix: "+", label: "Technology programs", sub: "Active across the stack" },
