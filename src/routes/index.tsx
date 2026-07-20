@@ -6,17 +6,24 @@ import {
   ArrowUpRight,
   Atom,
   BatteryCharging,
+  Beaker,
   Bot,
   Cpu,
   Factory,
+  FlaskConical,
   Globe2,
+  GraduationCap,
   Leaf,
+  Lightbulb,
   Menu,
   Network,
+  Rocket,
   Search,
+  ShieldCheck,
   Sparkles,
   X,
 } from "lucide-react";
+
 import { getMetrics, type Metric } from "@/lib/metrics.functions";
 import facilityAerial from "@/assets/facility-aerial.jpg.asset.json";
 import roboticsLine from "@/assets/robotics-line.jpg.asset.json";
