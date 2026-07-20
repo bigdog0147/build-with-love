@@ -69,12 +69,40 @@ function ResetPasswordPage() {
     };
   }, []);
 
+  const checks = [
+    { id: "len", label: "At least 12 characters", ok: password.length >= 12 },
+    { id: "upper", label: "One uppercase letter (A–Z)", ok: /[A-Z]/.test(password) },
+    { id: "lower", label: "One lowercase letter (a–z)", ok: /[a-z]/.test(password) },
+    { id: "num", label: "One number (0–9)", ok: /\d/.test(password) },
+    {
+      id: "sym",
+      label: "One symbol (!@#$…)",
+      ok: /[^A-Za-z0-9]/.test(password),
+    },
+    {
+      id: "nospace",
+      label: "No leading or trailing spaces",
+      ok: password.length > 0 && password === password.trim(),
+    },
+  ];
+  const passedCount = checks.filter((c) => c.ok).length;
+  const strengthPct = password.length === 0 ? 0 : (passedCount / checks.length) * 100;
+  const strengthLabel =
+    passedCount <= 2 ? "Weak" : passedCount <= 4 ? "Fair" : passedCount === 5 ? "Strong" : "Excellent";
+  const strengthColor =
+    passedCount <= 2
+      ? "var(--danger)"
+      : passedCount <= 4
+        ? "#d97706"
+        : "var(--gold)";
+  const allPassed = checks.every((c) => c.ok);
   const pwError =
-    password.length > 0 && password.length < 8 ? "At least 8 characters" : null;
+    password.length > 0 && !allPassed
+      ? "Password doesn't meet all requirements"
+      : null;
   const confirmError =
     confirm.length > 0 && confirm !== password ? "Passwords do not match" : null;
-  const canSubmit =
-    validLink && password.length >= 8 && confirm === password && !loading;
+  const canSubmit = validLink && allPassed && confirm === password && !loading;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -143,8 +171,10 @@ function ResetPasswordPage() {
                     type={showPw ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
+                    placeholder="At least 12 characters"
                     autoComplete="new-password"
+                    aria-invalid={Boolean(pwError)}
+                    aria-describedby="pw-requirements"
                     className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60"
                   />
                   <button
@@ -156,10 +186,64 @@ function ResetPasswordPage() {
                     {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+
+                {/* Strength meter */}
+                <div className="mt-3">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-elevated)]">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${strengthPct}%`,
+                        background: strengthColor,
+                        boxShadow:
+                          passedCount >= 5 ? "0 0 12px " + strengthColor : "none",
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">Password strength</span>
+                    <span style={{ color: password.length === 0 ? "var(--muted-foreground)" : strengthColor }}>
+                      {password.length === 0 ? "—" : strengthLabel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Requirements checklist */}
+                <ul
+                  id="pw-requirements"
+                  className="mt-3 grid gap-1.5 sm:grid-cols-2"
+                >
+                  {checks.map((c) => (
+                    <li
+                      key={c.id}
+                      className={
+                        "flex items-center gap-2 text-[11px] transition-colors " +
+                        (c.ok ? "text-[var(--gold)]" : "text-muted-foreground")
+                      }
+                    >
+                      <span
+                        aria-hidden
+                        className={
+                          "grid h-3.5 w-3.5 place-items-center rounded-full border text-[9px] " +
+                          (c.ok
+                            ? "border-[var(--gold)]/60 bg-[var(--gold)]/15"
+                            : "border-border")
+                        }
+                      >
+                        {c.ok ? "✓" : ""}
+                      </span>
+                      <span>{c.label}</span>
+                    </li>
+                  ))}
+                </ul>
+
                 {pwError && (
-                  <span className="mt-1 block text-[11px] text-[var(--danger)]">{pwError}</span>
+                  <span role="alert" className="mt-2 block text-[11px] text-[var(--danger)]">
+                    {pwError}
+                  </span>
                 )}
               </label>
+
 
               <label className="block">
                 <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
