@@ -9,6 +9,8 @@ import {
   BatteryCharging,
   Beaker,
   Bot,
+  Brain,
+  CircuitBoard,
   Cpu,
   Factory,
   FlaskConical,
@@ -25,6 +27,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Zap,
   X,
 } from "lucide-react";
 
@@ -176,6 +179,7 @@ function LandingPage() {
         <Metrics />
 
         <Technology />
+        <TechnologyGrid />
         <Manufacturing />
         <AIPlatform />
         <GigafactoryNetwork />
@@ -1003,7 +1007,221 @@ function Technology() {
   );
 }
 
+/* ---------- Technology Grid (3x2 + banner + counters) ---------- */
 
+const TECH_GRID = [
+  {
+    icon: Brain,
+    tag: "Artificial Intelligence",
+    body: "Developing intelligent systems capable of predictive analytics, industrial automation, computer vision, and autonomous decision support to improve efficiency across manufacturing and infrastructure.",
+    cta: "Learn more",
+  },
+  {
+    icon: Bot,
+    tag: "Robotics & Automation",
+    body: "Designing autonomous robotic platforms and precision automation systems that improve safety, productivity, and manufacturing accuracy.",
+    cta: "Explore robotics",
+  },
+  {
+    icon: Factory,
+    tag: "Advanced Manufacturing",
+    body: "Building digitally connected production environments powered by AI, intelligent sensors, and next-generation manufacturing technologies.",
+    cta: "View platform",
+  },
+  {
+    icon: Zap,
+    tag: "Renewable Energy Systems",
+    body: "Creating intelligent energy solutions designed to improve sustainability, optimize power management, and support resilient industrial operations.",
+    cta: "Discover energy",
+  },
+  {
+    icon: CircuitBoard,
+    tag: "Industrial Software",
+    body: "Developing digital platforms that connect machines, facilities, and operational data to enable intelligent industrial management.",
+    cta: "View software",
+  },
+  {
+    icon: FlaskConical,
+    tag: "Research & Innovation",
+    body: "Driving continuous innovation through research programs exploring future technologies, engineering breakthroughs, and emerging industrial solutions.",
+    cta: "Research center",
+  },
+];
+
+const TECH_STATS = [
+  { value: 12, suffix: "+", label: "Technology programs", sub: "Active across the stack" },
+  { value: 50, suffix: "+", label: "Research initiatives", sub: "Global engineering network" },
+  { value: 100, suffix: "+", label: "Innovation concepts", sub: "In prototyping & validation" },
+  { value: 24, suffix: "/7", label: "Engineering excellence", sub: "Continuous operations" },
+];
+
+function TechnologyGrid() {
+  return (
+    <section id="technology-grid" className="relative px-6 py-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-24 -z-10 mx-auto h-[420px] max-w-6xl opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(ellipse at 30% 40%, oklch(0.72 0.19 245 / 22%), transparent 60%), radial-gradient(ellipse at 75% 55%, oklch(0.82 0.14 85 / 18%), transparent 65%)",
+        }}
+      />
+      <div className="mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Technology"
+          title="Engineering the technologies that build tomorrow"
+          desc="At Gigafactory 3, we develop intelligent technologies that transform industries through artificial intelligence, advanced automation, robotics, sustainable energy, and next-generation manufacturing systems."
+        />
+
+        <div className="mx-auto mt-8 max-w-3xl text-center text-sm leading-relaxed text-muted-foreground">
+          <p>
+            Innovation is not just about creating products — it is about building the systems that
+            power the future. Our technology ecosystem integrates intelligent software, precision
+            engineering, advanced manufacturing, and digital infrastructure into scalable solutions
+            for industries around the world.
+          </p>
+        </div>
+
+        {/* 3x2 grid */}
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {TECH_GRID.map((t, i) => {
+            const Icon = t.icon;
+            return (
+              <article
+                key={t.tag}
+                className="group relative overflow-hidden rounded-2xl border border-border p-7 glass transition-all duration-500 hover:-translate-y-1 hover:border-[var(--gold)]/50 animate-fade-in"
+                style={{
+                  animationDelay: `${i * 80}ms`,
+                  boxShadow: "var(--shadow-card)",
+                }}
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, oklch(0.82 0.14 85 / 40%), transparent 40%, oklch(0.72 0.19 245 / 30%))",
+                    mask: "linear-gradient(#000,#000) content-box, linear-gradient(#000,#000)",
+                    WebkitMask:
+                      "linear-gradient(#000,#000) content-box, linear-gradient(#000,#000)",
+                    WebkitMaskComposite: "xor",
+                    maskComposite: "exclude",
+                    padding: "1px",
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-60"
+                  style={{ background: "var(--gradient-gold)" }}
+                />
+
+                <div className="relative">
+                  <div
+                    className="grid h-12 w-12 place-items-center rounded-xl transition-transform duration-500 group-hover:scale-110"
+                    style={{
+                      background: "color-mix(in oklab, var(--gold) 14%, transparent)",
+                      color: "var(--gold)",
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  <div className="mt-5 text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    0{i + 1}
+                  </div>
+                  <h3 className="mt-2 font-display text-xl leading-snug">{t.tag}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.body}</p>
+
+                  <a
+                    href="#contact"
+                    className="mt-6 inline-flex items-center gap-1.5 text-sm text-[var(--gold)] transition-transform duration-300 hover:translate-x-0.5"
+                  >
+                    {t.cta} <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {/* Statement banner */}
+        <div
+          className="relative mt-20 overflow-hidden rounded-3xl border border-border"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${roboticsLine.url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "grayscale(0.7) brightness(0.35)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(120deg, oklch(0.16 0.015 260 / 92%) 0%, oklch(0.16 0.015 260 / 55%) 55%, oklch(0.72 0.19 245 / 25%) 100%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, oklch(1 0 0 / 40%) 1px, transparent 1px), linear-gradient(to bottom, oklch(1 0 0 / 40%) 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+            }}
+          />
+
+          <div className="relative grid gap-10 p-10 lg:grid-cols-3 lg:p-16">
+            <div className="lg:col-span-2">
+              <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                The Gigafactory 3 doctrine
+              </div>
+              <h3 className="mt-4 font-display text-4xl leading-tight sm:text-5xl lg:text-6xl">
+                <span className="gold-text">Innovation driven.</span>
+                <br />
+                Intelligence powered.
+                <br />
+                <span className="text-muted-foreground">Future ready.</span>
+              </h3>
+            </div>
+            <div className="flex flex-col justify-end gap-4 text-sm leading-relaxed text-muted-foreground">
+              <p>
+                A futuristic manufacturing campus of robotic systems, holographic interfaces,
+                automated production lines and intelligent energy infrastructure — engineered as a
+                single, coherent industrial platform.
+              </p>
+              <a
+                href="#contact"
+                className="inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--gold)]/40 bg-background/40 px-5 py-3 text-sm text-foreground backdrop-blur-md transition-all hover:border-[var(--gold)] hover:shadow-[0_0_24px_-6px_oklch(0.82_0.14_85/60%)]"
+              >
+                Request a technology briefing <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Animated stats */}
+        <div className="mt-16 grid gap-8 rounded-2xl border border-border p-8 glass sm:grid-cols-2 lg:grid-cols-4">
+          {TECH_STATS.map((s) => (
+            <Counter
+              key={s.label}
+              value={s.value}
+              suffix={s.suffix}
+              label={s.label}
+              sub={s.sub}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /* ---------- Manufacturing ---------- */
 
