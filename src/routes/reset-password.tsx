@@ -184,7 +184,7 @@ function ResetPasswordPage() {
         ) : done ? (
           <SuccessPanel />
         ) : linkError || !validLink ? (
-          <InvalidLinkPanel message={linkError} recoveryEmail={recoveryEmail} />
+          <InvalidLinkPanel message={linkError} maskedHint={maskedHint} onHintChange={setMaskedHint} />
         ) : (
           <div>
             <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
