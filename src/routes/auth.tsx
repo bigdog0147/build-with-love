@@ -534,9 +534,11 @@ function validate(f: RegState): Partial<Record<keyof RegState, string>> {
 function SignInForm({
   switchToSignUp,
   onSignedIn,
+  onNeedsVerification,
 }: {
   switchToSignUp: () => void;
   onSignedIn: () => void;
+  onNeedsVerification: (email: string) => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -548,8 +550,24 @@ function SignInForm({
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("confirm") || msg.includes("not confirmed") || msg.includes("verified")) {
+          onNeedsVerification(email);
+          return;
+        }
+        throw error;
+      }
+      const user = data.user;
+      const confirmed =
+        Boolean(user?.email_confirmed_at) ||
+        Boolean((user as { confirmed_at?: string } | null)?.confirmed_at);
+      if (!confirmed) {
+        await supabase.auth.signOut();
+        onNeedsVerification(email);
+        return;
+      }
       onSignedIn();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed");
@@ -557,6 +575,7 @@ function SignInForm({
       setLoading(false);
     }
   }
+
 
   async function handleGoogle() {
     setError(null);
