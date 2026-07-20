@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_audit_log: {
+        Row: {
+          created_at: string
+          email_hash: string | null
+          email_masked: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          metadata: Json
+          reason: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_hash?: string | null
+          email_masked?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          reason?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string | null
+          email_masked?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          reason?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           created_at: string

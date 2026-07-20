@@ -826,10 +826,13 @@ function ForgotPasswordForm({ switchToSignIn }: { switchToSignIn: () => void }) 
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { requestPasswordReset } = await import("@/lib/reset-request.functions");
+      await requestPasswordReset({
+        data: {
+          email,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
       });
-      if (error) throw error;
       setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send reset email");

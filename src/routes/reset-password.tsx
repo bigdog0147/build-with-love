@@ -410,10 +410,10 @@ function InvalidLinkPanel({
     try {
       const redirectTo =
         typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo,
+      const { requestPasswordReset } = await import("@/lib/reset-request.functions");
+      await requestPasswordReset({
+        data: { email: email.trim(), redirectTo },
       });
-      if (err) throw err;
       window.localStorage.setItem(RESEND_STORAGE_KEY, String(Date.now()));
       setCooldown(RESEND_COOLDOWN_SECONDS);
       setSent(true);
