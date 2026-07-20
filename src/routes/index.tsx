@@ -160,7 +160,9 @@ function LandingPage() {
       <main id="top" className="relative">
         <Hero />
         <Highlights />
+        <CinematicBand />
         <Metrics />
+
         <Technology />
         <Manufacturing />
         <Industries />
