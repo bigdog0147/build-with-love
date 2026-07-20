@@ -2038,6 +2038,212 @@ function Footer() {
   );
 }
 
+/* ---------- Research & Innovation ---------- */
+
+const RESEARCH_STATS = [
+  { icon: FlaskConical, k: "Research labs", v: "32", sub: "across 12 countries" },
+  { icon: ShieldCheck, k: "Active patents", v: "4,180", sub: "+612 filed in 2025" },
+  { icon: GraduationCap, k: "PhD researchers", v: "1,940", sub: "38 disciplines" },
+  { icon: Lightbulb, k: "R&D commitment", v: "$4.2B", sub: "≈ 11% of revenue" },
+];
+
+const RESEARCH_PROGRAMS = [
+  {
+    icon: Atom,
+    tag: "Materials",
+    title: "Solid-state chemistry",
+    body:
+      "Next-generation solid electrolytes, ceramic composites and rare-earth-free magnets developed in our Osaka and Munich labs.",
+    tags: ["Solid-state cells", "Rare-earth-free", "Composite alloys"],
+  },
+  {
+    icon: Cpu,
+    tag: "Silicon",
+    title: "Neuromorphic compute",
+    body:
+      "3nm accelerators and neuromorphic photonic cores designed in-house to run trillion-parameter industrial models at the edge.",
+    tags: ["3nm process", "Photonics", "Edge inference"],
+  },
+  {
+    icon: Bot,
+    tag: "Robotics",
+    title: "Dexterous manipulation",
+    body:
+      "Multi-modal foundation models for humanoid and industrial arms — trained across billions of hours of simulated & real telemetry.",
+    tags: ["Foundation models", "Tactile sensing", "Sim-to-real"],
+  },
+  {
+    icon: Leaf,
+    tag: "Energy",
+    title: "Grid-scale storage",
+    body:
+      "Long-duration iron-air and thermal batteries paired with autonomous microgrid controllers for continental clean-energy backbones.",
+    tags: ["Iron-air", "Thermal storage", "Microgrid AI"],
+  },
+  {
+    icon: Beaker,
+    tag: "Bio-industrial",
+    title: "Precision biomanufacturing",
+    body:
+      "Engineered microbes and enzymatic pathways producing high-value polymers, proteins and pharma precursors at industrial scale.",
+    tags: ["Bioreactors", "Enzyme design", "Green chemistry"],
+  },
+  {
+    icon: Rocket,
+    tag: "Frontier",
+    title: "Orbital & hypersonic",
+    body:
+      "Reusable launch structures, hypersonic thermal shielding and in-orbit assembly platforms for next-decade infrastructure.",
+    tags: ["Reusable launch", "Thermal shielding", "In-orbit assembly"],
+  },
+];
+
+const RESEARCH_PIPELINE = [
+  { phase: "Discovery", detail: "Fundamental science · 3–7 yr horizon", pct: 100 },
+  { phase: "Applied R&D", detail: "Prototype platforms & pilots", pct: 78 },
+  { phase: "Industrialisation", detail: "Pilot line → gigafactory transfer", pct: 52 },
+  { phase: "Deployment", detail: "Global rollout & certification", pct: 26 },
+];
+
+function ResearchInnovation() {
+  return (
+    <section id="research" className="relative overflow-hidden px-6 py-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(1000px 500px at 15% 10%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%), radial-gradient(900px 500px at 85% 90%, color-mix(in oklab, var(--electric) 8%, transparent), transparent 60%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-7xl">
+        <SectionHeader
+          eyebrow="Research & Innovation"
+          title="A decade of breakthroughs. Engineered every day."
+          desc="From fundamental materials science to orbital infrastructure — our research organisation compounds discovery into deployable industrial technology."
+        />
+
+        {/* Stats */}
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {RESEARCH_STATS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div
+                key={s.k}
+                className="group relative overflow-hidden rounded-2xl border border-border p-6 glass transition hover:border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)]"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-white/5">
+                    <Icon className="h-5 w-5 text-[var(--gold)]" />
+                  </span>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+                    {s.k}
+                  </div>
+                </div>
+                <div className="mt-5 font-display text-4xl gold-text">{s.v}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{s.sub}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Programs */}
+        <div className="mt-16 grid gap-6 lg:grid-cols-3">
+          {RESEARCH_PROGRAMS.map((p) => {
+            const Icon = p.icon;
+            return (
+              <article
+                key={p.title}
+                className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border p-7 glass transition hover:-translate-y-1 hover:border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)]"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl border border-border bg-white/5">
+                    <Icon className="h-5 w-5 text-[var(--gold)]" />
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    {p.tag}
+                  </span>
+                </div>
+                <h3 className="mt-6 font-display text-2xl">{p.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {p.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full border border-border/80 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 -bottom-px h-px opacity-0 transition group-hover:opacity-100"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, var(--gold), transparent)",
+                  }}
+                />
+              </article>
+            );
+          })}
+        </div>
+
+        {/* Pipeline */}
+        <div
+          className="mt-16 overflow-hidden rounded-3xl border border-border p-8 glass sm:p-10"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                Innovation pipeline
+              </div>
+              <h3 className="mt-3 font-display text-3xl sm:text-4xl">
+                Discovery to deployment — engineered as one system.
+              </h3>
+            </div>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-xs uppercase tracking-[0.22em] text-foreground transition hover:border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] hover:text-[var(--gold)]"
+            >
+              Partner with our labs <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-4">
+            {RESEARCH_PIPELINE.map((p, i) => (
+              <div key={p.phase} className="relative">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-7 w-7 place-items-center rounded-full border border-[color:color-mix(in_oklab,var(--gold)_60%,transparent)] font-display text-xs text-[var(--gold)]">
+                    {i + 1}
+                  </span>
+                  <div className="text-sm font-medium">{p.phase}</div>
+                </div>
+                <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-white/5">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${p.pct}%`,
+                      background:
+                        "linear-gradient(90deg, var(--gold), color-mix(in oklab, var(--gold) 40%, transparent))",
+                      boxShadow: "0 0 12px color-mix(in oklab, var(--gold) 40%, transparent)",
+                    }}
+                  />
+                </div>
+                <div className="mt-3 text-xs text-muted-foreground">{p.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 /* ---------- Section header ---------- */
 
 function SectionHeader({
