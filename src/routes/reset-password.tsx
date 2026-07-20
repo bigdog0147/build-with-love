@@ -142,6 +142,8 @@ function ResetPasswordPage() {
       // global signOut didn't propagate to this tab yet.
       await supabase.auth.signOut();
       setDone(true);
+      // Reset flow completed — the hint is no longer needed.
+      clearRecoveryHint();
       setTimeout(() => navigate({ to: "/auth", replace: true }), 2200);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not update password";
