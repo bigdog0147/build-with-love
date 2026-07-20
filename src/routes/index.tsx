@@ -2555,7 +2555,54 @@ function Field({
 
 /* ---------- Footer ---------- */
 
+function NewsletterForm() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [email, setEmail] = useState("");
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "submitting" || !email) return;
+    setStatus("submitting");
+    setTimeout(() => setStatus("success"), 900);
+  };
+
+  if (status === "success") {
+    return (
+      <div
+        role="status"
+        className="mt-6 flex max-w-sm items-center gap-3 rounded-xl border border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_6%,transparent)] px-4 py-3 text-sm animate-fade-in"
+      >
+        <CheckCircle2 className="h-4 w-4 text-[var(--gold)]" />
+        <span>Subscribed. Watch your inbox for the next briefing.</span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} aria-busy={status === "submitting"} className="mt-6 flex max-w-sm gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={status === "submitting"}
+        placeholder="Newsletter · your email"
+        className="flex-1 rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition disabled:opacity-60 focus:border-[var(--gold)]/60"
+      />
+      <button
+        type="submit"
+        disabled={status === "submitting"}
+        className="inline-flex min-w-[76px] items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-80"
+        style={{ background: "var(--gradient-gold)" }}
+      >
+        {status === "submitting" ? <Loader2 className="h-4 w-4 gf-spin" /> : "Join"}
+      </button>
+    </form>
+  );
+}
+
 function Footer() {
+
   const cols = [
     {
       h: "Company",
