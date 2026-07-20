@@ -4,26 +4,16 @@ import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Info, Loader2, Mail, Sh
 import { supabase } from "@/integrations/supabase/client";
 import { updatePasswordFromRecovery } from "@/lib/password-recovery.functions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  clearRecoveryHint,
+  maskEmail,
+  readRecoveryHint,
+  saveRecoveryHint,
+} from "@/lib/recovery-hint";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
 
-function maskEmail(raw: string): string {
-  const email = raw.trim().toLowerCase();
-  const at = email.indexOf("@");
-  if (at < 1 || at === email.length - 1) return email;
-  const local = email.slice(0, at);
-  const domain = email.slice(at + 1);
-  const maskPart = (s: string) => {
-    if (s.length <= 2) return s[0] + "•";
-    if (s.length <= 4) return s[0] + "•••" + s[s.length - 1];
-    return s[0] + "•".repeat(Math.min(6, s.length - 2)) + s[s.length - 1];
-  };
-  const dot = domain.lastIndexOf(".");
-  const maskedDomain =
-    dot > 0 ? maskPart(domain.slice(0, dot)) + domain.slice(dot) : maskPart(domain);
-  return maskPart(local) + "@" + maskedDomain;
-}
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
@@ -52,7 +42,10 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null);
+  // Masked hint persisted across refreshes/navigation so the badge stays
+  // consistent even if the recovery session isn't (yet) present. We only
+  // ever hold the masked form in React state.
+  const [maskedHint, setMaskedHint] = useState<string | null>(() => readRecoveryHint());
 
   // Supabase parses the recovery token from the URL hash and creates a
   // temporary session with a PASSWORD_RECOVERY event. Wait for it before
@@ -69,9 +62,15 @@ function ResetPasswordPage() {
       return;
     }
 
+    const rememberEmail = (email?: string | null) => {
+      if (!email) return;
+      const masked = saveRecoveryHint(email);
+      if (masked) setMaskedHint(masked);
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
-      if (session?.user?.email) setRecoveryEmail(session.user.email);
+      rememberEmail(session?.user?.email);
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setValidLink(true);
         setReady(true);
@@ -81,7 +80,7 @@ function ResetPasswordPage() {
     // Fallback: if session already exists (page opened directly after redirect)
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
-      if (data.session?.user?.email) setRecoveryEmail(data.session.user.email);
+      rememberEmail(data.session?.user?.email);
       if (data.session) {
         setValidLink(true);
       }
@@ -93,6 +92,7 @@ function ResetPasswordPage() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
 
   const checks = [
     { id: "len", label: "At least 12 characters", ok: password.length >= 12 },
@@ -142,6 +142,8 @@ function ResetPasswordPage() {
       // global signOut didn't propagate to this tab yet.
       await supabase.auth.signOut();
       setDone(true);
+      // Reset flow completed — the hint is no longer needed.
+      clearRecoveryHint();
       setTimeout(() => navigate({ to: "/auth", replace: true }), 2200);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not update password";
@@ -182,7 +184,7 @@ function ResetPasswordPage() {
         ) : done ? (
           <SuccessPanel />
         ) : linkError || !validLink ? (
-          <InvalidLinkPanel message={linkError} recoveryEmail={recoveryEmail} />
+          <InvalidLinkPanel message={linkError} maskedHint={maskedHint} onHintChange={setMaskedHint} />
         ) : (
           <div>
             <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
@@ -366,12 +368,17 @@ function SuccessPanel() {
 
 function InvalidLinkPanel({
   message,
-  recoveryEmail,
+  maskedHint,
+  onHintChange,
 }: {
   message: string | null;
-  recoveryEmail: string | null;
+  maskedHint: string | null;
+  onHintChange: (masked: string | null) => void;
 }) {
-  const [email, setEmail] = useState(recoveryEmail ?? "");
+  // We don't prefill the raw email — the persisted hint is only masked. The
+  // user retypes it to trigger a resend, and any newly-typed valid address
+  // updates the persisted hint so it stays consistent going forward.
+  const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -380,7 +387,8 @@ function InvalidLinkPanel({
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const maskedTyped = emailValid ? maskEmail(email) : null;
-  const maskedRecovery = recoveryEmail ? maskEmail(recoveryEmail) : null;
+  const displayedMasked = maskedHint ?? maskedTyped;
+
 
   useEffect(() => {
     function tick() {
@@ -415,6 +423,10 @@ function InvalidLinkPanel({
       await requestPasswordReset({
         data: { email: email.trim(), redirectTo },
       });
+      // Refresh the persisted hint so a follow-up refresh still shows the
+      // same (masked) address the user just requested.
+      const masked = saveRecoveryHint(email);
+      if (masked) onHintChange(masked);
       window.localStorage.setItem(RESEND_STORAGE_KEY, String(Date.now()));
       setCooldown(RESEND_COOLDOWN_SECONDS);
       setSent(true);
@@ -457,7 +469,7 @@ function InvalidLinkPanel({
             "This password reset link has expired or has already been used. Request a new one to continue."}
         </p>
 
-        {(maskedRecovery || maskedTyped) && (
+        {displayedMasked && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -468,11 +480,12 @@ function InvalidLinkPanel({
                   <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
                   <span className="uppercase tracking-[0.18em]">Reset for</span>
                   <span className="font-mono text-foreground">
-                    {maskedRecovery ?? maskedTyped}
+                    {displayedMasked}
                   </span>
                   <Info className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
                 </div>
               </TooltipTrigger>
+
               <TooltipContent
                 id="masked-email-tooltip"
                 side="bottom"
