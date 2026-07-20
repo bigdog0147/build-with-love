@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      allocations: {
+        Row: {
+          color: string
+          id: string
+          label: string
+          percent: number
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          color: string
+          id?: string
+          label: string
+          percent: number
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          color?: string
+          id?: string
+          label?: string
+          percent?: number
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cards: {
+        Row: {
+          created_at: string
+          gradient: string
+          id: string
+          last4: string
+          name: string
+          sort_order: number
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gradient: string
+          id?: string
+          last4: string
+          name: string
+          sort_order?: number
+          tier: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gradient?: string
+          id?: string
+          last4?: string
+          name?: string
+          sort_order?: number
+          tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          initials: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          initials?: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          initials?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          kind: string
+          name: string
+          occurred_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind: string
+          name: string
+          occurred_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          kind?: string
+          name?: string
+          occurred_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number
+          code: string
+          created_at: string
+          delta_pct: number
+          fiat_value: number | null
+          id: string
+          label: string
+          sort_order: number
+          tint: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          code: string
+          created_at?: string
+          delta_pct?: number
+          fiat_value?: number | null
+          id?: string
+          label: string
+          sort_order?: number
+          tint?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          code?: string
+          created_at?: string
+          delta_pct?: number
+          fiat_value?: number | null
+          id?: string
+          label?: string
+          sort_order?: number
+          tint?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
