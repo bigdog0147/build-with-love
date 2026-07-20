@@ -57,7 +57,7 @@ const COUNTRIES = [
   "Other",
 ];
 
-type Mode = "sign-up" | "sign-in";
+type Mode = "sign-up" | "sign-in" | "forgot-password";
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -120,9 +120,12 @@ function AuthPage() {
                 onPendingVerification={(email) => setPendingEmail(email)}
                 switchToSignIn={() => setMode("sign-in")}
               />
+            ) : mode === "forgot-password" ? (
+              <ForgotPasswordForm switchToSignIn={() => setMode("sign-in")} />
             ) : (
               <SignInForm
                 switchToSignUp={() => setMode("sign-up")}
+                switchToForgot={() => setMode("forgot-password")}
                 onSignedIn={() => navigate({ to: "/dashboard", replace: true })}
                 onNeedsVerification={(email) => setPendingEmail(email)}
               />
@@ -534,10 +537,12 @@ function validate(f: RegState): Partial<Record<keyof RegState, string>> {
 
 function SignInForm({
   switchToSignUp,
+  switchToForgot,
   onSignedIn,
   onNeedsVerification,
 }: {
   switchToSignUp: () => void;
+  switchToForgot: () => void;
   onSignedIn: () => void;
   onNeedsVerification: (email: string) => void;
 }) {
@@ -622,6 +627,15 @@ function SignInForm({
             placeholder="••••••••"
           />
         </Field>
+        <div className="-mt-2 text-right">
+          <button
+            type="button"
+            onClick={switchToForgot}
+            className="text-xs text-[var(--gold)] hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
 
         {error && (
           <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
@@ -796,6 +810,136 @@ function VerifyEmailScreen({
   );
 }
 
+/* ---------------- Forgot Password ---------------- */
+
+function ForgotPasswordForm({ switchToSignIn }: { switchToSignIn: () => void }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send reset email");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div
+        className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+        style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+      >
+        <div
+          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
+          style={{ background: "var(--gradient-gold)" }}
+        />
+        <div className="relative">
+          <div
+            className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            <Mail className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+            Reset link sent
+          </div>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl">Check your inbox</h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            If an account exists for{" "}
+            <span className="text-foreground">{email}</span>, we've sent a secure link
+            to reset your password. The link will expire shortly for your safety.
+          </p>
+          <button
+            onClick={switchToSignIn}
+            className="mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
+        Password recovery
+      </div>
+      <h1 className="mt-2 font-display text-3xl sm:text-4xl">Reset your password</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Enter the email associated with your account and we'll send a secure
+        link to choose a new password.
+      </p>
+
+      <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+        <Field label="Email">
+          <Input
+            type="email"
+            value={email}
+            onChange={setEmail}
+            placeholder="you@company.com"
+            autoComplete="email"
+          />
+        </Field>
+
+        {error && (
+          <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={!isValid || loading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            background: "var(--gradient-gold)",
+            boxShadow: isValid ? "var(--shadow-glow)" : undefined,
+          }}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Sending link…
+            </>
+          ) : (
+            <>
+              Send reset link
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
+
+        <div className="text-center text-xs text-muted-foreground">
+          Remembered it?{" "}
+          <button
+            type="button"
+            onClick={switchToSignIn}
+            className="text-[var(--gold)] hover:underline"
+          >
+            Back to sign in
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 
 /* ---------------- UI primitives ---------------- */
