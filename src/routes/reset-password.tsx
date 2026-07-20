@@ -7,6 +7,23 @@ import { updatePasswordFromRecovery } from "@/lib/password-recovery.functions";
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
 
+function maskEmail(raw: string): string {
+  const email = raw.trim().toLowerCase();
+  const at = email.indexOf("@");
+  if (at < 1 || at === email.length - 1) return email;
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const maskPart = (s: string) => {
+    if (s.length <= 2) return s[0] + "•";
+    if (s.length <= 4) return s[0] + "•••" + s[s.length - 1];
+    return s[0] + "•".repeat(Math.min(6, s.length - 2)) + s[s.length - 1];
+  };
+  const dot = domain.lastIndexOf(".");
+  const maskedDomain =
+    dot > 0 ? maskPart(domain.slice(0, dot)) + domain.slice(dot) : maskPart(domain);
+  return maskPart(local) + "@" + maskedDomain;
+}
+
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   ssr: false,
@@ -34,6 +51,7 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null);
 
   // Supabase parses the recovery token from the URL hash and creates a
   // temporary session with a PASSWORD_RECOVERY event. Wait for it before
@@ -52,6 +70,7 @@ function ResetPasswordPage() {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
+      if (session?.user?.email) setRecoveryEmail(session.user.email);
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setValidLink(true);
         setReady(true);
@@ -61,6 +80,7 @@ function ResetPasswordPage() {
     // Fallback: if session already exists (page opened directly after redirect)
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
+      if (data.session?.user?.email) setRecoveryEmail(data.session.user.email);
       if (data.session) {
         setValidLink(true);
       }
@@ -161,7 +181,7 @@ function ResetPasswordPage() {
         ) : done ? (
           <SuccessPanel />
         ) : linkError || !validLink ? (
-          <InvalidLinkPanel message={linkError} />
+          <InvalidLinkPanel message={linkError} recoveryEmail={recoveryEmail} />
         ) : (
           <div>
             <div className="text-xs uppercase tracking-[0.24em] text-[var(--gold)]">
@@ -343,8 +363,14 @@ function SuccessPanel() {
   );
 }
 
-function InvalidLinkPanel({ message }: { message: string | null }) {
-  const [email, setEmail] = useState("");
+function InvalidLinkPanel({
+  message,
+  recoveryEmail,
+}: {
+  message: string | null;
+  recoveryEmail: string | null;
+}) {
+  const [email, setEmail] = useState(recoveryEmail ?? "");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -352,6 +378,8 @@ function InvalidLinkPanel({ message }: { message: string | null }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const maskedTyped = emailValid ? maskEmail(email) : null;
+  const maskedRecovery = recoveryEmail ? maskEmail(recoveryEmail) : null;
 
   useEffect(() => {
     function tick() {
@@ -427,6 +455,19 @@ function InvalidLinkPanel({ message }: { message: string | null }) {
           {message ??
             "This password reset link has expired or has already been used. Request a new one to continue."}
         </p>
+
+        {(maskedRecovery || maskedTyped) && (
+          <div
+            className="mx-auto mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground"
+            title="Only a masked hint is shown to protect account privacy"
+          >
+            <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
+            <span className="uppercase tracking-[0.18em]">Reset for</span>
+            <span className="font-mono text-foreground">
+              {maskedRecovery ?? maskedTyped}
+            </span>
+          </div>
+        )}
 
         <form onSubmit={resend} className="mx-auto mt-8 max-w-sm space-y-3 text-left" noValidate>
           <label className="block">
