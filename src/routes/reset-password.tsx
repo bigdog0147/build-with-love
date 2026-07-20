@@ -51,6 +51,7 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState<string | null>(null);
 
   // Supabase parses the recovery token from the URL hash and creates a
   // temporary session with a PASSWORD_RECOVERY event. Wait for it before
@@ -69,6 +70,7 @@ function ResetPasswordPage() {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
+      if (session?.user?.email) setRecoveryEmail(session.user.email);
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
         setValidLink(true);
         setReady(true);
