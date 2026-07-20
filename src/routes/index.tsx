@@ -179,6 +179,7 @@ function LandingPage() {
         <Metrics />
 
         <Technology />
+        <TechnologyGrid />
         <Manufacturing />
         <AIPlatform />
         <GigafactoryNetwork />
