@@ -423,6 +423,10 @@ function InvalidLinkPanel({
       await requestPasswordReset({
         data: { email: email.trim(), redirectTo },
       });
+      // Refresh the persisted hint so a follow-up refresh still shows the
+      // same (masked) address the user just requested.
+      const masked = saveRecoveryHint(email);
+      if (masked) onHintChange(masked);
       window.localStorage.setItem(RESEND_STORAGE_KEY, String(Date.now()));
       setCooldown(RESEND_COOLDOWN_SECONDS);
       setSent(true);
