@@ -159,6 +159,7 @@ function LandingPage() {
 
       <main id="top" className="relative">
         <Hero />
+        <CompanyOverview />
         <Highlights />
         <CinematicBand />
         <Metrics />
@@ -174,6 +175,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 /* ---------- Ambient background ---------- */
 
@@ -425,7 +427,159 @@ function HeroVisual() {
   );
 }
 
+/* ---------- Company Overview ---------- */
+
+const OVERVIEW_PILLARS = [
+  {
+    k: "Founded",
+    v: "2026",
+    d: "Global HQ",
+  },
+  {
+    k: "47",
+    v: "Countries",
+    d: "Operational footprint",
+  },
+  {
+    k: "12,400+",
+    v: "Engineers",
+    d: "Across 9 disciplines",
+  },
+  {
+    k: "$34B",
+    v: "R&D committed",
+    d: "Through 2030",
+  },
+];
+
+function CompanyOverview() {
+  return (
+    <section id="company" className="relative px-6 py-32">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
+          {/* Left — narrative */}
+          <div className="lg:col-span-6">
+            <div className="text-[11px] uppercase tracking-[0.32em] text-[var(--gold)]">
+              About Gigafactory 3
+            </div>
+            <h2 className="mt-4 font-display text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+              Building the operating system for{" "}
+              <span className="gold-text">global industry.</span>
+            </h2>
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground">
+              Gigafactory 3 is an industrial technology company engineering the next generation
+              of intelligent manufacturing. We design, build and operate autonomous factories
+              powered by proprietary AI, robotics and clean-energy systems — delivered as a
+              single, vertically integrated platform.
+            </p>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
+              Our mission is to make advanced manufacturing programmable — so nations, enterprises
+              and industries can produce anything, anywhere, with precision, resilience and
+              sustainability engineered in from the first line of code.
+            </p>
+
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <a
+                href="#technology"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5"
+                style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+              >
+                Our Technology <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href="#investors"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/40 px-5 py-3 text-sm backdrop-blur-md hover:border-[var(--gold)]/50"
+              >
+                Corporate Overview <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+
+          {/* Right — image + floating credentials */}
+          <div className="relative lg:col-span-6">
+            <div
+              className="relative overflow-hidden rounded-3xl border border-border"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <img
+                src={facilityExterior.url}
+                alt="Gigafactory 3 global headquarters facility"
+                className="aspect-[4/5] w-full object-cover"
+                style={{ filter: "grayscale(30%) contrast(1.05) brightness(0.9)" }}
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(180deg, transparent 40%, oklch(0.08 0.01 250 / 0.85) 100%)",
+                }}
+              />
+              <div
+                className="absolute inset-0 mix-blend-overlay opacity-30"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 30% 20%, var(--gold) 0%, transparent 55%)",
+                }}
+              />
+              <div className="absolute inset-x-6 bottom-6">
+                <div className="text-[10px] uppercase tracking-[0.32em] text-[var(--gold)]">
+                  Headquarters
+                </div>
+                <div className="mt-1 font-display text-2xl text-white">
+                  Campus 01 · Intelligent Industry Park
+                </div>
+              </div>
+            </div>
+
+            {/* Floating credential card */}
+            <div className="absolute -left-4 -top-6 hidden w-64 rounded-2xl border border-border p-5 glass backdrop-blur-xl md:block">
+              <div className="flex items-center gap-2 text-[var(--gold)]">
+                <Leaf className="h-4 w-4" />
+                <span className="text-[10px] uppercase tracking-[0.28em]">Certified</span>
+              </div>
+              <div className="mt-2 font-display text-lg leading-tight">
+                Net-zero operations by 2032
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Powered end-to-end by on-site renewables and grid-integrated storage.
+              </div>
+            </div>
+
+            <div className="absolute -bottom-6 -right-4 hidden w-64 rounded-2xl border border-border p-5 glass backdrop-blur-xl md:block">
+              <div className="flex items-center gap-2 text-[var(--gold)]">
+                <Globe2 className="h-4 w-4" />
+                <span className="text-[10px] uppercase tracking-[0.28em]">Sovereign-grade</span>
+              </div>
+              <div className="mt-2 font-display text-lg leading-tight">
+                Trusted by 40+ governments
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Deployed across defence, infrastructure and national industrial programmes.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom credentials strip */}
+        <div className="mt-24 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {OVERVIEW_PILLARS.map((p) => (
+            <div key={p.k} className="bg-background/60 p-8 backdrop-blur-md">
+              <div className="font-display text-4xl gold-text">{p.k}</div>
+              <div className="mt-2 text-sm text-foreground">{p.v}</div>
+              <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                {p.d}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- Highlights ---------- */
+
+
 
 const HIGHLIGHTS = [
   {
