@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
@@ -332,6 +335,75 @@ function SuccessPanel() {
 }
 
 function InvalidLinkPanel({ message }: { message: string | null }) {
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  useEffect(() => {
+    function tick() {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(RESEND_STORAGE_KEY) : null;
+      const last = raw ? parseInt(raw, 10) : 0;
+      const remaining = Math.max(
+        0,
+        RESEND_COOLDOWN_SECONDS - Math.floor((Date.now() - last) / 1000),
+      );
+      setCooldown(remaining);
+      if (remaining === 0 && timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  async function resend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!emailValid || sending || cooldown > 0) return;
+    setSending(true);
+    setError(null);
+    try {
+      const redirectTo =
+        typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo,
+      });
+      if (err) throw err;
+      window.localStorage.setItem(RESEND_STORAGE_KEY, String(Date.now()));
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setSent(true);
+      if (!timerRef.current) {
+        timerRef.current = setInterval(() => {
+          const raw = window.localStorage.getItem(RESEND_STORAGE_KEY);
+          const last = raw ? parseInt(raw, 10) : 0;
+          const remaining = Math.max(
+            0,
+            RESEND_COOLDOWN_SECONDS - Math.floor((Date.now() - last) / 1000),
+          );
+          setCooldown(remaining);
+          if (remaining === 0 && timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+        }, 1000);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send reset email");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const disabled = !emailValid || sending || cooldown > 0;
+
   return (
     <div
       className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
@@ -346,13 +418,77 @@ function InvalidLinkPanel({ message }: { message: string | null }) {
           {message ??
             "This password reset link has expired or has already been used. Request a new one to continue."}
         </p>
+
+        <form onSubmit={resend} className="mx-auto mt-8 max-w-sm space-y-3 text-left" noValidate>
+          <label className="block">
+            <span className="mb-1 block text-[11px] uppercase tracking-widest text-muted-foreground">
+              Email address
+            </span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setSent(false);
+                setError(null);
+              }}
+              placeholder="you@company.com"
+              autoComplete="email"
+              className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60"
+            />
+          </label>
+
+          {error && (
+            <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+              {error}
+            </div>
+          )}
+
+          {sent && !error && (
+            <div className="flex items-start gap-2 rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]">
+              <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>
+                If an account exists for that address, a new reset link is on its way. Check your inbox
+                and spam folder.
+              </span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={disabled}
+            className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              background: "var(--gradient-gold)",
+              boxShadow: !disabled ? "var(--shadow-glow)" : undefined,
+            }}
+          >
+            {sending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending…
+              </>
+            ) : cooldown > 0 ? (
+              <>Resend available in {cooldown}s</>
+            ) : (
+              <>
+                {sent ? "Resend reset email" : "Send reset email"}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+
+          <p className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-[var(--gold)]" />
+            Rate-limited for your protection
+          </p>
+        </form>
+
         <Link
           to="/auth"
-          className="mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground"
-          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          className="mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-muted-foreground hover:text-[var(--gold)]"
         >
-          Request a new link
-          <ArrowRight className="h-4 w-4" />
+          Back to sign in
         </Link>
       </div>
     </div>
