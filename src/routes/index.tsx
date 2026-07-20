@@ -2591,19 +2591,8 @@ function Footer() {
             <p className="mt-5 max-w-sm text-sm text-muted-foreground">
               Engineering the future of intelligent industry — from silicon to skyline.
             </p>
-            <form onSubmit={(e) => e.preventDefault()} className="mt-6 flex max-w-sm gap-2">
-              <input
-                type="email"
-                placeholder="Newsletter · your email"
-                className="flex-1 rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-              <button
-                className="rounded-xl px-4 text-sm font-medium text-primary-foreground"
-                style={{ background: "var(--gradient-gold)" }}
-              >
-                Join
-              </button>
-            </form>
+            <NewsletterForm />
+
           </div>
 
           {cols.map((c) => (
