@@ -283,14 +283,24 @@ function Logo() {
 /* ---------- Hero ---------- */
 
 function Hero() {
+  const [heroLoaded, setHeroLoaded] = useState(false);
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-32">
       {/* Cinematic backdrop */}
       <div aria-hidden className="absolute inset-0 -z-0">
+        {!heroLoaded && (
+          <div
+            className="absolute inset-0 skeleton-block gf-shimmer"
+            style={{ borderRadius: 0 }}
+          />
+        )}
         <img
           src={roboticsLine.url}
           alt=""
-          className="h-full w-full object-cover opacity-[0.35]"
+          onLoad={() => setHeroLoaded(true)}
+          className={`h-full w-full object-cover transition-opacity duration-700 ${
+            heroLoaded ? "opacity-[0.35]" : "opacity-0"
+          }`}
           style={{ transform: "scale(1.05)", filter: "grayscale(60%) contrast(1.05)" }}
         />
         <div
@@ -305,6 +315,7 @@ function Hero() {
           style={{ background: "radial-gradient(ellipse at 70% 30%, var(--gold) 0%, transparent 55%)" }}
         />
       </div>
+
 
       <div className="mx-auto grid w-full max-w-7xl gap-16 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
