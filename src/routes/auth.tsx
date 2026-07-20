@@ -537,10 +537,12 @@ function validate(f: RegState): Partial<Record<keyof RegState, string>> {
 
 function SignInForm({
   switchToSignUp,
+  switchToForgot,
   onSignedIn,
   onNeedsVerification,
 }: {
   switchToSignUp: () => void;
+  switchToForgot: () => void;
   onSignedIn: () => void;
   onNeedsVerification: (email: string) => void;
 }) {
