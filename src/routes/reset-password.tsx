@@ -80,6 +80,7 @@ function ResetPasswordPage() {
     // Fallback: if session already exists (page opened directly after redirect)
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
+      if (data.session?.user?.email) setRecoveryEmail(data.session.user.email);
       if (data.session) {
         setValidLink(true);
       }
