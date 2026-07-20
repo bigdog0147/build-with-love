@@ -18,6 +18,10 @@ import {
   X,
 } from "lucide-react";
 import { getMetrics, type Metric } from "@/lib/metrics.functions";
+import facilityAerial from "@/assets/facility-aerial.jpg.asset.json";
+import roboticsLine from "@/assets/robotics-line.jpg.asset.json";
+import productionLine from "@/assets/production-line.jpg.asset.json";
+import facilityExterior from "@/assets/facility-exterior.jpg.asset.json";
 
 const metricsQueryOptions = queryOptions({
   queryKey: ["metrics"],
