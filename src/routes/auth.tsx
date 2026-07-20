@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Mail,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -62,12 +63,22 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("sign-up");
   const [welcome, setWelcome] = useState<{ name: string } | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session && !welcome) navigate({ to: "/dashboard", replace: true });
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
+      if (!user) return;
+      const confirmed =
+        Boolean(user.email_confirmed_at) ||
+        Boolean((user as { confirmed_at?: string }).confirmed_at);
+      if (confirmed && !welcome && !pendingEmail) {
+        navigate({ to: "/dashboard", replace: true });
+      } else if (!confirmed && !pendingEmail) {
+        setPendingEmail(user.email ?? "");
+      }
     });
-  }, [navigate, welcome]);
+  }, [navigate, welcome, pendingEmail]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -90,20 +101,30 @@ function AuthPage() {
               </div>
             </Link>
 
-            {welcome ? (
+            {pendingEmail ? (
+              <VerifyEmailScreen
+                email={pendingEmail}
+                onBack={async () => {
+                  await supabase.auth.signOut();
+                  setPendingEmail(null);
+                  setMode("sign-in");
+                }}
+              />
+            ) : welcome ? (
               <WelcomeScreen
                 name={welcome.name}
                 onContinue={() => navigate({ to: "/dashboard", replace: true })}
               />
             ) : mode === "sign-up" ? (
               <RegisterForm
-                onSuccess={(name) => setWelcome({ name })}
+                onPendingVerification={(email) => setPendingEmail(email)}
                 switchToSignIn={() => setMode("sign-in")}
               />
             ) : (
               <SignInForm
                 switchToSignUp={() => setMode("sign-up")}
                 onSignedIn={() => navigate({ to: "/dashboard", replace: true })}
+                onNeedsVerification={(email) => setPendingEmail(email)}
               />
             )}
           </div>
@@ -199,10 +220,10 @@ const initialReg: RegState = {
 };
 
 function RegisterForm({
-  onSuccess,
+  onPendingVerification,
   switchToSignIn,
 }: {
-  onSuccess: (name: string) => void;
+  onPendingVerification: (email: string) => void;
   switchToSignIn: () => void;
 }) {
   const [f, setF] = useState<RegState>(initialReg);
@@ -250,21 +271,17 @@ function RegisterForm({
         },
       });
       if (error) throw error;
-      // Ensure session established (auto-confirm is enabled)
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) {
-        await supabase.auth.signInWithPassword({
-          email: f.email,
-          password: f.password,
-        });
-      }
-      onSuccess(f.firstName || f.username || "there");
+      // Email verification required — sign out any provisional session and
+      // route the user to the verification screen.
+      await supabase.auth.signOut();
+      onPendingVerification(f.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
   }
+
 
   async function handleGoogle() {
     setError(null);
@@ -518,9 +535,11 @@ function validate(f: RegState): Partial<Record<keyof RegState, string>> {
 function SignInForm({
   switchToSignUp,
   onSignedIn,
+  onNeedsVerification,
 }: {
   switchToSignUp: () => void;
   onSignedIn: () => void;
+  onNeedsVerification: (email: string) => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -532,8 +551,24 @@ function SignInForm({
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("confirm") || msg.includes("not confirmed") || msg.includes("verified")) {
+          onNeedsVerification(email);
+          return;
+        }
+        throw error;
+      }
+      const user = data.user;
+      const confirmed =
+        Boolean(user?.email_confirmed_at) ||
+        Boolean((user as { confirmed_at?: string } | null)?.confirmed_at);
+      if (!confirmed) {
+        await supabase.auth.signOut();
+        onNeedsVerification(email);
+        return;
+      }
       onSignedIn();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed");
@@ -541,6 +576,7 @@ function SignInForm({
       setLoading(false);
     }
   }
+
 
   async function handleGoogle() {
     setError(null);
@@ -664,6 +700,103 @@ function WelcomeScreen({
     </div>
   );
 }
+
+/* ---------------- Verify Email ---------------- */
+
+function VerifyEmailScreen({
+  email,
+  onBack,
+}: {
+  email: string;
+  onBack: () => void;
+}) {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function resend() {
+    setSending(true);
+    setError(null);
+    setSent(false);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resend email");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+      style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+    >
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
+        style={{ background: "var(--gradient-gold)" }}
+      />
+      <div className="relative">
+        <div
+          className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          <Mail className="h-8 w-8 text-primary-foreground" />
+        </div>
+        <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+          Verify your email
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl">Check your inbox</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          We sent a verification link to{" "}
+          <span className="text-foreground">{email || "your email"}</span>. Click the link
+          to activate your account and unlock the member dashboard.
+        </p>
+
+        {sent && (
+          <div className="mt-6 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]">
+            Verification email sent. Please check your inbox and spam folder.
+          </div>
+        )}
+        {error && (
+          <div className="mt-6 rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <button
+            onClick={resend}
+            disabled={sending || !email}
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            {sending ? "Sending…" : "Resend verification email"}
+          </button>
+          <button
+            onClick={onBack}
+            className="text-xs text-muted-foreground hover:text-[var(--gold)]"
+          >
+            Use a different account
+          </button>
+        </div>
+
+        <p className="mt-8 text-[11px] text-muted-foreground">
+          Dashboard access is restricted until your email address is verified.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
 
 /* ---------------- UI primitives ---------------- */
 
