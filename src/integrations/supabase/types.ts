@@ -74,6 +74,42 @@ export type Database = {
         }
         Relationships: []
       }
+      metrics: {
+        Row: {
+          created_at: string
+          decimals: number
+          id: string
+          label: string
+          sort_order: number
+          sub: string | null
+          suffix: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          decimals?: number
+          id?: string
+          label: string
+          sort_order?: number
+          sub?: string | null
+          suffix?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          decimals?: number
+          id?: string
+          label?: string
+          sort_order?: number
+          sub?: string | null
+          suffix?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
