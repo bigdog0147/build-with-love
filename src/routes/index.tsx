@@ -9,6 +9,8 @@ import {
   BatteryCharging,
   Beaker,
   Bot,
+  Brain,
+  CircuitBoard,
   Cpu,
   Factory,
   FlaskConical,
@@ -25,6 +27,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Zap,
   X,
 } from "lucide-react";
 
