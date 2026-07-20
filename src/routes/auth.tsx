@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { maskEmail } from "@/lib/recovery-hint";
 import { lovable } from "@/integrations/lovable";
 import roboticsLine from "@/assets/robotics-line.jpg.asset.json";
 
