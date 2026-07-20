@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
