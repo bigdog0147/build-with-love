@@ -701,6 +701,103 @@ function WelcomeScreen({
   );
 }
 
+/* ---------------- Verify Email ---------------- */
+
+function VerifyEmailScreen({
+  email,
+  onBack,
+}: {
+  email: string;
+  onBack: () => void;
+}) {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function resend() {
+    setSending(true);
+    setError(null);
+    setSent(false);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resend email");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl border border-border p-10 text-center"
+      style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
+    >
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-30 blur-3xl"
+        style={{ background: "var(--gradient-gold)" }}
+      />
+      <div className="relative">
+        <div
+          className="mx-auto grid h-16 w-16 place-items-center rounded-2xl"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          <Mail className="h-8 w-8 text-primary-foreground" />
+        </div>
+        <div className="mt-6 text-xs uppercase tracking-[0.28em] text-[var(--gold)]">
+          Verify your email
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl">Check your inbox</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          We sent a verification link to{" "}
+          <span className="text-foreground">{email || "your email"}</span>. Click the link
+          to activate your account and unlock the member dashboard.
+        </p>
+
+        {sent && (
+          <div className="mt-6 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]">
+            Verification email sent. Please check your inbox and spam folder.
+          </div>
+        )}
+        {error && (
+          <div className="mt-6 rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <button
+            onClick={resend}
+            disabled={sending || !email}
+            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            {sending ? "Sending…" : "Resend verification email"}
+          </button>
+          <button
+            onClick={onBack}
+            className="text-xs text-muted-foreground hover:text-[var(--gold)]"
+          >
+            Use a different account
+          </button>
+        </div>
+
+        <p className="mt-8 text-[11px] text-muted-foreground">
+          Dashboard access is restricted until your email address is verified.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+
 /* ---------------- UI primitives ---------------- */
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
