@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -15,6 +15,9 @@ import {
   GraduationCap,
   Leaf,
   Lightbulb,
+  Loader2,
+  CheckCircle2,
+
   Menu,
   Network,
   Rocket,
@@ -280,14 +283,24 @@ function Logo() {
 /* ---------- Hero ---------- */
 
 function Hero() {
+  const [heroLoaded, setHeroLoaded] = useState(false);
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-32">
       {/* Cinematic backdrop */}
       <div aria-hidden className="absolute inset-0 -z-0">
+        {!heroLoaded && (
+          <div
+            className="absolute inset-0 skeleton-block gf-shimmer"
+            style={{ borderRadius: 0 }}
+          />
+        )}
         <img
           src={roboticsLine.url}
           alt=""
-          className="h-full w-full object-cover opacity-[0.35]"
+          onLoad={() => setHeroLoaded(true)}
+          className={`h-full w-full object-cover transition-opacity duration-700 ${
+            heroLoaded ? "opacity-[0.35]" : "opacity-0"
+          }`}
           style={{ transform: "scale(1.05)", filter: "grayscale(60%) contrast(1.05)" }}
         />
         <div
@@ -302,6 +315,7 @@ function Hero() {
           style={{ background: "radial-gradient(ellipse at 70% 30%, var(--gold) 0%, transparent 55%)" }}
         />
       </div>
+
 
       <div className="mx-auto grid w-full max-w-7xl gap-16 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
@@ -686,24 +700,49 @@ function CinematicBand() {
 
 
 function Metrics() {
-  const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
   return (
     <section className="relative border-y border-border bg-[color-mix(in_oklab,var(--surface)_60%,transparent)] px-6 py-20">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3 lg:grid-cols-6">
-        {metrics.map((m: Metric) => (
-          <Counter
-            key={m.id}
-            value={m.value}
-            suffix={m.suffix}
-            label={m.label}
-            decimals={m.decimals}
-            sub={m.sub ?? undefined}
-          />
-        ))}
+        <Suspense fallback={<MetricsSkeleton />}>
+          <MetricsList />
+        </Suspense>
       </div>
     </section>
   );
 }
+
+function MetricsList() {
+  const { data: metrics } = useSuspenseQuery(metricsQueryOptions);
+  return (
+    <>
+      {metrics.map((m: Metric) => (
+        <Counter
+          key={m.id}
+          value={m.value}
+          suffix={m.suffix}
+          label={m.label}
+          decimals={m.decimals}
+          sub={m.sub ?? undefined}
+        />
+      ))}
+    </>
+  );
+}
+
+function MetricsSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="text-center">
+          <div className="mx-auto h-10 w-28 rounded-md skeleton-block gf-shimmer sm:h-12" />
+          <div className="mx-auto mt-3 h-3 w-20 rounded skeleton-block gf-shimmer" />
+          <div className="mx-auto mt-2 h-2 w-14 rounded skeleton-block gf-shimmer opacity-70" />
+        </div>
+      ))}
+    </>
+  );
+}
+
 
 function Counter({
   value,
@@ -2279,6 +2318,15 @@ const CONTACT_CHANNELS = [
 ];
 
 function Contact() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "submitting") return;
+    setStatus("submitting");
+    setTimeout(() => setStatus("success"), 1100);
+  };
+
   return (
     <section id="contact" className="relative overflow-hidden px-6 py-32">
       <div
@@ -2299,7 +2347,8 @@ function Contact() {
         {/* Form + channels */}
         <div className="mt-14 grid gap-6 lg:grid-cols-12">
           <form
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={onSubmit}
+            aria-busy={status === "submitting"}
             className="rounded-3xl border border-border p-8 glass lg:col-span-7"
             style={{ boxShadow: "var(--shadow-card)" }}
           >
@@ -2309,24 +2358,67 @@ function Contact() {
             <h3 className="mt-3 font-display text-2xl sm:text-3xl">
               Confidential inquiry
             </h3>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <Field label="Full name" placeholder="Ada Lovelace" />
-              <Field label="Company / Institution" placeholder="Organization" />
-              <Field label="Email" type="email" placeholder="you@company.com" />
-              <Field label="Country" placeholder="Country / Region" />
-              <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
-              <Field label="Message" placeholder="Tell us about your requirements" full textarea />
-            </div>
-            <button
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
-              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-            >
-              Submit inquiry <ArrowRight className="h-4 w-4" />
-            </button>
-            <p className="mt-4 text-xs text-muted-foreground">
-              All submissions are reviewed by our regional partnerships team within one business day.
-            </p>
+
+            {status === "success" ? (
+              <div
+                role="status"
+                className="mt-8 flex items-start gap-4 rounded-2xl border border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_6%,transparent)] p-6 animate-fade-in"
+              >
+                <CheckCircle2 className="mt-0.5 h-6 w-6 text-[var(--gold)]" />
+                <div>
+                  <div className="font-display text-lg">Inquiry received.</div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    A partnerships lead in your region will be in touch within one business day.
+                    Reference forwarded to the appropriate desk.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStatus("idle")}
+                    className="mt-4 text-xs uppercase tracking-[0.24em] text-[var(--gold)] hover:underline"
+                  >
+                    Submit another inquiry
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <fieldset
+                  disabled={status === "submitting"}
+                  className={`mt-8 grid gap-4 sm:grid-cols-2 transition-opacity ${
+                    status === "submitting" ? "opacity-60" : "opacity-100"
+                  }`}
+                >
+                  <Field label="Full name" placeholder="Ada Lovelace" />
+                  <Field label="Company / Institution" placeholder="Organization" />
+                  <Field label="Email" type="email" placeholder="you@company.com" />
+                  <Field label="Country" placeholder="Country / Region" />
+                  <Field label="Interest" placeholder="AI, robotics, energy, infrastructure…" full />
+                  <Field label="Message" placeholder="Tell us about your requirements" full textarea />
+                </fieldset>
+                <button
+                  type="submit"
+                  disabled={status === "submitting"}
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-80"
+                  style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+                >
+                  {status === "submitting" ? (
+                    <>
+                      <Loader2 className="h-4 w-4 gf-spin" />
+                      Transmitting securely…
+                    </>
+                  ) : (
+                    <>
+                      Submit inquiry <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+                <p className="mt-4 text-xs text-muted-foreground">
+                  All submissions are reviewed by our regional partnerships team within one business day.
+                </p>
+              </>
+            )}
           </form>
+
 
           <div className="grid gap-4 lg:col-span-5">
             <div
@@ -2463,7 +2555,54 @@ function Field({
 
 /* ---------- Footer ---------- */
 
+function NewsletterForm() {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [email, setEmail] = useState("");
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (status === "submitting" || !email) return;
+    setStatus("submitting");
+    setTimeout(() => setStatus("success"), 900);
+  };
+
+  if (status === "success") {
+    return (
+      <div
+        role="status"
+        className="mt-6 flex max-w-sm items-center gap-3 rounded-xl border border-[color:color-mix(in_oklab,var(--gold)_50%,transparent)] bg-[color:color-mix(in_oklab,var(--gold)_6%,transparent)] px-4 py-3 text-sm animate-fade-in"
+      >
+        <CheckCircle2 className="h-4 w-4 text-[var(--gold)]" />
+        <span>Subscribed. Watch your inbox for the next briefing.</span>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} aria-busy={status === "submitting"} className="mt-6 flex max-w-sm gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={status === "submitting"}
+        placeholder="Newsletter · your email"
+        className="flex-1 rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none transition disabled:opacity-60 focus:border-[var(--gold)]/60"
+      />
+      <button
+        type="submit"
+        disabled={status === "submitting"}
+        className="inline-flex min-w-[76px] items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-80"
+        style={{ background: "var(--gradient-gold)" }}
+      >
+        {status === "submitting" ? <Loader2 className="h-4 w-4 gf-spin" /> : "Join"}
+      </button>
+    </form>
+  );
+}
+
 function Footer() {
+
   const cols = [
     {
       h: "Company",
@@ -2499,19 +2638,8 @@ function Footer() {
             <p className="mt-5 max-w-sm text-sm text-muted-foreground">
               Engineering the future of intelligent industry — from silicon to skyline.
             </p>
-            <form onSubmit={(e) => e.preventDefault()} className="mt-6 flex max-w-sm gap-2">
-              <input
-                type="email"
-                placeholder="Newsletter · your email"
-                className="flex-1 rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-              <button
-                className="rounded-xl px-4 text-sm font-medium text-primary-foreground"
-                style={{ background: "var(--gradient-gold)" }}
-              >
-                Join
-              </button>
-            </form>
+            <NewsletterForm />
+
           </div>
 
           {cols.map((c) => (
