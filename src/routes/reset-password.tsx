@@ -69,12 +69,40 @@ function ResetPasswordPage() {
     };
   }, []);
 
+  const checks = [
+    { id: "len", label: "At least 12 characters", ok: password.length >= 12 },
+    { id: "upper", label: "One uppercase letter (A–Z)", ok: /[A-Z]/.test(password) },
+    { id: "lower", label: "One lowercase letter (a–z)", ok: /[a-z]/.test(password) },
+    { id: "num", label: "One number (0–9)", ok: /\d/.test(password) },
+    {
+      id: "sym",
+      label: "One symbol (!@#$…)",
+      ok: /[^A-Za-z0-9]/.test(password),
+    },
+    {
+      id: "nospace",
+      label: "No leading or trailing spaces",
+      ok: password.length > 0 && password === password.trim(),
+    },
+  ];
+  const passedCount = checks.filter((c) => c.ok).length;
+  const strengthPct = password.length === 0 ? 0 : (passedCount / checks.length) * 100;
+  const strengthLabel =
+    passedCount <= 2 ? "Weak" : passedCount <= 4 ? "Fair" : passedCount === 5 ? "Strong" : "Excellent";
+  const strengthColor =
+    passedCount <= 2
+      ? "var(--danger)"
+      : passedCount <= 4
+        ? "#d97706"
+        : "var(--gold)";
+  const allPassed = checks.every((c) => c.ok);
   const pwError =
-    password.length > 0 && password.length < 8 ? "At least 8 characters" : null;
+    password.length > 0 && !allPassed
+      ? "Password doesn't meet all requirements"
+      : null;
   const confirmError =
     confirm.length > 0 && confirm !== password ? "Passwords do not match" : null;
-  const canSubmit =
-    validLink && password.length >= 8 && confirm === password && !loading;
+  const canSubmit = validLink && allPassed && confirm === password && !loading;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
