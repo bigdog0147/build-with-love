@@ -676,59 +676,30 @@ function Manufacturing() {
         </div>
 
         <div className="relative aspect-square rounded-3xl border border-border glass overflow-hidden">
-          <svg viewBox="0 0 400 400" className="h-full w-full">
-            <defs>
-              <radialGradient id="rg" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stopColor="oklch(0.82 0.14 85)" stopOpacity="0.5" />
-                <stop offset="100%" stopColor="transparent" />
-              </radialGradient>
-            </defs>
-            <circle cx="200" cy="200" r="160" fill="url(#rg)" />
-            {[60, 100, 140, 180].map((r, i) => (
-              <circle
-                key={r}
-                cx="200"
-                cy="200"
-                r={r}
-                fill="none"
-                stroke="oklch(1 0 0 / 10%)"
-                strokeDasharray={i % 2 ? "2 6" : "0"}
-              />
-            ))}
-            {Array.from({ length: 12 }).map((_, i) => {
-              const a = (i / 12) * Math.PI * 2;
-              const x = 200 + Math.cos(a) * 180;
-              const y = 200 + Math.sin(a) * 180;
-              return (
-                <line
-                  key={i}
-                  x1="200"
-                  y1="200"
-                  x2={x}
-                  y2={y}
-                  stroke="oklch(1 0 0 / 6%)"
-                />
-              );
-            })}
-            {[
-              [200, 40],
-              [340, 140],
-              [320, 300],
-              [140, 340],
-              [60, 200],
-            ].map(([x, y], i) => (
-              <g key={i}>
-                <circle cx={x} cy={y} r="6" fill="var(--gold)">
-                  <animate attributeName="opacity" values="1;0.3;1" dur={`${2 + i}s`} repeatCount="indefinite" />
-                </circle>
-                <circle cx={x} cy={y} r="14" fill="none" stroke="var(--gold)" strokeOpacity="0.3" />
-              </g>
-            ))}
-            <circle cx="200" cy="200" r="10" fill="oklch(0.72 0.19 245)" />
-          </svg>
+          <img
+            src={productionLine.url}
+            alt="Autonomous production line"
+            className="absolute inset-0 h-full w-full object-cover opacity-70"
+            style={{ filter: "grayscale(30%) contrast(1.05)" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, transparent 40%, oklch(0.10 0.01 250 / 0.85) 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-40 blur-3xl"
+            style={{ background: "var(--gradient-gold)" }}
+          />
           <div className="absolute bottom-4 left-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
             <div className="text-muted-foreground">Live network</div>
             <div className="font-display">24 sites synchronised</div>
+          </div>
+          <div className="absolute right-4 top-4 rounded-xl border border-border bg-background/60 px-3 py-2 text-xs backdrop-blur">
+            <div className="text-[var(--gold)] text-[10px] uppercase tracking-[0.28em]">Cell 07 · Live</div>
+            <div className="mt-1 font-display">99.98% uptime</div>
           </div>
         </div>
       </div>
