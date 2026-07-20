@@ -833,6 +833,10 @@ function ForgotPasswordForm({ switchToSignIn }: { switchToSignIn: () => void }) 
           redirectTo: `${window.location.origin}/reset-password`,
         },
       });
+      // Persist a masked hint so the reset page can show the same badge
+      // even after the user closes this tab and returns from their inbox.
+      const { saveRecoveryHint } = await import("@/lib/recovery-hint");
+      saveRecoveryHint(email);
       setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send reset email");
