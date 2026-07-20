@@ -159,6 +159,7 @@ function LandingPage() {
 
       <main id="top" className="relative">
         <Hero />
+        <CompanyOverview />
         <Highlights />
         <CinematicBand />
         <Metrics />
@@ -174,6 +175,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 /* ---------- Ambient background ---------- */
 
