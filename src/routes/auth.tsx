@@ -120,9 +120,12 @@ function AuthPage() {
                 onPendingVerification={(email) => setPendingEmail(email)}
                 switchToSignIn={() => setMode("sign-in")}
               />
+            ) : mode === "forgot-password" ? (
+              <ForgotPasswordForm switchToSignIn={() => setMode("sign-in")} />
             ) : (
               <SignInForm
                 switchToSignUp={() => setMode("sign-up")}
+                switchToForgot={() => setMode("forgot-password")}
                 onSignedIn={() => navigate({ to: "/dashboard", replace: true })}
                 onNeedsVerification={(email) => setPendingEmail(email)}
               />
