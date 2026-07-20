@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Loader2, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Info, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { updatePasswordFromRecovery } from "@/lib/password-recovery.functions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const RESEND_STORAGE_KEY = "gf3:reset-resend-last";
@@ -457,16 +458,35 @@ function InvalidLinkPanel({
         </p>
 
         {(maskedRecovery || maskedTyped) && (
-          <div
-            className="mx-auto mt-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground"
-            title="Only a masked hint is shown to protect account privacy"
-          >
-            <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
-            <span className="uppercase tracking-[0.18em]">Reset for</span>
-            <span className="font-mono text-foreground">
-              {maskedRecovery ?? maskedTyped}
-            </span>
-          </div>
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className="mx-auto mt-5 inline-flex max-w-full cursor-help items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground transition-colors hover:border-[var(--gold)]/40"
+                  aria-describedby="masked-email-tooltip"
+                >
+                  <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  <span className="uppercase tracking-[0.18em]">Reset for</span>
+                  <span className="font-mono text-foreground">
+                    {maskedRecovery ?? maskedTyped}
+                  </span>
+                  <Info className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                id="masked-email-tooltip"
+                side="bottom"
+                className="max-w-[260px] border border-[var(--gold)]/30 bg-[var(--surface)] text-left text-xs text-foreground shadow-xl"
+                sideOffset={8}
+              >
+                <p className="font-medium text-[var(--gold)]">Privacy-preserving hint</p>
+                <p className="mt-1 text-muted-foreground">
+                  Only a masked version of the email is shown. This protects your
+                  privacy and never reveals whether an account exists.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
 
         <form onSubmit={resend} className="mx-auto mt-8 max-w-sm space-y-3 text-left" noValidate>
