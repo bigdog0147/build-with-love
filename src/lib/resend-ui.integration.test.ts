@@ -23,8 +23,9 @@ class MemStorage {
 }
 
 const store = new MemStorage();
-// @ts-expect-error attach a minimal window for the recovery-hint module
-globalThis.window = { localStorage: store } as unknown as Window & typeof globalThis;
+(globalThis as unknown as { window: { localStorage: MemStorage } }).window = {
+  localStorage: store,
+};
 
 beforeEach(() => {
   store.clear();
