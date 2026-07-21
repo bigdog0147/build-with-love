@@ -383,11 +383,31 @@ function InvalidLinkPanel({
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [copiedHint, setCopiedHint] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const maskedTyped = emailValid ? maskEmail(email) : null;
   const displayedMasked = maskedHint ?? maskedTyped;
+
+  async function copyHintToClipboard() {
+    if (!displayedMasked) return;
+    try {
+      await navigator.clipboard.writeText(displayedMasked);
+      setCopiedHint(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopiedHint(false), 2000);
+    } catch {
+      // Clipboard API may be unavailable; silently ignore.
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
 
   useEffect(() => {
