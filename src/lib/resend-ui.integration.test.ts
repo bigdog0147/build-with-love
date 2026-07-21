@@ -103,10 +103,14 @@ describe("both UI surfaces show the same neutral wording + masked hint", () => {
     "utf8",
   );
 
+  const norm = (s: string) => s.replace(/\s+/g, " ").toLowerCase();
+  const authText = norm(authSrc);
+  const resetText = norm(resetSrc);
+
   it("both include the invariant neutral disclosure", () => {
     const invariant = "we show the same confirmation whether or not an";
-    expect(authSrc.toLowerCase()).toContain(invariant);
-    expect(resetSrc.toLowerCase()).toContain(invariant);
+    expect(authText).toContain(invariant);
+    expect(resetText).toContain(invariant);
   });
 
   it("both reference the shared masked hint (saveRecoveryHint / maskEmail)", () => {
