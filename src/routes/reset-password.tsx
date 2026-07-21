@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, Diamond, Eye, EyeOff, Info, Loader2, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, CheckCircle2, Copy, Diamond, Eye, EyeOff, Info, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { updatePasswordFromRecovery } from "@/lib/password-recovery.functions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
