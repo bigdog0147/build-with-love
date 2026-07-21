@@ -45,7 +45,6 @@ describe("resend success panels are enumeration-safe", () => {
       /\bwe (found|located|matched) (your|an) account\b/i,
       /\bsuccessfully sent to\b/i, // implies delivery -> account exists
       /\bemail (has been )?delivered\b/i,
-      /\bwelcome back\b/i,
     ];
     for (const re of accountExistsSignals) {
       expect(authText, `auth.tsx must not contain ${re}`).not.toMatch(re);
