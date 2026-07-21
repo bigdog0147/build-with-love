@@ -589,29 +589,88 @@ function InvalidLinkPanel({
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={disabled}
-            className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              background: "var(--gradient-gold)",
-              boxShadow: !disabled ? "var(--shadow-glow)" : undefined,
-            }}
-          >
-            {sending ? (
+          {(() => {
+            const cooldownActive = cooldown > 0;
+            const statusId = "resend-cooldown-status";
+            // Announce sparingly: every 10s, plus the final 5s, plus "ready".
+            const shouldAnnounce =
+              !cooldownActive ||
+              cooldown <= 5 ||
+              cooldown % 10 === 0;
+            const announcement = sending
+              ? "Sending reset email…"
+              : cooldownActive
+              ? `Resend available in ${cooldown} second${cooldown === 1 ? "" : "s"}.`
+              : sent
+              ? "Resend is now available."
+              : "";
+            const pct = cooldownActive
+              ? ((RESEND_COOLDOWN_SECONDS - cooldown) / RESEND_COOLDOWN_SECONDS) * 100
+              : 100;
+            return (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Sending…
+                <button
+                  type="submit"
+                  disabled={disabled}
+                  aria-disabled={disabled}
+                  aria-describedby={sending || cooldownActive || sent ? statusId : undefined}
+                  className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl py-3 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  style={{
+                    background: "var(--gradient-gold)",
+                    boxShadow: !disabled ? "var(--shadow-glow)" : undefined,
+                  }}
+                >
+                  {cooldownActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-y-0 left-0 bg-black/25 transition-[width] duration-500"
+                      style={{ width: `${100 - pct}%` }}
+                    />
+                  )}
+                  <span className="relative flex items-center gap-2">
+                    {sending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        Sending…
+                      </>
+                    ) : cooldownActive ? (
+                      <>
+                        <span aria-hidden="true">Resend available in {cooldown}s</span>
+                      </>
+                    ) : (
+                      <>
+                        {sent ? "Resend reset email" : "Send reset email"}
+                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                {cooldownActive && (
+                  <progress
+                    value={RESEND_COOLDOWN_SECONDS - cooldown}
+                    max={RESEND_COOLDOWN_SECONDS}
+                    aria-label={`Resend cooldown, ${cooldown} second${
+                      cooldown === 1 ? "" : "s"
+                    } remaining`}
+                    className="sr-only"
+                  />
+                )}
+
+                {/* Polite live region for screen readers. Content only changes
+                    at announce-worthy ticks so ATs don't chatter every second. */}
+                <div
+                  id={statusId}
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="sr-only"
+                >
+                  {shouldAnnounce ? announcement : ""}
+                </div>
               </>
-            ) : cooldown > 0 ? (
-              <>Resend available in {cooldown}s</>
-            ) : (
-              <>
-                {sent ? "Resend reset email" : "Send reset email"}
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
+            );
+          })()}
 
           <p className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-[var(--gold)]" />
