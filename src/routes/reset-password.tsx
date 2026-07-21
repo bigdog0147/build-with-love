@@ -490,36 +490,64 @@ function InvalidLinkPanel({
         </p>
 
         {displayedMasked && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className="mx-auto mt-5 inline-flex max-w-full cursor-help items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground transition-colors hover:border-[var(--gold)]/40"
-                  aria-describedby="masked-email-tooltip"
-                >
-                  <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
-                  <span className="uppercase tracking-[0.18em]">Reset for</span>
-                  <span className="font-mono text-foreground">
-                    {displayedMasked}
-                  </span>
-                  <Info className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
-                </div>
-              </TooltipTrigger>
+          <div className="mx-auto mt-5 inline-flex items-center gap-2">
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="inline-flex max-w-full cursor-help items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1.5 text-[11px] text-muted-foreground transition-colors hover:border-[var(--gold)]/40"
+                    aria-describedby="masked-email-tooltip"
+                  >
+                    <Mail className="h-3.5 w-3.5 text-[var(--gold)]" />
+                    <span className="uppercase tracking-[0.18em]">Reset for</span>
+                    <span className="font-mono text-foreground">
+                      {displayedMasked}
+                    </span>
+                    <Info className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                </TooltipTrigger>
 
-              <TooltipContent
-                id="masked-email-tooltip"
-                side="bottom"
-                className="max-w-[260px] border border-[var(--gold)]/30 bg-[var(--surface)] text-left text-xs text-foreground shadow-xl"
-                sideOffset={8}
-              >
-                <p className="font-medium text-[var(--gold)]">Privacy-preserving hint</p>
-                <p className="mt-1 text-muted-foreground">
-                  Only a masked version of the email is shown. This protects your
-                  privacy and never reveals whether an account exists.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+                <TooltipContent
+                  id="masked-email-tooltip"
+                  side="bottom"
+                  className="max-w-[260px] border border-[var(--gold)]/30 bg-[var(--surface)] text-left text-xs text-foreground shadow-xl"
+                  sideOffset={8}
+                >
+                  <p className="font-medium text-[var(--gold)]">Privacy-preserving hint</p>
+                  <p className="mt-1 text-muted-foreground">
+                    Only a masked version of the email is shown. This protects your
+                    privacy and never reveals whether an account exists.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={copyHintToClipboard}
+                    className="grid h-8 w-8 place-items-center rounded-full border border-border bg-[var(--surface)] text-muted-foreground transition-colors hover:border-[var(--gold)]/40 hover:text-[var(--gold)]"
+                    aria-label={copiedHint ? "Copied masked email" : "Copy masked email"}
+                  >
+                    {copiedHint ? (
+                      <Check className="h-3.5 w-3.5 text-[var(--gold)]" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className="border border-[var(--gold)]/30 bg-[var(--surface)] text-xs text-foreground shadow-xl"
+                  sideOffset={8}
+                >
+                  {copiedHint ? "Copied" : "Copy masked email"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         )}
 
         <form onSubmit={resend} className="mx-auto mt-8 max-w-sm space-y-3 text-left" noValidate>
