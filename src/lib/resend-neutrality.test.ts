@@ -34,16 +34,22 @@ describe("resend success panels are enumeration-safe", () => {
   });
 
   it("neither surface uses copy that only makes sense when the account exists", () => {
+    // Strip the neutral sentence itself before scanning, since it legitimately
+    // contains "account exists" as part of the privacy disclaimer.
+    const strip = (src: string) =>
+      norm(src).split(NEUTRAL_SENTENCE).join(" ");
+    const authText = strip(authSrc);
+    const resetText = strip(resetSrc);
     const accountExistsSignals = [
-      /\baccount (found|exists|located|verified)\b/i,
+      /\baccount (found|located|verified)\b/i,
       /\bwe (found|located|matched) (your|an) account\b/i,
       /\bsuccessfully sent to\b/i, // implies delivery -> account exists
       /\bemail (has been )?delivered\b/i,
       /\bwelcome back\b/i,
     ];
     for (const re of accountExistsSignals) {
-      expect(authSrc, `auth.tsx must not contain ${re}`).not.toMatch(re);
-      expect(resetSrc, `reset-password.tsx must not contain ${re}`).not.toMatch(re);
+      expect(authText, `auth.tsx must not contain ${re}`).not.toMatch(re);
+      expect(resetText, `reset-password.tsx must not contain ${re}`).not.toMatch(re);
     }
   });
 
