@@ -52,7 +52,8 @@ class Snapshot:
 
 async def goto_forgot_form(page: Page) -> None:
     await page.goto(f"{BASE_URL}/auth", wait_until="domcontentloaded")
-    # Click "Forgot password?" to switch the auth panel into forgot mode.
+    # /auth boots in sign-up mode. Flip to sign-in, then into forgot mode.
+    await page.get_by_role("button", name="Sign in", exact=True).click()
     await page.get_by_role("button", name="Forgot password?").click()
     await page.get_by_role("heading", name="Reset your password").wait_for()
 
