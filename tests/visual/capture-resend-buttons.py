@@ -51,9 +51,12 @@ class Snapshot:
 
 
 async def goto_forgot_form(page: Page) -> None:
-    await page.goto(f"{BASE_URL}/auth", wait_until="domcontentloaded")
+    # `networkidle` + hydration delay: TanStack Start hydrates the auth panel
+    # after first paint, and clicking before hydration silently no-ops.
+    await page.goto(f"{BASE_URL}/auth", wait_until="networkidle")
+    await page.wait_for_timeout(1200)
     # /auth boots in sign-up mode. Flip to sign-in, then into forgot mode.
-    await page.get_by_role("button", name="Sign in", exact=True).click()
+    await page.locator('button:has-text("Sign in")').last.click()
     await page.get_by_role("button", name="Forgot password?").click()
     await page.get_by_role("heading", name="Reset your password").wait_for()
 
