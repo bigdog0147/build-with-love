@@ -93,10 +93,12 @@ async def prime_reset_cooldown(page: Page, seconds_ago: int | None) -> None:
     )
     # Navigate WITHOUT a recovery hash → the route falls into the invalid-link
     # branch and renders the resend form we want to snapshot.
-    await page.goto(f"{BASE_URL}/reset-password", wait_until="domcontentloaded")
-    # Wait for the invalid-link resend button to be attached.
-    await page.get_by_role("button", name=lambda n: "reset email" in (n or "").lower()
-                           or "resend available" in (n or "").lower()).first.wait_for()
+    await page.goto(f"{BASE_URL}/reset-password", wait_until="networkidle")
+    await page.wait_for_timeout(1200)  # hydration + auth-state settle
+    # Wait for the invalid-link resend form's submit button (any label variant).
+    await page.locator(
+        'form:has(input[type="email"]) button[type="submit"]'
+    ).first.wait_for()
     # Type a valid email so the button isn't disabled purely on validation.
     await page.get_by_placeholder("you@company.com").fill("jane.doe@example.com")
 
