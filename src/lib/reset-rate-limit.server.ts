@@ -67,11 +67,12 @@ export async function checkAndRecordResetAttempt(
   let limited = false;
   let reason: string | undefined;
 
+  const limits = getLimits();
   for (const k of keys) {
     const hourLimit =
-      k.key_type === "email_hash" ? LIMITS.emailPerHour : LIMITS.ipPerHour;
+      k.key_type === "email_hash" ? limits.emailPerHour : limits.ipPerHour;
     const dayLimit =
-      k.key_type === "email_hash" ? LIMITS.emailPerDay : LIMITS.ipPerDay;
+      k.key_type === "email_hash" ? limits.emailPerDay : limits.ipPerDay;
 
     const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
       supabaseAdmin
