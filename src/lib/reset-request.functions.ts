@@ -37,21 +37,19 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
         reason: `rate_limited: ${reason ?? "unknown"}`,
         metadata: { rate_limited: true },
       });
-      // Neutral response — never signal throttling to the client.
-      return { ok: true as const };
+    } else {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
+        redirectTo: data.redirectTo,
+      });
+      await recordAuditEvent({
+        eventType: "reset_request",
+        email: data.email,
+        success: !error,
+        reason: error?.message ?? null,
+      });
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(data.email, {
-      redirectTo: data.redirectTo,
-    });
-
-    await recordAuditEvent({
-      eventType: "reset_request",
-      email: data.email,
-      success: !error,
-      reason: error?.message ?? null,
-    });
-
+    // Neutral response — never signal throttling or delivery status.
     return { ok: true as const };
   });
