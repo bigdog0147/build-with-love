@@ -70,6 +70,7 @@ beforeEach(() => {
 describe("checkAndRecordResetAttempt", () => {
   it("allows attempts under the hourly limit", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.emailPerHour; i++) {
       const r = await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
       expect(r.limited).toBe(false);
@@ -78,6 +79,7 @@ describe("checkAndRecordResetAttempt", () => {
 
   it("limits once the per-email hourly threshold is crossed", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.emailPerHour; i++) {
       await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
     }
@@ -88,6 +90,7 @@ describe("checkAndRecordResetAttempt", () => {
 
   it("still records the attempt when limited (budget keeps decaying)", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.emailPerHour + 3; i++) {
       await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
     }
@@ -97,6 +100,7 @@ describe("checkAndRecordResetAttempt", () => {
 
   it("isolates budgets across different email hashes", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.emailPerHour; i++) {
       await checkAndRecordResetAttempt({ emailHash: "a", ip: null });
     }
@@ -106,6 +110,7 @@ describe("checkAndRecordResetAttempt", () => {
 
   it("limits on IP even when the email is fresh", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.ipPerHour; i++) {
       await checkAndRecordResetAttempt({
         emailHash: `unique-${i}`,
@@ -122,6 +127,7 @@ describe("checkAndRecordResetAttempt", () => {
 
   it("does not throttle IP when it is null", async () => {
     const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
     for (let i = 0; i < limits.ipPerHour + 5; i++) {
       await checkAndRecordResetAttempt({
         emailHash: `unique-${i}`,
