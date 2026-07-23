@@ -77,13 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gigafactory 3 — Engineering Tomorrow's Intelligent Infrastructure" },
-      { name: "description", content: "Gigafactory 3 builds intelligent manufacturing ecosystems powered by artificial intelligence, robotics, renewable energy and next-generation industrial technology." },
+      { title: "Gigafactory 3 — Private Banking Dashboard" },
+      { name: "description", content: "A dark-luxury private banking dashboard: portfolio, multi-currency wallets, cards and transactions." },
       { name: "author", content: "Gigafactory 3" },
-      { property: "og:title", content: "Gigafactory 3 — Intelligent Industrial Technology" },
-      { property: "og:description", content: "AI, robotics, advanced manufacturing and clean energy — engineered at global scale." },
+      { property: "og:title", content: "Gigafactory 3 — Private Banking Dashboard" },
+      { property: "og:description", content: "Portfolio, wallets, cards and transactions in one dark-luxury cockpit." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -118,21 +119,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
-
-  useEffect(() => {
-    // Lazy import to keep server bundle lean and avoid touching localStorage during SSR.
-    let unsub: (() => void) | undefined;
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      const { data } = supabase.auth.onAuthStateChange((event) => {
-        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-        router.invalidate();
-        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-      });
-      unsub = () => data.subscription.unsubscribe();
-    });
-    return () => unsub?.();
-  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
