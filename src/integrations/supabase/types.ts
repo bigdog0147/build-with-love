@@ -209,6 +209,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reset_rate_limits: {
+        Row: {
+          attempted_at: string
+          id: string
+          key_type: string
+          key_value: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          key_type: string
+          key_value: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          key_type?: string
+          key_value?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
