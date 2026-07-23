@@ -138,3 +138,51 @@ describe("checkAndRecordResetAttempt", () => {
     expect(ipRows.length).toBe(0);
   });
 });
+
+describe("getLimits env overrides", () => {
+  const original = { ...process.env };
+  beforeEach(() => {
+    process.env = { ...original };
+  });
+
+  it("falls back to defaults when env vars are unset", async () => {
+    delete process.env.RESET_LIMIT_EMAIL_PER_HOUR;
+    delete process.env.RESET_LIMIT_EMAIL_PER_DAY;
+    delete process.env.RESET_LIMIT_IP_PER_HOUR;
+    delete process.env.RESET_LIMIT_IP_PER_DAY;
+    const { getLimits, DEFAULT_LIMITS } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual(DEFAULT_LIMITS);
+  });
+
+  it("reads positive integer overrides from env", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "5";
+    process.env.RESET_LIMIT_EMAIL_PER_DAY = "20";
+    process.env.RESET_LIMIT_IP_PER_HOUR = "50";
+    process.env.RESET_LIMIT_IP_PER_DAY = "200";
+    const { getLimits } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual({
+      emailPerHour: 5,
+      emailPerDay: 20,
+      ipPerHour: 50,
+      ipPerDay: 200,
+    });
+  });
+
+  it("ignores invalid or non-positive values and falls back", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "0";
+    process.env.RESET_LIMIT_EMAIL_PER_DAY = "-4";
+    process.env.RESET_LIMIT_IP_PER_HOUR = "abc";
+    process.env.RESET_LIMIT_IP_PER_DAY = "";
+    const { getLimits, DEFAULT_LIMITS } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual(DEFAULT_LIMITS);
+  });
+
+  it("honors an override at runtime — a lower hourly cap trips earlier", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "2";
+    store.rows = [];
+    const { checkAndRecordResetAttempt } = await import("./reset-rate-limit.server");
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(false);
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(false);
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(true);
+  });
+});
