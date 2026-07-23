@@ -69,16 +69,18 @@ beforeEach(() => {
 
 describe("checkAndRecordResetAttempt", () => {
   it("allows attempts under the hourly limit", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.emailPerHour; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.emailPerHour; i++) {
       const r = await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
       expect(r.limited).toBe(false);
     }
   });
 
   it("limits once the per-email hourly threshold is crossed", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.emailPerHour; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.emailPerHour; i++) {
       await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
     }
     const r = await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
@@ -87,17 +89,19 @@ describe("checkAndRecordResetAttempt", () => {
   });
 
   it("still records the attempt when limited (budget keeps decaying)", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.emailPerHour + 3; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.emailPerHour + 3; i++) {
       await checkAndRecordResetAttempt({ emailHash: "h1", ip: null });
     }
     const forEmail = store.rows.filter((r) => r.key_type === "email_hash");
-    expect(forEmail.length).toBe(LIMITS.emailPerHour + 3);
+    expect(forEmail.length).toBe(limits.emailPerHour + 3);
   });
 
   it("isolates budgets across different email hashes", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.emailPerHour; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.emailPerHour; i++) {
       await checkAndRecordResetAttempt({ emailHash: "a", ip: null });
     }
     const r = await checkAndRecordResetAttempt({ emailHash: "b", ip: null });
@@ -105,8 +109,9 @@ describe("checkAndRecordResetAttempt", () => {
   });
 
   it("limits on IP even when the email is fresh", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.ipPerHour; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.ipPerHour; i++) {
       await checkAndRecordResetAttempt({
         emailHash: `unique-${i}`,
         ip: "1.2.3.4",
@@ -121,8 +126,9 @@ describe("checkAndRecordResetAttempt", () => {
   });
 
   it("does not throttle IP when it is null", async () => {
-    const { checkAndRecordResetAttempt, LIMITS } = await import("./reset-rate-limit.server");
-    for (let i = 0; i < LIMITS.ipPerHour + 5; i++) {
+    const { checkAndRecordResetAttempt, getLimits } = await import("./reset-rate-limit.server");
+    const limits = getLimits();
+    for (let i = 0; i < limits.ipPerHour + 5; i++) {
       await checkAndRecordResetAttempt({
         emailHash: `unique-${i}`,
         ip: null,
@@ -130,5 +136,53 @@ describe("checkAndRecordResetAttempt", () => {
     }
     const ipRows = store.rows.filter((r) => r.key_type === "ip");
     expect(ipRows.length).toBe(0);
+  });
+});
+
+describe("getLimits env overrides", () => {
+  const original = { ...process.env };
+  beforeEach(() => {
+    process.env = { ...original };
+  });
+
+  it("falls back to defaults when env vars are unset", async () => {
+    delete process.env.RESET_LIMIT_EMAIL_PER_HOUR;
+    delete process.env.RESET_LIMIT_EMAIL_PER_DAY;
+    delete process.env.RESET_LIMIT_IP_PER_HOUR;
+    delete process.env.RESET_LIMIT_IP_PER_DAY;
+    const { getLimits, DEFAULT_LIMITS } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual(DEFAULT_LIMITS);
+  });
+
+  it("reads positive integer overrides from env", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "5";
+    process.env.RESET_LIMIT_EMAIL_PER_DAY = "20";
+    process.env.RESET_LIMIT_IP_PER_HOUR = "50";
+    process.env.RESET_LIMIT_IP_PER_DAY = "200";
+    const { getLimits } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual({
+      emailPerHour: 5,
+      emailPerDay: 20,
+      ipPerHour: 50,
+      ipPerDay: 200,
+    });
+  });
+
+  it("ignores invalid or non-positive values and falls back", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "0";
+    process.env.RESET_LIMIT_EMAIL_PER_DAY = "-4";
+    process.env.RESET_LIMIT_IP_PER_HOUR = "abc";
+    process.env.RESET_LIMIT_IP_PER_DAY = "";
+    const { getLimits, DEFAULT_LIMITS } = await import("./reset-rate-limit.server");
+    expect(getLimits()).toEqual(DEFAULT_LIMITS);
+  });
+
+  it("honors an override at runtime — a lower hourly cap trips earlier", async () => {
+    process.env.RESET_LIMIT_EMAIL_PER_HOUR = "2";
+    store.rows = [];
+    const { checkAndRecordResetAttempt } = await import("./reset-rate-limit.server");
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(false);
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(false);
+    expect((await checkAndRecordResetAttempt({ emailHash: "z", ip: null })).limited).toBe(true);
   });
 });

@@ -2,12 +2,40 @@
 // Never import from route/component modules directly — load inside
 // server function handlers with `await import(...)`.
 
-export const LIMITS = {
+// Defaults are used when the corresponding env var is unset or invalid.
+// Env vars (all optional, positive integers):
+//   RESET_LIMIT_EMAIL_PER_HOUR   default 3
+//   RESET_LIMIT_EMAIL_PER_DAY    default 8
+//   RESET_LIMIT_IP_PER_HOUR      default 10
+//   RESET_LIMIT_IP_PER_DAY       default 30
+export const DEFAULT_LIMITS = {
   emailPerHour: 3,
   emailPerDay: 8,
   ipPerHour: 10,
   ipPerDay: 30,
 } as const;
+
+function parsePositiveInt(raw: string | undefined, fallback: number): number {
+  if (!raw) return fallback;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+export function getLimits() {
+  const env = (typeof process !== "undefined" ? process.env : {}) as Record<
+    string,
+    string | undefined
+  >;
+  return {
+    emailPerHour: parsePositiveInt(env.RESET_LIMIT_EMAIL_PER_HOUR, DEFAULT_LIMITS.emailPerHour),
+    emailPerDay: parsePositiveInt(env.RESET_LIMIT_EMAIL_PER_DAY, DEFAULT_LIMITS.emailPerDay),
+    ipPerHour: parsePositiveInt(env.RESET_LIMIT_IP_PER_HOUR, DEFAULT_LIMITS.ipPerHour),
+    ipPerDay: parsePositiveInt(env.RESET_LIMIT_IP_PER_DAY, DEFAULT_LIMITS.ipPerDay),
+  };
+}
+
+/** @deprecated Use getLimits() so overrides apply. Kept for backwards compat. */
+export const LIMITS = DEFAULT_LIMITS;
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -39,11 +67,12 @@ export async function checkAndRecordResetAttempt(
   let limited = false;
   let reason: string | undefined;
 
+  const limits = getLimits();
   for (const k of keys) {
     const hourLimit =
-      k.key_type === "email_hash" ? LIMITS.emailPerHour : LIMITS.ipPerHour;
+      k.key_type === "email_hash" ? limits.emailPerHour : limits.ipPerHour;
     const dayLimit =
-      k.key_type === "email_hash" ? LIMITS.emailPerDay : LIMITS.ipPerDay;
+      k.key_type === "email_hash" ? limits.emailPerDay : limits.ipPerDay;
 
     const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
       supabaseAdmin
