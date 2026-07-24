@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_audit_log: {
+        Row: {
+          created_at: string
+          email_hash: string | null
+          email_masked: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          metadata: Json
+          reason: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_hash?: string | null
+          email_masked?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          reason?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string | null
+          email_masked?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          metadata?: Json
+          reason?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           created_at: string
@@ -74,33 +116,117 @@ export type Database = {
         }
         Relationships: []
       }
+      metrics: {
+        Row: {
+          created_at: string
+          decimals: number
+          id: string
+          label: string
+          sort_order: number
+          sub: string | null
+          suffix: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          decimals?: number
+          id?: string
+          label: string
+          sort_order?: number
+          sub?: string | null
+          suffix?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          decimals?: number
+          id?: string
+          label?: string
+          sort_order?: number
+          sub?: string | null
+          suffix?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          country: string | null
           created_at: string
           display_name: string
+          first_name: string | null
           id: string
           initials: string
+          interests: string[]
+          last_name: string | null
+          membership: string
+          organization: string | null
+          phone: string | null
+          role: string
           tier: string
           updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string
+          first_name?: string | null
           id: string
           initials?: string
+          interests?: string[]
+          last_name?: string | null
+          membership?: string
+          organization?: string | null
+          phone?: string | null
+          role?: string
           tier?: string
           updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string
+          first_name?: string | null
           id?: string
           initials?: string
+          interests?: string[]
+          last_name?: string | null
+          membership?: string
+          organization?: string | null
+          phone?: string | null
+          role?: string
           tier?: string
           updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      reset_rate_limits: {
+        Row: {
+          attempted_at: string
+          id: string
+          key_type: string
+          key_value: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          key_type: string
+          key_value: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          key_type?: string
+          key_value?: string
         }
         Relationships: []
       }
