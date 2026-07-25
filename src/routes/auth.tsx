@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Diamond } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -14,9 +14,16 @@ export const Route = createFileRoute("/auth")({
   }),
 });
 
+// Cooldown (seconds) between resend attempts. Kept short for UX; abuse
+// throttling on the server side is handled separately (see reset-limits.ts).
+const RESEND_COOLDOWN_SECONDS = 30;
+
+type Mode = "sign-in" | "sign-up" | "otp";
+type OtpStep = "request" | "verify";
+
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+  const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -103,99 +110,339 @@ function AuthPage() {
           className="rounded-2xl border border-border p-8"
           style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}
         >
-          <h1 className="font-display text-3xl">
-            {mode === "sign-in" ? "Welcome back" : "Open your account"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "sign-in"
-              ? "Access your portfolio, wallets and cards."
-              : "A dashboard tailored to your holdings will be provisioned instantly."}
-          </p>
-
-          <button
-            onClick={handleGoogle}
-            className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </button>
-
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            or
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {mode === "sign-up" && (
-              <Field label="Full name">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Elena Marchetti"
-                  className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-                />
-              </Field>
-            )}
-            <Field label="Email">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@bank.com"
-                className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-            </Field>
-            <Field label="Password">
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-              />
-            </Field>
-
-            {error && (
-              <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
-                {error}
-              </div>
-            )}
-            {notice && (
-              <div className="rounded-lg border border-[var(--success)]/30 bg-[var(--success)]/10 px-3 py-2 text-xs text-[var(--success)]">
-                {notice}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
-              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-            >
-              {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-xs text-muted-foreground">
-            {mode === "sign-in" ? "New here?" : "Already have an account?"}{" "}
-            <button
-              onClick={() => {
-                setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+          {mode === "otp" ? (
+            <OtpFlow
+              onBack={() => {
+                setMode("sign-in");
                 setError(null);
                 setNotice(null);
               }}
-              className="text-[var(--gold)] hover:underline"
-            >
-              {mode === "sign-in" ? "Open an account" : "Sign in"}
-            </button>
-          </div>
+              onSuccess={() => navigate({ to: "/dashboard", replace: true })}
+            />
+          ) : (
+            <>
+              <h1 className="font-display text-3xl">
+                {mode === "sign-in" ? "Welcome back" : "Open your account"}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {mode === "sign-in"
+                  ? "Access your portfolio, wallets and cards."
+                  : "A dashboard tailored to your holdings will be provisioned instantly."}
+              </p>
+
+              <button
+                onClick={handleGoogle}
+                className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
+              >
+                <GoogleIcon />
+                Continue with Google
+              </button>
+
+              <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="h-px flex-1 bg-border" />
+                or
+                <span className="h-px flex-1 bg-border" />
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {mode === "sign-up" && (
+                  <Field label="Full name">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Elena Marchetti"
+                      className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
+                    />
+                  </Field>
+                )}
+                <Field label="Email">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@bank.com"
+                    className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
+                  />
+                </Field>
+                <Field label="Password">
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
+                  />
+                </Field>
+
+                {error && (
+                  <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+                    {error}
+                  </div>
+                )}
+                {notice && (
+                  <div className="rounded-lg border border-[var(--success)]/30 bg-[var(--success)]/10 px-3 py-2 text-xs text-[var(--success)]">
+                    {notice}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                  style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+                >
+                  {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
+                </button>
+              </form>
+
+              <button
+                onClick={() => {
+                  setMode("otp");
+                  setError(null);
+                  setNotice(null);
+                }}
+                className="mt-4 w-full rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
+              >
+                Sign in with email code
+              </button>
+
+              <div className="mt-6 text-center text-xs text-muted-foreground">
+                {mode === "sign-in" ? "New here?" : "Already have an account?"}{" "}
+                <button
+                  onClick={() => {
+                    setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+                    setError(null);
+                    setNotice(null);
+                  }}
+                  className="text-[var(--gold)] hover:underline"
+                >
+                  {mode === "sign-in" ? "Open an account" : "Sign in"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => void }) {
+  const [step, setStep] = useState<OtpStep>("request");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("");
+  const [remaining, setRemaining] = useState(0);
+
+  const resendButtonRef = useRef<HTMLButtonElement | null>(null);
+  const codeInputRef = useRef<HTMLInputElement | null>(null);
+  const wasCoolingDownRef = useRef(false);
+
+  // Countdown timer
+  useEffect(() => {
+    if (remaining <= 0) return;
+    const t = setInterval(() => setRemaining((r) => (r <= 1 ? 0 : r - 1)), 1000);
+    return () => clearInterval(t);
+  }, [remaining]);
+
+  // Announce cooldown completion + restore focus to the resend button when
+  // it becomes actionable again.
+  useEffect(() => {
+    if (remaining === 0 && wasCoolingDownRef.current) {
+      wasCoolingDownRef.current = false;
+      setStatus("Resend available.");
+      resendButtonRef.current?.focus();
+    }
+  }, [remaining]);
+
+  const startCooldown = useCallback(() => {
+    setRemaining(RESEND_COOLDOWN_SECONDS);
+    wasCoolingDownRef.current = true;
+    setStatus(`Code sent. You can resend in ${RESEND_COOLDOWN_SECONDS} seconds.`);
+  }, []);
+
+  async function requestCode(e?: React.FormEvent) {
+    e?.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      startCooldown();
+      setStep("verify");
+      // Focus the code input after it mounts.
+      setTimeout(() => codeInputRef.current?.focus(), 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resendCode() {
+    if (remaining > 0 || loading) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      startCooldown();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not resend code");
+      setStatus("Resend failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code.trim(),
+        type: "email",
+      });
+      if (error) throw error;
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <h1 className="font-display text-3xl">Sign in with a code</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {step === "request"
+          ? "We'll email you a one-time code."
+          : `Enter the 6-digit code we sent to ${email}.`}
+      </p>
+
+      {/* Polite live region for cooldown / resend announcements */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        role="status"
+        data-testid="resend-status"
+        className="sr-only"
+      >
+        {remaining > 0
+          ? `Resend available in ${remaining} second${remaining === 1 ? "" : "s"}.`
+          : status}
+      </div>
+
+      {step === "request" ? (
+        <form onSubmit={requestCode} className="mt-6 space-y-3">
+          <Field label="Email">
+            <input
+              type="email"
+              required
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@bank.com"
+              className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
+            />
+          </Field>
+          {error && (
+            <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+              {error}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {loading ? "Sending…" : "Send code"}
+          </button>
+          <button
+            type="button"
+            onClick={onBack}
+            className="w-full rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Back
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={verifyCode} className="mt-6 space-y-3">
+          <Field label="Verification code">
+            <input
+              ref={codeInputRef}
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="123456"
+              className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm tracking-[0.4em] outline-none focus:border-[var(--gold)]/60"
+            />
+          </Field>
+
+          {error && (
+            <div className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-3 py-2 text-xs text-[var(--danger)]">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || code.length === 0}
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {loading ? "Verifying…" : "Verify & sign in"}
+          </button>
+
+          <button
+            ref={resendButtonRef}
+            type="button"
+            onClick={resendCode}
+            disabled={remaining > 0 || loading}
+            aria-disabled={remaining > 0 || loading}
+            aria-describedby="resend-status-visible"
+            data-testid="resend-button"
+            className="w-full rounded-xl border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium transition-colors hover:border-[var(--gold)]/60 disabled:opacity-60"
+          >
+            {remaining > 0 ? `Resend code in ${remaining}s` : "Resend code"}
+          </button>
+          <p
+            id="resend-status-visible"
+            className="text-center text-xs text-muted-foreground"
+          >
+            {remaining > 0
+              ? "Please wait before requesting another code."
+              : "Didn't get it? Check spam or resend."}
+          </p>
+
+          <button
+            type="button"
+            onClick={onBack}
+            className="w-full rounded-xl py-2 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Use a different method
+          </button>
+        </form>
+      )}
     </div>
   );
 }
