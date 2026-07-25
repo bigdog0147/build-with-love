@@ -252,12 +252,20 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
   }, [remaining]);
 
   // Announce cooldown completion + restore focus to the resend button when
-  // it becomes actionable again.
+  // it becomes actionable again. Only steal focus if the user isn't actively
+  // interacting with another control (e.g. still typing the code).
   useEffect(() => {
     if (remaining === 0 && wasCoolingDownRef.current) {
       wasCoolingDownRef.current = false;
       setStatus("Resend available.");
-      resendButtonRef.current?.focus();
+      const active = typeof document !== "undefined" ? document.activeElement : null;
+      const focusIsElsewhere =
+        active instanceof HTMLElement &&
+        active !== document.body &&
+        active !== resendButtonRef.current;
+      if (!focusIsElsewhere) {
+        resendButtonRef.current?.focus();
+      }
     }
   }, [remaining]);
 
