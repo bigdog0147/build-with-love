@@ -15,9 +15,13 @@ export const Route = createFileRoute("/auth")({
   }),
 });
 
-// Cooldown (seconds) between resend attempts. Kept short for UX; abuse
-// throttling on the server side is handled separately (see reset-limits.ts).
-const RESEND_COOLDOWN_SECONDS = 30;
+// Cooldown (seconds) between resend attempts. Sourced from
+// RESET_LIMIT_COOLDOWN_SECONDS (with safe fallback to the shared default) so
+// the UI cooldown matches server-side abuse throttling.
+const RESEND_COOLDOWN_SECONDS = parseResetLimitValue(
+  import.meta.env.VITE_RESET_LIMIT_COOLDOWN_SECONDS as string | undefined,
+  RESET_LIMIT_DEFAULTS.RESET_LIMIT_COOLDOWN_SECONDS,
+);
 
 type Mode = "sign-in" | "sign-up" | "otp";
 type OtpStep = "request" | "verify";
