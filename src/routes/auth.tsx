@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Diamond } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { parseResetLimitValue, RESET_LIMIT_DEFAULTS } from "@/lib/reset-limits";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -14,9 +15,13 @@ export const Route = createFileRoute("/auth")({
   }),
 });
 
-// Cooldown (seconds) between resend attempts. Kept short for UX; abuse
-// throttling on the server side is handled separately (see reset-limits.ts).
-const RESEND_COOLDOWN_SECONDS = 30;
+// Cooldown (seconds) between resend attempts. Sourced from
+// RESET_LIMIT_COOLDOWN_SECONDS (with safe fallback to the shared default) so
+// the UI cooldown matches server-side abuse throttling.
+const RESEND_COOLDOWN_SECONDS = parseResetLimitValue(
+  import.meta.env.VITE_RESET_LIMIT_COOLDOWN_SECONDS as string | undefined,
+  RESET_LIMIT_DEFAULTS.RESET_LIMIT_COOLDOWN_SECONDS,
+);
 
 type Mode = "sign-in" | "sign-up" | "otp";
 type OtpStep = "request" | "verify";
@@ -413,15 +418,6 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
           )}
 
           <button
-            type="submit"
-            disabled={loading || code.length === 0}
-            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
-            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-          >
-            {loading ? "Verifying…" : "Verify & sign in"}
-          </button>
-
-          <button
             ref={resendButtonRef}
             type="button"
             onClick={resendCode}
@@ -441,6 +437,15 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
               ? "Please wait before requesting another code."
               : "Didn't get it? Check spam or resend."}
           </p>
+
+          <button
+            type="submit"
+            disabled={loading || code.length === 0}
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {loading ? "Verifying…" : "Verify & sign in"}
+          </button>
 
           <button
             type="button"
