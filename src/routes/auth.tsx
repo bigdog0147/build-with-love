@@ -418,15 +418,6 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
           )}
 
           <button
-            type="submit"
-            disabled={loading || code.length === 0}
-            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
-            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-          >
-            {loading ? "Verifying…" : "Verify & sign in"}
-          </button>
-
-          <button
             ref={resendButtonRef}
             type="button"
             onClick={resendCode}
@@ -446,6 +437,15 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
               ? "Please wait before requesting another code."
               : "Didn't get it? Check spam or resend."}
           </p>
+
+          <button
+            type="submit"
+            disabled={loading || code.length === 0}
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
+            style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+          >
+            {loading ? "Verifying…" : "Verify & sign in"}
+          </button>
 
           <button
             type="button"
