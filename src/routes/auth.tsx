@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Diamond } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { parseResetLimitValue, RESET_LIMIT_DEFAULTS } from "@/lib/reset-limits";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
