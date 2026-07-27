@@ -1,101 +1,144 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Diamond, Gem, LineChart, Shield } from "lucide-react";
+import { ArrowRight, Atom, BatteryCharging, Bot, Cpu, Factory, Network, Radar, Rocket } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { GlassCard } from "@/components/section";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => ({
     meta: [
-      { title: "Gigafactory 3 — Private Banking, reimagined" },
+      { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
       {
         name: "description",
-        content: "A dark-luxury private banking cockpit: portfolio, multi-currency wallets, cards and transactions in one place.",
+        content:
+          "Gigafactory 3 builds AI-powered manufacturing ecosystems — robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
       },
-      { property: "og:title", content: "Gigafactory 3 — Private Banking" },
-      { property: "og:description", content: "Portfolio, wallets, cards and transactions in one dark-luxury cockpit." },
+      { property: "og:title", content: "Gigafactory 3 — Intelligent Industry" },
+      {
+        property: "og:description",
+        content:
+          "AI-powered manufacturing ecosystems integrating robotics, automation and clean energy to transform global industry.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });
 
+const TECHS = [
+  { icon: Atom, name: "Artificial Intelligence" },
+  { icon: Bot, name: "Robotics" },
+  { icon: Factory, name: "Advanced Manufacturing" },
+  { icon: BatteryCharging, name: "Battery Systems" },
+  { icon: Cpu, name: "Semiconductors" },
+  { icon: Network, name: "Industrial Automation" },
+  { icon: Radar, name: "Digital Twin Systems" },
+  { icon: Rocket, name: "Aerospace Systems" },
+];
+
 function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground">
-      <div
-        className="pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-40 blur-3xl"
-        style={{ background: "var(--gradient-gold)" }}
-      />
-      <div
-        className="pointer-events-none absolute -bottom-40 -left-40 h-[32rem] w-[32rem] rounded-full opacity-30 blur-3xl"
-        style={{ background: "var(--gradient-electric)" }}
-      />
+    <div className="min-h-screen">
+      <SiteHeader />
 
-      <header className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-lg" style={{ background: "var(--gradient-gold)" }}>
-            <Diamond className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="font-display text-lg leading-none">Gigafactory 3</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Private Bank</div>
-          </div>
-        </div>
-        <Link
-          to="/auth"
-          className="rounded-xl border border-border bg-[var(--surface)] px-4 py-2 text-sm hover:border-[var(--gold)]/60"
-        >
-          Sign in
-        </Link>
-      </header>
+      <section className="relative overflow-hidden">
+        <div
+          className="pointer-events-none absolute -right-40 -top-40 h-[36rem] w-[36rem] rounded-full opacity-40 blur-3xl"
+          style={{ background: "var(--gradient-gold)" }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-40 -left-40 h-[36rem] w-[36rem] rounded-full opacity-25 blur-3xl"
+          style={{ background: "var(--gradient-electric)" }}
+        />
 
-      <main className="relative mx-auto max-w-6xl px-6 pb-24 pt-16 lg:pt-28">
-        <div className="max-w-3xl">
+        <div className="relative mx-auto max-w-7xl px-6 pb-28 pt-20 lg:pt-32">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
-            Obsidian tier · Invitation only
+            Intelligent Industry · Global Scale
           </span>
-          <h1 className="mt-6 font-display text-5xl leading-[1.05] sm:text-6xl lg:text-7xl">
-            Your entire fortune, <span className="gold-text">in one cockpit.</span>
+          <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[1.03] sm:text-6xl lg:text-7xl">
+            Engineering Tomorrow's <span className="gold-text">Intelligent Infrastructure.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            Portfolio, multi-currency wallets, private markets, and metal cards — orchestrated in a
-            single, quiet interface designed for those who prefer clarity to noise.
+            Gigafactory 3 develops intelligent manufacturing ecosystems powered by artificial
+            intelligence, robotics, advanced automation, and sustainable energy to shape the
+            future of global industry.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
-              to="/auth"
+              to="/technologies"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
               style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
             >
-              Enter your dashboard
+              Explore Our Technologies
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/auth"
+              to="/investors"
               className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm hover:border-[var(--gold)]/60"
             >
-              Open an account
+              Investor Overview
+            </Link>
+          </div>
+
+          <div className="mt-24 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { k: "12", l: "Global Facilities" },
+              { k: "$4.2B", l: "R&D Committed" },
+              { k: "38", l: "Countries Served" },
+              { k: "1,900+", l: "Engineers & Scientists" },
+            ].map((s) => (
+              <GlassCard key={s.l}>
+                <div className="font-display text-3xl">{s.k}</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {s.l}
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-[var(--surface)]/30">
+        <div className="mx-auto max-w-7xl px-6 py-20">
+          <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+            Core Technologies
+          </div>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">
+            A vertically-integrated platform for intelligent industry.
+          </h2>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TECHS.map(({ icon: Icon, name }) => (
+              <div
+                key={name}
+                className="glass rounded-xl border border-border p-5 transition-colors hover:border-[var(--gold)]/50"
+              >
+                <div
+                  className="grid h-10 w-10 place-items-center rounded-lg"
+                  style={{
+                    background: "color-mix(in oklab, var(--gold) 14%, transparent)",
+                    color: "var(--gold)",
+                  }}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="mt-4 font-display text-lg leading-tight">{name}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10">
+            <Link
+              to="/technologies"
+              className="inline-flex items-center gap-2 text-sm text-[var(--gold)] hover:underline"
+            >
+              See the full technology stack <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
+      </section>
 
-        <div className="mt-24 grid gap-6 md:grid-cols-3">
-          {[
-            { icon: LineChart, title: "Portfolio intelligence", body: "Real-time performance, allocation and risk across every asset class." },
-            { icon: Gem, title: "Private markets access", body: "Series-stage venture, real assets and structured deals, on request." },
-            { icon: Shield, title: "Discreet by design", body: "Balance privacy toggle, hardware-key sign-in, concierge on standby." },
-          ].map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-border p-6 glass">
-              <div
-                className="grid h-10 w-10 place-items-center rounded-lg"
-                style={{ background: "color-mix(in oklab, var(--gold) 15%, transparent)", color: "var(--gold)" }}
-              >
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="mt-4 font-display text-lg">{title}</div>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </main>
+      <SiteFooter />
     </div>
   );
 }
