@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /verify
+
+Sitemap: https://gf3x.space/sitemap.xml
