@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
 import { Route as IndustriesRouteImport } from './routes/industries'
@@ -25,6 +26,11 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 const TechnologiesRoute = TechnologiesRouteImport.update({
   id: '/technologies',
   path: '/technologies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/sitemap.xml'
     | '/technologies'
     | '/dashboard'
     | '/verify'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/sitemap.xml'
     | '/technologies'
     | '/dashboard'
     | '/verify'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/sitemap.xml'
     | '/technologies'
     | '/_authenticated/dashboard'
     | '/_authenticated/verify'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   IndustriesRoute: typeof IndustriesRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologiesRoute: typeof TechnologiesRoute
 }
 
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/technologies'
       fullPath: '/technologies'
       preLoaderRoute: typeof TechnologiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndustriesRoute: IndustriesRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologiesRoute: TechnologiesRoute,
 }
 export const routeTree = rootRouteImport
