@@ -902,20 +902,6 @@ function ProgressPill({ label, active, tone }: { label: string; active: boolean;
   );
 }
 
-export function statusMeta(status: KycProfile["id_status"]) {
-  switch (status) {
-    case "verified":
-      return { label: "Verified", className: "border border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]" };
-    case "under_review":
-      return { label: "In review", className: "border border-[var(--electric)]/40 bg-[var(--electric)]/10 text-[var(--electric)]" };
-    case "submitted":
-      return { label: "Submitted", className: "border border-[var(--gold)]/40 bg-[var(--gold)]/10 text-[var(--gold)]" };
-    case "rejected":
-      return { label: "Action required", className: "border border-[var(--danger)]/40 bg-[var(--danger)]/10 text-[var(--danger)]" };
-    default:
-      return { label: "Not started", className: "border border-border text-muted-foreground" };
-  }
-}
 
 function cx(...c: (string | false | undefined | null)[]) {
   return c.filter(Boolean).join(" ");
