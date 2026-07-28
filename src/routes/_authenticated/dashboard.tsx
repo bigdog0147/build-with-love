@@ -24,8 +24,7 @@ import {
 } from "lucide-react";
 import { Suspense, useState } from "react";
 import { getDashboard, type Allocation, type Card, type Transaction, type Wallet as WalletT } from "@/lib/dashboard.functions";
-import { computeCompletion, getKyc } from "@/lib/kyc.functions";
-import { statusMeta } from "@/routes/_authenticated/verify";
+import { computeCompletion, getKyc, statusMeta } from "@/lib/kyc.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 const dashboardQuery = queryOptions({

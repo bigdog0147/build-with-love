@@ -22,6 +22,7 @@ import {
   computeCompletion,
   getKyc,
   saveKyc,
+  statusMeta,
   submitKyc,
   type KycDocType,
   type KycProfile,
