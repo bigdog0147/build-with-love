@@ -82,10 +82,13 @@ function DashboardInner() {
   const { data } = useSuspenseQuery(dashboardQuery);
   const [showBalances, setShowBalances] = useState(true);
 
-  // Total net worth in USD equivalent
+  // Total net worth in USD equivalent. Fall back to the wallet's own balance
+  // when fiat_value is missing so non-USD wallets (e.g. EUR) aren't silently
+  // dropped from the headline figure.
   const totalUsd = data.wallets.reduce((sum, w) => {
     if (w.code === "USD") return sum + Number(w.balance);
-    return sum + Number(w.fiat_value ?? 0);
+    const fiat = w.fiat_value == null ? Number(w.balance) : Number(w.fiat_value);
+    return sum + (Number.isFinite(fiat) ? fiat : 0);
   }, 0);
 
   return (
