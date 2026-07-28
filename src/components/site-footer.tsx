@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Diamond } from "lucide-react";
+import logo from "@/assets/g3-logo.png";
 
 export function SiteFooter() {
   return (
@@ -7,13 +7,10 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
-            <div
-              className="grid h-8 w-8 place-items-center rounded-md"
-              style={{ background: "var(--gradient-gold)" }}
-            >
-              <Diamond className="h-4 w-4 text-primary-foreground" />
+            <img src={logo} alt="Gigafactory 3 logo" width={32} height={32} className="h-8 w-8 object-contain" />
+            <div className="font-display text-base tracking-wide">
+              GIGAFACTORY <span className="gold-text">3</span>
             </div>
-            <div className="font-display text-base">Gigafactory 3</div>
           </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             Engineering the future of intelligent industry — AI-powered manufacturing,
