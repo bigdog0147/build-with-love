@@ -7,6 +7,7 @@ import heroImage from "@/assets/g3-hero.jpg";
 import facilityAerial from "@/assets/g3-facility-aerial.jpg.asset.json";
 import productionLine from "@/assets/g3-production-line.jpg.asset.json";
 import { Reveal, CountUp } from "@/components/reveal";
+import { PrefetchOnApproach } from "@/components/prefetch-on-approach";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -159,6 +160,8 @@ function LandingPage() {
       </section>
 
       <section className="relative overflow-hidden border-t border-border/60">
+        <PrefetchOnApproach urls={[facilityAerial.url, productionLine.url]} />
+
         <div
           className="pointer-events-none absolute -left-40 top-1/3 h-[32rem] w-[32rem] rounded-full opacity-20 blur-3xl"
           style={{ background: "var(--gradient-electric)" }}
@@ -197,6 +200,8 @@ function LandingPage() {
                   src={facilityAerial.url}
                   alt="Aerial view of a Gigafactory 3X production campus"
                   loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="h-[22rem] w-full scale-[1.06] object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-[1.1] lg:h-[28rem]"
                   style={{ animation: "kenburns 18s ease-in-out infinite alternate" }}
                 />
@@ -236,6 +241,8 @@ function LandingPage() {
                   src={productionLine.url}
                   alt="Robotic assembly line inside a Gigafactory 3X production hall"
                   loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="h-[22rem] w-full scale-[1.06] object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-[1.1] lg:h-[28rem]"
                   style={{ animation: "kenburns-alt 20s ease-in-out infinite alternate" }}
                 />
