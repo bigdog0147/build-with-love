@@ -160,6 +160,8 @@ function LandingPage() {
       </section>
 
       <section className="relative overflow-hidden border-t border-border/60">
+        <PrefetchOnApproach urls={[facilityAerial.url, productionLine.url]} />
+
         <div
           className="pointer-events-none absolute -left-40 top-1/3 h-[32rem] w-[32rem] rounded-full opacity-20 blur-3xl"
           style={{ background: "var(--gradient-electric)" }}
