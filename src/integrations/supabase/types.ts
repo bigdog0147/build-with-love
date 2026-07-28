@@ -116,6 +116,84 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_profiles: {
+        Row: {
+          country_of_residence: string | null
+          created_at: string
+          current_step: number
+          date_of_birth: string | null
+          doc_back_path: string | null
+          doc_front_path: string | null
+          doc_type: Database["public"]["Enums"]["kyc_doc_type"] | null
+          email_verified: boolean
+          expected_usage: string | null
+          full_legal_name: string | null
+          id_status: Database["public"]["Enums"]["kyc_status"]
+          nationality: string | null
+          phone_number: string | null
+          phone_verified: boolean
+          postal_code: string | null
+          recovery_email: string | null
+          residential_address: string | null
+          selfie_path: string | null
+          source_of_funds: string | null
+          tax_country: string | null
+          two_factor_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_of_residence?: string | null
+          created_at?: string
+          current_step?: number
+          date_of_birth?: string | null
+          doc_back_path?: string | null
+          doc_front_path?: string | null
+          doc_type?: Database["public"]["Enums"]["kyc_doc_type"] | null
+          email_verified?: boolean
+          expected_usage?: string | null
+          full_legal_name?: string | null
+          id_status?: Database["public"]["Enums"]["kyc_status"]
+          nationality?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean
+          postal_code?: string | null
+          recovery_email?: string | null
+          residential_address?: string | null
+          selfie_path?: string | null
+          source_of_funds?: string | null
+          tax_country?: string | null
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_of_residence?: string | null
+          created_at?: string
+          current_step?: number
+          date_of_birth?: string | null
+          doc_back_path?: string | null
+          doc_front_path?: string | null
+          doc_type?: Database["public"]["Enums"]["kyc_doc_type"] | null
+          email_verified?: boolean
+          expected_usage?: string | null
+          full_legal_name?: string | null
+          id_status?: Database["public"]["Enums"]["kyc_status"]
+          nationality?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean
+          postal_code?: string | null
+          recovery_email?: string | null
+          residential_address?: string | null
+          selfie_path?: string | null
+          source_of_funds?: string | null
+          tax_country?: string | null
+          two_factor_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           created_at: string
@@ -313,7 +391,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      kyc_doc_type:
+        | "passport"
+        | "national_id"
+        | "drivers_license"
+        | "residence_permit"
+      kyc_status:
+        | "not_started"
+        | "submitted"
+        | "under_review"
+        | "verified"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -440,6 +528,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      kyc_doc_type: [
+        "passport",
+        "national_id",
+        "drivers_license",
+        "residence_permit",
+      ],
+      kyc_status: [
+        "not_started",
+        "submitted",
+        "under_review",
+        "verified",
+        "rejected",
+      ],
+    },
   },
 } as const
