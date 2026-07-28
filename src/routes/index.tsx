@@ -241,6 +241,8 @@ function LandingPage() {
                   src={productionLine.url}
                   alt="Robotic assembly line inside a Gigafactory 3X production hall"
                   loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="h-[22rem] w-full scale-[1.06] object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-[1.1] lg:h-[28rem]"
                   style={{ animation: "kenburns-alt 20s ease-in-out infinite alternate" }}
                 />
