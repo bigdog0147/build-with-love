@@ -7,6 +7,7 @@ import heroImage from "@/assets/g3-hero.jpg";
 import facilityAerial from "@/assets/g3-facility-aerial.jpg.asset.json";
 import productionLine from "@/assets/g3-production-line.jpg.asset.json";
 import { Reveal, CountUp } from "@/components/reveal";
+import { PrefetchOnApproach } from "@/components/prefetch-on-approach";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
