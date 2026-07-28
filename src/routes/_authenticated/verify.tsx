@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
