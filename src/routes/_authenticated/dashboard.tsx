@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate, Link as RouterLink } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowUpRight,
@@ -18,12 +18,14 @@ import {
   Send,
   Settings,
   Shield,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   Wallet,
 } from "lucide-react";
 import { Suspense, useState } from "react";
 import { getDashboard, type Allocation, type Card, type Transaction, type Wallet as WalletT } from "@/lib/dashboard.functions";
+import { computeCompletion, getKyc, statusMeta } from "@/lib/kyc.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 const dashboardQuery = queryOptions({
@@ -97,6 +99,7 @@ function DashboardInner() {
         <Sidebar />
         <main className="min-w-0 flex-1 space-y-6">
           <TopBar displayName={data.profile.display_name} initials={data.profile.initials} tier={data.profile.tier} />
+          <AccountStatusPanel />
           <HeroPortfolio
             total={totalUsd}
             show={showBalances}
@@ -125,6 +128,7 @@ function Sidebar() {
     { icon: CreditCard, label: "Cards" },
     { icon: Landmark, label: "Transfers" },
     { icon: Gem, label: "Private markets" },
+    { icon: ShieldCheck, label: "Verification", to: "/verify" },
     { icon: Shield, label: "Security" },
     { icon: Settings, label: "Settings" },
   ];
@@ -141,19 +145,28 @@ function Sidebar() {
           </div>
         </div>
         <nav className="space-y-1">
-          {nav.map(({ icon: Icon, label, active }) => (
-            <button
-              key={label}
-              className={classNames(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />}
-            </button>
-          ))}
+          {nav.map(({ icon: Icon, label, active, to }) => {
+            const cls = classNames(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+            );
+            const content = (
+              <>
+                <Icon className="h-4 w-4" />
+                {label}
+                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />}
+              </>
+            );
+            return to ? (
+              <RouterLink key={label} to={to} className={cls}>
+                {content}
+              </RouterLink>
+            ) : (
+              <button key={label} className={cls}>
+                {content}
+              </button>
+            );
+          })}
         </nav>
       </div>
       <div className="rounded-xl border border-border/70 p-4">
@@ -581,3 +594,68 @@ function CardsColumn({ cards }: { cards: Card[] }) {
 
 // Suppress unused-import warning for useServerFn if router preloader tree-shakes it.
 void useServerFn;
+
+function AccountStatusPanel() {
+  const { data: kyc } = useQuery({ queryKey: ["kyc"], queryFn: () => getKyc() });
+  if (!kyc) return null;
+  const pct = computeCompletion(kyc);
+  const status = statusMeta(kyc.id_status);
+  const items = [
+    { label: "Email verified", ok: kyc.email_verified },
+    { label: "Phone verified", ok: kyc.phone_verified },
+    { label: "Identity documents", ok: kyc.id_status !== "not_started" },
+    { label: "Two-factor auth", ok: kyc.two_factor_enabled },
+    { label: "Compliance profile", ok: !!kyc.tax_country && !!kyc.source_of_funds },
+  ];
+  const verified = kyc.id_status === "verified";
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl border border-border p-5"
+      style={{ background: "var(--gradient-surface)" }}
+    >
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: "var(--gradient-gold)" }}>
+          <Shield className="h-5 w-5 text-primary-foreground" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-display text-lg">Account status</div>
+            <span className={"rounded-full px-2 py-0.5 text-[11px] " + status.className}>{status.label}</span>
+            <span className="text-xs text-muted-foreground">Profile completion {pct}%</span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-elevated)]">
+            <div className="h-full rounded-full" style={{ width: pct + "%", background: "var(--gradient-gold)" }} />
+          </div>
+          <ul className="mt-3 flex flex-wrap gap-2 text-[11px]">
+            {items.map((it) => (
+              <li
+                key={it.label}
+                className={
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 " +
+                  (it.ok
+                    ? "border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]"
+                    : "border-border text-muted-foreground")
+                }
+              >
+                <span className={"h-1.5 w-1.5 rounded-full " + (it.ok ? "bg-current" : "bg-muted-foreground/40")} />
+                {it.label}
+              </li>
+            ))}
+          </ul>
+          {!verified && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Complete identity verification to unlock transfers, private markets, and institutional research.
+            </p>
+          )}
+        </div>
+        <RouterLink
+          to="/verify"
+          className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-medium text-primary-foreground"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          {verified ? "Review profile" : "Continue verification"}
+        </RouterLink>
+      </div>
+    </section>
+  );
+}
