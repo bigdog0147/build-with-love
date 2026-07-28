@@ -145,19 +145,28 @@ function Sidebar() {
           </div>
         </div>
         <nav className="space-y-1">
-          {nav.map(({ icon: Icon, label, active }) => (
-            <button
-              key={label}
-              className={classNames(
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />}
-            </button>
-          ))}
+          {nav.map(({ icon: Icon, label, active, to }) => {
+            const cls = classNames(
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+              active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+            );
+            const content = (
+              <>
+                <Icon className="h-4 w-4" />
+                {label}
+                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />}
+              </>
+            );
+            return to ? (
+              <RouterLink key={label} to={to} className={cls}>
+                {content}
+              </RouterLink>
+            ) : (
+              <button key={label} className={cls}>
+                {content}
+              </button>
+            );
+          })}
         </nav>
       </div>
       <div className="rounded-xl border border-border/70 p-4">
