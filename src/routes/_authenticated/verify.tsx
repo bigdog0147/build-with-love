@@ -601,7 +601,7 @@ function StepSecurity({
   saving,
 }: {
   kyc: KycProfile;
-  onSubmit: () => void;
+  onSubmit: (finalPatch?: Partial<KycProfile>) => void;
   onBack: () => void;
   saving: boolean;
 }) {
@@ -679,19 +679,12 @@ function StepSecurity({
         onBack={onBack}
         rightLabel={saving ? "Submitting…" : "Submit for review"}
         rightDisabled={saving}
-        onNext={async () => {
-          // Persist 2FA + recovery selections, then submit for review.
-          await fetch("about:blank").catch(() => {}); // no-op placeholder
-          onSubmit();
-        }}
-        onNextInterceptor={async (proceed) => {
-          // Save selections first via saveKyc through onNext bubbling.
-          proceed();
-        }}
-        extraSaveBefore={{
-          two_factor_enabled: twofa,
-          recovery_email: recovery || null,
-        }}
+        onNext={() =>
+          onSubmit({
+            two_factor_enabled: twofa,
+            recovery_email: recovery || null,
+          })
+        }
       />
     </div>
   );
