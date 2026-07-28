@@ -1,5 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Atom, BatteryCharging, Bot, Cpu, Factory, Gauge, Globe2, Network, Radar, Rocket, ShieldCheck, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  Atom,
+  BatteryCharging,
+  Bot,
+  Cpu,
+  Factory,
+  Gauge,
+  Globe2,
+  Layers,
+  LineChart,
+  Network,
+  Radar,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  SunMedium,
+  Users,
+  Zap,
+} from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GlassCard } from "@/components/section";
@@ -39,7 +58,63 @@ export const Route = createFileRoute("/")({
   },
 });
 
-const TECHS = [
+const HIGHLIGHTS = [
+  {
+    icon: Atom,
+    name: "Artificial Intelligence",
+    desc: "Sovereign foundation models and industrial copilots orchestrating every plant, cell and process in real time.",
+  },
+  {
+    icon: Bot,
+    name: "Robotics & Automation",
+    desc: "Autonomous manipulators, mobile fleets and closed-loop control engineered for lights-out precision at scale.",
+  },
+  {
+    icon: Factory,
+    name: "Advanced Manufacturing",
+    desc: "Vertically integrated giga-scale production — from wafer to finished system — under one digital twin.",
+  },
+  {
+    icon: SunMedium,
+    name: "Clean Energy Systems",
+    desc: "On-site solar, storage and grid intelligence powering carbon-neutral operations across every gigasite.",
+  },
+];
+
+const TECH_PREVIEW = [
+  {
+    icon: Sparkles,
+    kicker: "AI Platform",
+    title: "Industrial intelligence, deployed at the edge.",
+    desc: "A unified stack for perception, planning and generative process design — trained on trillions of factory-floor signals and deployed on sovereign compute.",
+  },
+  {
+    icon: Bot,
+    kicker: "Robotics Division",
+    title: "Autonomous work, engineered end-to-end.",
+    desc: "Manipulators, humanoids and AMR fleets built on a shared control plane. One SDK, one safety model, one operations dashboard.",
+  },
+  {
+    icon: BatteryCharging,
+    kicker: "Battery Systems",
+    title: "High-density cells for a decarbonised grid.",
+    desc: "Solid-state chemistries, integrated packs and gigawatt-scale storage — manufactured in-house, from active material to module.",
+  },
+  {
+    icon: Cpu,
+    kicker: "Semiconductor Manufacturing",
+    title: "Silicon designed for autonomous systems.",
+    desc: "Custom SoCs, power electronics and AI accelerators fabricated in our own advanced-node facilities for latency-critical workloads.",
+  },
+  {
+    icon: Network,
+    kicker: "Autonomous Industrial Networks",
+    title: "A single operating system for global production.",
+    desc: "Every gigasite runs as a node on the G3 Mesh — federated data, unified telemetry, and closed-loop optimisation across continents.",
+  },
+];
+
+const CORE_TECHS = [
   { icon: Atom, name: "Artificial Intelligence" },
   { icon: Bot, name: "Robotics" },
   { icon: Factory, name: "Advanced Manufacturing" },
@@ -55,6 +130,7 @@ function LandingPage() {
     <div className="min-h-screen">
       <SiteHeader />
 
+      {/* ================= HERO ================= */}
       <section className="relative overflow-hidden">
         <img
           src={heroImage}
@@ -72,36 +148,62 @@ function LandingPage() {
           className="pointer-events-none absolute -bottom-40 -left-40 h-[36rem] w-[36rem] rounded-full opacity-25 blur-3xl"
           style={{ background: "var(--gradient-electric)" }}
         />
+        {/* Floating data particles */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span
+              key={i}
+              className="absolute block h-1 w-1 rounded-full"
+              style={{
+                left: `${(i * 137) % 100}%`,
+                top: `${(i * 53) % 100}%`,
+                background: i % 3 === 0 ? "var(--gold)" : "var(--electric)",
+                opacity: 0.35,
+                animation: `float-particle ${8 + (i % 6)}s ease-in-out ${i * 0.4}s infinite alternate`,
+                boxShadow: "0 0 12px currentColor",
+              }}
+            />
+          ))}
+        </div>
 
         <div className="relative mx-auto max-w-7xl px-6 pb-28 pt-20 lg:pt-32">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
-            Intelligent Industry · Global Scale
-          </span>
-          <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[1.03] sm:text-6xl lg:text-7xl">
-            Engineering Tomorrow's <span className="gold-text">Intelligent Infrastructure.</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            Gigafactory 3 develops intelligent manufacturing ecosystems powered by artificial
-            intelligence, robotics, advanced automation, and sustainable energy to shape the
-            future of global industry.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link
-              to="/technologies"
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
-              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-            >
-              Explore Our Technologies
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/investors"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm hover:border-[var(--gold)]/60"
-            >
-              Investor Overview
-            </Link>
-          </div>
+          <Reveal direction="up">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-[var(--surface)] px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
+              Intelligent Industry · Global Scale
+            </span>
+          </Reveal>
+          <Reveal direction="up" delay={80}>
+            <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[1.03] sm:text-6xl lg:text-7xl">
+              Engineering Tomorrow's{" "}
+              <span className="gold-text">Intelligent Infrastructure.</span>
+            </h1>
+          </Reveal>
+          <Reveal direction="up" delay={160}>
+            <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+              Gigafactory 3 builds intelligent manufacturing ecosystems powered by artificial
+              intelligence, advanced robotics, renewable energy and next-generation industrial
+              technology — for governments, enterprises and global industries.
+            </p>
+          </Reveal>
+          <Reveal direction="up" delay={220}>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link
+                to="/technologies"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
+                style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+              >
+                Explore Technology
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/investors"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm transition-colors hover:border-[var(--gold)]/60"
+              >
+                Investor Presentation
+              </Link>
+            </div>
+          </Reveal>
 
           <div className="mt-24 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -109,43 +211,140 @@ function LandingPage() {
               { k: "$4.2B", l: "R&D Committed" },
               { k: "38", l: "Countries Served" },
               { k: "1,900+", l: "Engineers & Scientists" },
-            ].map((s) => (
-              <GlassCard key={s.l}>
-                <div className="font-display text-3xl">{s.k}</div>
-                <div className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  {s.l}
-                </div>
-              </GlassCard>
+            ].map((s, i) => (
+              <Reveal key={s.l} direction="up" delay={i * 90}>
+                <GlassCard>
+                  <div className="font-display text-3xl">{s.k}</div>
+                  <div className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    {s.l}
+                  </div>
+                </GlassCard>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
+      {/* ================= COMPANY HIGHLIGHTS ================= */}
+      <section className="border-t border-border/60 bg-[var(--surface)]/30">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <Reveal direction="up">
+            <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+              What we build
+            </div>
+            <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl lg:text-5xl">
+              Four pillars of the modern industrial stack.
+            </h2>
+          </Reveal>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {HIGHLIGHTS.map(({ icon: Icon, name, desc }, i) => (
+              <Reveal key={name} direction="up" delay={i * 110}>
+                <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-[var(--surface)]/60 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-[var(--gold)]/50 hover:shadow-[var(--shadow-glow)]">
+                  <div
+                    className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-40"
+                    style={{ background: "var(--gradient-gold)" }}
+                  />
+                  <div
+                    className="grid h-11 w-11 place-items-center rounded-xl transition-transform duration-500 group-hover:scale-110"
+                    style={{
+                      background: "color-mix(in oklab, var(--gold) 14%, transparent)",
+                      color: "var(--gold)",
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-5 font-display text-xl leading-tight">{name}</div>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+                  <div className="mt-6 flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] text-[var(--gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                    Learn more <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= PERFORMANCE METRICS ================= */}
+      <section className="relative overflow-hidden border-t border-border/60">
+        <div
+          className="pointer-events-none absolute -right-40 top-0 h-[28rem] w-[28rem] rounded-full opacity-20 blur-3xl"
+          style={{ background: "var(--gradient-gold)" }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6 py-24">
+          <Reveal direction="up">
+            <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+              By the numbers
+            </div>
+            <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl lg:text-5xl">
+              Performance at <span className="gold-text">planetary scale.</span>
+            </h2>
+          </Reveal>
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: Globe2, value: 12, l: "Global Facilities", s: "Across 4 continents" },
+              { icon: Sparkles, value: 480, l: "AI Systems Deployed", s: "Production-grade models" },
+              { icon: Factory, value: 6.4, decimals: 1, suffix: "M", l: "Units / year capacity", s: "Vertically integrated" },
+              { icon: LineChart, value: 320, l: "Active Research Projects", s: "24 international labs" },
+              { icon: Globe2, value: 38, l: "Countries Served", s: "Government & enterprise" },
+              { icon: Users, value: 140, l: "Enterprise Partners", s: "Fortune 500 & sovereign" },
+            ].map(({ icon: Icon, value, decimals, suffix, l, s }, i) => (
+              <Reveal key={l} direction="up" delay={i * 90}>
+                <GlassCard className="group relative overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-[var(--gold)]/50 hover:shadow-[var(--shadow-glow)]">
+                  <div className="flex items-start justify-between">
+                    <div
+                      className="grid h-10 w-10 place-items-center rounded-lg transition-transform duration-500 group-hover:scale-110"
+                      style={{
+                        background: "color-mix(in oklab, var(--gold) 14%, transparent)",
+                        color: "var(--gold)",
+                      }}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <div className="mt-5 font-display text-4xl">
+                    <CountUp value={value} decimals={decimals ?? 0} suffix={suffix ?? ""} />
+                  </div>
+                  <div className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    {l}
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground/80">{s}</div>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CORE TECH GRID ================= */}
       <section className="border-t border-border/60 bg-[var(--surface)]/30">
         <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-            Core Technologies
-          </div>
-          <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">
-            A vertically-integrated platform for intelligent industry.
-          </h2>
+          <Reveal direction="up">
+            <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+              Core Technologies
+            </div>
+            <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl">
+              A vertically-integrated platform for intelligent industry.
+            </h2>
+          </Reveal>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {TECHS.map(({ icon: Icon, name }) => (
-              <div
-                key={name}
-                className="glass rounded-xl border border-border p-5 transition-colors hover:border-[var(--gold)]/50"
-              >
-                <div
-                  className="grid h-10 w-10 place-items-center rounded-lg"
-                  style={{
-                    background: "color-mix(in oklab, var(--gold) 14%, transparent)",
-                    color: "var(--gold)",
-                  }}
-                >
-                  <Icon className="h-5 w-5" />
+            {CORE_TECHS.map(({ icon: Icon, name }, i) => (
+              <Reveal key={name} direction="up" delay={i * 60}>
+                <div className="glass h-full rounded-xl border border-border p-5 transition-all duration-500 hover:-translate-y-0.5 hover:border-[var(--gold)]/50">
+                  <div
+                    className="grid h-10 w-10 place-items-center rounded-lg"
+                    style={{
+                      background: "color-mix(in oklab, var(--gold) 14%, transparent)",
+                      color: "var(--gold)",
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-4 font-display text-lg leading-tight">{name}</div>
                 </div>
-                <div className="mt-4 font-display text-lg leading-tight">{name}</div>
-              </div>
+              </Reveal>
             ))}
           </div>
           <div className="mt-10">
@@ -159,6 +358,7 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ================= GLOBAL OPERATIONS ================= */}
       <section className="relative overflow-hidden border-t border-border/60">
         <PrefetchOnApproach urls={[facilityAerial.url, productionLine.url]} />
 
@@ -181,7 +381,11 @@ function LandingPage() {
                 every line, every plant, engineered to a common standard of precision.
               </p>
             </Reveal>
-            <Reveal direction="left" delay={180} className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            <Reveal
+              direction="left"
+              delay={180}
+              className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
+            >
               <span className="rounded-full border border-border bg-[var(--surface)] px-3 py-1">
                 <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
                 ISO 9001 · IATF 16949
@@ -198,7 +402,7 @@ function LandingPage() {
               <figure className="group relative overflow-hidden rounded-2xl border border-border">
                 <img
                   src={facilityAerial.url}
-                  alt="Aerial view of a Gigafactory 3X production campus"
+                  alt="Aerial view of a Gigafactory 3 production campus"
                   loading="lazy"
                   decoding="async"
                   fetchPriority="low"
@@ -239,7 +443,7 @@ function LandingPage() {
               <figure className="group relative overflow-hidden rounded-2xl border border-border">
                 <img
                   src={productionLine.url}
-                  alt="Robotic assembly line inside a Gigafactory 3X production hall"
+                  alt="Robotic assembly line inside a Gigafactory 3 production hall"
                   loading="lazy"
                   decoding="async"
                   fetchPriority="low"
@@ -257,7 +461,7 @@ function LandingPage() {
                 />
                 <figcaption className="absolute inset-x-0 bottom-0 p-6">
                   <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--electric)]">
-                    Lights-out Cell · G3X-Automate
+                    Lights-out Cell · G3-Automate
                   </div>
                   <div className="mt-2 font-display text-2xl">
                     <CountUp value={99.98} decimals={2} suffix="% first-pass yield" />
@@ -300,26 +504,183 @@ function LandingPage() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
 
-          <Reveal direction="up" delay={120}>
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Link
-                to="/industries"
-                className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
-                style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
-              >
-                Tour our industries
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm transition-colors hover:border-[var(--gold)]/60"
-              >
-                <Zap className="h-4 w-4 text-[var(--electric)]" />
-                Inside Gigafactory 3
-              </Link>
+      {/* ================= TECHNOLOGY PREVIEW ================= */}
+      <section className="border-t border-border/60 bg-[var(--surface)]/30">
+        <div className="mx-auto max-w-7xl px-6 py-24">
+          <Reveal direction="up">
+            <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+              Technology preview
             </div>
+            <h2 className="mt-3 max-w-3xl font-display text-3xl sm:text-4xl lg:text-5xl">
+              A single stack, from silicon to <span className="gold-text">sovereign compute.</span>
+            </h2>
           </Reveal>
+
+          <div className="mt-14 flex flex-col gap-10">
+            {TECH_PREVIEW.map(({ icon: Icon, kicker, title, desc }, i) => {
+              const reverse = i % 2 === 1;
+              return (
+                <Reveal key={kicker} direction="up" delay={40}>
+                  <div
+                    className={`grid items-center gap-8 md:grid-cols-2 ${
+                      reverse ? "md:[&>*:first-child]:order-2" : ""
+                    }`}
+                  >
+                    {/* Illustration panel */}
+                    <div className="group relative h-64 overflow-hidden rounded-2xl border border-border bg-[var(--surface)] md:h-72">
+                      <div
+                        className="absolute inset-0 opacity-70"
+                        style={{
+                          background:
+                            i % 2 === 0
+                              ? "radial-gradient(600px 300px at 20% 20%, color-mix(in oklab, var(--gold) 30%, transparent), transparent 60%), radial-gradient(500px 250px at 80% 80%, color-mix(in oklab, var(--electric) 24%, transparent), transparent 60%)"
+                              : "radial-gradient(600px 300px at 80% 20%, color-mix(in oklab, var(--electric) 26%, transparent), transparent 60%), radial-gradient(500px 250px at 20% 80%, color-mix(in oklab, var(--gold) 24%, transparent), transparent 60%)",
+                        }}
+                      />
+                      {/* Grid pattern */}
+                      <svg
+                        aria-hidden
+                        className="absolute inset-0 h-full w-full opacity-[0.18]"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <defs>
+                          <pattern
+                            id={`grid-${i}`}
+                            width="40"
+                            height="40"
+                            patternUnits="userSpaceOnUse"
+                          >
+                            <path
+                              d="M 40 0 L 0 0 0 40"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="0.5"
+                            />
+                          </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill={`url(#grid-${i})`} />
+                      </svg>
+                      {/* Central glyph */}
+                      <div className="absolute inset-0 grid place-items-center">
+                        <div
+                          className="grid h-24 w-24 place-items-center rounded-2xl border border-border backdrop-blur-md transition-transform duration-700 group-hover:scale-110"
+                          style={{
+                            background:
+                              "color-mix(in oklab, var(--surface-elevated) 60%, transparent)",
+                            boxShadow: "var(--shadow-glow)",
+                            color: "var(--gold)",
+                          }}
+                        >
+                          <Icon className="h-10 w-10" />
+                        </div>
+                      </div>
+                      {/* Scanline */}
+                      <div
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, transparent, var(--electric), transparent)",
+                          animation: "scanline 4.2s linear infinite",
+                        }}
+                      />
+                    </div>
+
+                    {/* Copy */}
+                    <div>
+                      <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-[var(--gold)]">
+                        <Layers className="h-3.5 w-3.5" />
+                        {kicker}
+                      </div>
+                      <h3 className="mt-3 font-display text-2xl leading-tight sm:text-3xl">
+                        {title}
+                      </h3>
+                      <p className="mt-4 max-w-xl text-base text-muted-foreground">{desc}</p>
+                      <Link
+                        to="/technologies"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-4 py-2.5 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--gold)]/60"
+                      >
+                        Learn more <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= INVESTOR BANNER ================= */}
+      <section className="relative overflow-hidden border-t border-border/60">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{
+            background:
+              "radial-gradient(800px 400px at 15% 30%, color-mix(in oklab, var(--gold) 22%, transparent), transparent 60%), radial-gradient(700px 400px at 85% 70%, color-mix(in oklab, var(--electric) 18%, transparent), transparent 60%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6 py-24">
+          <div className="grid gap-10 lg:grid-cols-5 lg:items-center">
+            <Reveal direction="up" className="lg:col-span-3">
+              <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                Investors
+              </div>
+              <h2 className="mt-3 font-display text-3xl leading-[1.1] sm:text-4xl lg:text-5xl">
+                Built for the next decade of{" "}
+                <span className="gold-text">industrial value creation.</span>
+              </h2>
+              <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
+                Gigafactory 3 combines sustainable growth, long-term innovation and disciplined
+                corporate governance — with a global expansion roadmap aligned to the next
+                industrial supercycle.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/investors"
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background: "var(--gradient-gold)",
+                    boxShadow: "var(--shadow-glow)",
+                  }}
+                >
+                  Download Investor Presentation
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm transition-colors hover:border-[var(--gold)]/60"
+                >
+                  Contact Investor Relations
+                </Link>
+              </div>
+            </Reveal>
+
+            <Reveal direction="up" delay={160} className="lg:col-span-2">
+              <div className="grid gap-3">
+                {[
+                  { k: "Sustainable growth", v: "Compounding CAGR across every division" },
+                  { k: "Long-term innovation", v: "$4.2B R&D committed through 2030" },
+                  { k: "Global expansion", v: "12 gigasites · 4 continents · 38 markets" },
+                  { k: "Corporate governance", v: "Independent board · SASB & TCFD aligned" },
+                ].map((row, i) => (
+                  <Reveal key={row.k} direction="left" delay={i * 90}>
+                    <div className="glass flex items-center justify-between gap-4 rounded-xl border border-border p-4 transition-colors hover:border-[var(--gold)]/50">
+                      <div>
+                        <div className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">
+                          {row.k}
+                        </div>
+                        <div className="mt-1 text-sm text-foreground/90">{row.v}</div>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
