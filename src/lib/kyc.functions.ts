@@ -113,3 +113,18 @@ export function computeCompletion(k: KycProfile): number {
   const done = checks.filter(Boolean).length;
   return Math.round((done / checks.length) * 100);
 }
+
+export function statusMeta(status: KycStatus) {
+  switch (status) {
+    case "verified":
+      return { label: "Verified", className: "border border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]" };
+    case "under_review":
+      return { label: "In review", className: "border border-[var(--electric)]/40 bg-[var(--electric)]/10 text-[var(--electric)]" };
+    case "submitted":
+      return { label: "Submitted", className: "border border-[var(--gold)]/40 bg-[var(--gold)]/10 text-[var(--gold)]" };
+    case "rejected":
+      return { label: "Action required", className: "border border-[var(--danger)]/40 bg-[var(--danger)]/10 text-[var(--danger)]" };
+    default:
+      return { label: "Not started", className: "border border-border text-muted-foreground" };
+  }
+}
