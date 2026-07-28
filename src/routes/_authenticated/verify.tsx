@@ -83,9 +83,10 @@ function VerifyInner() {
     }
   }
 
-  async function doSubmit() {
+  async function doSubmit(finalPatch?: Partial<KycProfile>) {
     setSaving(true);
     try {
+      if (finalPatch) await save({ data: finalPatch });
       await submit();
       await qc.invalidateQueries({ queryKey: ["kyc"] });
       setStep(6);
