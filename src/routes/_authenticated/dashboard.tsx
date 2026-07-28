@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate, Link as RouterLink } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowUpRight,
