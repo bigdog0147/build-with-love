@@ -127,6 +127,7 @@ function Sidebar() {
     { icon: CreditCard, label: "Cards" },
     { icon: Landmark, label: "Transfers" },
     { icon: Gem, label: "Private markets" },
+    { icon: ShieldCheck, label: "Verification", to: "/verify" },
     { icon: Shield, label: "Security" },
     { icon: Settings, label: "Settings" },
   ];
