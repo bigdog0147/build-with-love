@@ -200,6 +200,8 @@ function LandingPage() {
                   src={facilityAerial.url}
                   alt="Aerial view of a Gigafactory 3X production campus"
                   loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
                   className="h-[22rem] w-full scale-[1.06] object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-[1.1] lg:h-[28rem]"
                   style={{ animation: "kenburns 18s ease-in-out infinite alternate" }}
                 />
