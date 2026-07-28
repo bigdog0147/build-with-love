@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Diamond, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import logo from "@/assets/g3-logo.png";
 
 const NAV = [
   { to: "/about", label: "About" },
@@ -18,14 +19,17 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-[var(--background)]/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link to="/" className="flex items-center gap-3">
-          <div
-            className="grid h-9 w-9 place-items-center rounded-md"
-            style={{ background: "var(--gradient-gold)" }}
-          >
-            <Diamond className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <img
+            src={logo}
+            alt="Gigafactory 3 logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain"
+          />
           <div>
-            <div className="font-display text-base leading-none">Gigafactory 3</div>
+            <div className="font-display text-base leading-none tracking-wide">
+              GIGAFACTORY <span className="gold-text">3</span>
+            </div>
             <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
               Intelligent Industry
             </div>

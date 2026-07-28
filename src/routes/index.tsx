@@ -3,6 +3,7 @@ import { ArrowRight, Atom, BatteryCharging, Bot, Cpu, Factory, Network, Radar, R
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GlassCard } from "@/components/section";
+import heroImage from "@/assets/g3-hero.jpg";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -43,6 +44,14 @@ function LandingPage() {
       <SiteHeader />
 
       <section className="relative overflow-hidden">
+        <img
+          src={heroImage}
+          alt="AI-powered robotic assembly line inside a Gigafactory 3 facility"
+          width={1920}
+          height={1088}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
         <div
           className="pointer-events-none absolute -right-40 -top-40 h-[36rem] w-[36rem] rounded-full opacity-40 blur-3xl"
           style={{ background: "var(--gradient-gold)" }}
