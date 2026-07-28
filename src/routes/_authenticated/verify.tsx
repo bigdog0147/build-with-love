@@ -769,17 +769,12 @@ function StepNav({
   onNext,
   rightLabel,
   rightDisabled,
-  extraSaveBefore,
-  onNextInterceptor,
 }: {
   onBack?: () => void;
   onNext?: () => void;
   rightLabel: string;
   rightDisabled?: boolean;
-  extraSaveBefore?: Partial<KycProfile>;
-  onNextInterceptor?: (proceed: () => void) => void | Promise<void>;
 }) {
-  // If onNext is not provided, the parent renders a <form onSubmit> and the button is type=submit.
   return (
     <div className="flex items-center justify-between border-t border-border/60 pt-5">
       <button
@@ -792,16 +787,8 @@ function StepNav({
       </button>
       <button
         type={onNext ? "button" : "submit"}
-        onClick={
-          onNext
-            ? async () => {
-                if (onNextInterceptor) await onNextInterceptor(onNext);
-                else onNext();
-              }
-            : undefined
-        }
+        onClick={onNext}
         disabled={rightDisabled}
-        data-extra={extraSaveBefore ? "1" : undefined}
         className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
         style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
       >
