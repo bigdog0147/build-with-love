@@ -157,6 +157,130 @@ function LandingPage() {
         </div>
       </section>
 
+      <section className="relative overflow-hidden border-t border-border/60">
+        <div
+          className="pointer-events-none absolute -left-40 top-1/3 h-[32rem] w-[32rem] rounded-full opacity-20 blur-3xl"
+          style={{ background: "var(--gradient-electric)" }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6 py-24">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <div className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+                Global Operations
+              </div>
+              <h2 className="mt-3 font-display text-3xl leading-[1.1] sm:text-4xl lg:text-5xl">
+                Twelve gigasites. One <span className="gold-text">intelligent network.</span>
+              </h2>
+              <p className="mt-5 text-base text-muted-foreground sm:text-lg">
+                Our facilities operate as a single AI-orchestrated production fabric — synchronised
+                through digital twins, closed-loop robotics and sovereign compute. Every cell,
+                every line, every plant, engineered to a common standard of precision.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              <span className="rounded-full border border-border bg-[var(--surface)] px-3 py-1">
+                <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
+                ISO 9001 · IATF 16949
+              </span>
+              <span className="rounded-full border border-border bg-[var(--surface)] px-3 py-1">
+                <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[var(--electric)]" />
+                Carbon-neutral by 2030
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-5">
+            <figure className="group relative col-span-1 overflow-hidden rounded-2xl border border-border lg:col-span-3">
+              <img
+                src={facilityAerial.url}
+                alt="Aerial view of a Gigafactory 3X production campus"
+                loading="lazy"
+                className="h-[22rem] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] lg:h-[28rem]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+              <figcaption className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-4 p-6">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--gold)]">
+                    Site 07 · Yangtze Delta
+                  </div>
+                  <div className="mt-2 font-display text-2xl sm:text-3xl">
+                    2.1M m² integrated campus
+                  </div>
+                </div>
+                <div className="glass rounded-xl px-4 py-3 text-right">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    Annual output
+                  </div>
+                  <div className="font-display text-xl">1.4M units</div>
+                </div>
+              </figcaption>
+            </figure>
+
+            <figure className="group relative col-span-1 overflow-hidden rounded-2xl border border-border lg:col-span-2">
+              <img
+                src={productionLine.url}
+                alt="Robotic assembly line inside a Gigafactory 3X production hall"
+                loading="lazy"
+                className="h-[22rem] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] lg:h-[28rem]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+              <figcaption className="absolute inset-x-0 bottom-0 p-6">
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[var(--electric)]">
+                  Lights-out Cell · G3X-Automate
+                </div>
+                <div className="mt-2 font-display text-2xl">
+                  99.98% first-pass yield
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: Globe2, k: "12", l: "Gigasites", s: "Across 4 continents" },
+              { icon: Bot, k: "18,400", l: "Robots deployed", s: "Fleet-managed by AI" },
+              { icon: Gauge, k: "27%", l: "Throughput uplift", s: "Vs. prior generation" },
+              { icon: ShieldCheck, k: "100%", l: "Traceable output", s: "Digital-twin verified" },
+            ].map(({ icon: Icon, k, l, s }) => (
+              <GlassCard key={l}>
+                <div
+                  className="grid h-9 w-9 place-items-center rounded-lg"
+                  style={{
+                    background: "color-mix(in oklab, var(--electric) 14%, transparent)",
+                    color: "var(--electric)",
+                  }}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="mt-4 font-display text-3xl">{k}</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {l}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground/80">{s}</div>
+              </GlassCard>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <Link
+              to="/industries"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground"
+              style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+            >
+              Tour our industries
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/about"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-5 py-3 text-sm hover:border-[var(--gold)]/60"
+            >
+              <Zap className="h-4 w-4 text-[var(--electric)]" />
+              Inside Gigafactory 3
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   );
