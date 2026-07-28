@@ -113,3 +113,28 @@
   background-clip: text;
   color: transparent;
 }
+
+@keyframes kenburns {
+  0% { transform: scale(1.06) translate3d(0, 0, 0); }
+  100% { transform: scale(1.14) translate3d(-1.5%, -1%, 0); }
+}
+@keyframes kenburns-alt {
+  0% { transform: scale(1.06) translate3d(0, 0, 0); }
+  100% { transform: scale(1.16) translate3d(1.5%, -1.5%, 0); }
+}
+@keyframes shimmer {
+  0% { transform: translateX(-40%); }
+  100% { transform: translateX(40%); }
+}
+@keyframes scanline {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(28rem); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="kenburns"], [style*="shimmer"], [style*="scanline"] {
+    animation: none !important;
+  }
+}
