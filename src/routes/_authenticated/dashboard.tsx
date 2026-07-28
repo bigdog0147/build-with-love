@@ -97,6 +97,7 @@ function DashboardInner() {
         <Sidebar />
         <main className="min-w-0 flex-1 space-y-6">
           <TopBar displayName={data.profile.display_name} initials={data.profile.initials} tier={data.profile.tier} />
+          <AccountStatusPanel />
           <HeroPortfolio
             total={totalUsd}
             show={showBalances}
