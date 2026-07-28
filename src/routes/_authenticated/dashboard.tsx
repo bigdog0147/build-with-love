@@ -582,3 +582,68 @@ function CardsColumn({ cards }: { cards: Card[] }) {
 
 // Suppress unused-import warning for useServerFn if router preloader tree-shakes it.
 void useServerFn;
+
+function AccountStatusPanel() {
+  const { data: kyc } = useQuery({ queryKey: ["kyc"], queryFn: () => getKyc() });
+  if (!kyc) return null;
+  const pct = computeCompletion(kyc);
+  const status = statusMeta(kyc.id_status);
+  const items = [
+    { label: "Email verified", ok: kyc.email_verified },
+    { label: "Phone verified", ok: kyc.phone_verified },
+    { label: "Identity documents", ok: kyc.id_status !== "not_started" },
+    { label: "Two-factor auth", ok: kyc.two_factor_enabled },
+    { label: "Compliance profile", ok: !!kyc.tax_country && !!kyc.source_of_funds },
+  ];
+  const verified = kyc.id_status === "verified";
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl border border-border p-5"
+      style={{ background: "var(--gradient-surface)" }}
+    >
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: "var(--gradient-gold)" }}>
+          <Shield className="h-5 w-5 text-primary-foreground" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-display text-lg">Account status</div>
+            <span className={"rounded-full px-2 py-0.5 text-[11px] " + status.className}>{status.label}</span>
+            <span className="text-xs text-muted-foreground">Profile completion {pct}%</span>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-elevated)]">
+            <div className="h-full rounded-full" style={{ width: pct + "%", background: "var(--gradient-gold)" }} />
+          </div>
+          <ul className="mt-3 flex flex-wrap gap-2 text-[11px]">
+            {items.map((it) => (
+              <li
+                key={it.label}
+                className={
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 " +
+                  (it.ok
+                    ? "border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]"
+                    : "border-border text-muted-foreground")
+                }
+              >
+                <span className={"h-1.5 w-1.5 rounded-full " + (it.ok ? "bg-current" : "bg-muted-foreground/40")} />
+                {it.label}
+              </li>
+            ))}
+          </ul>
+          {!verified && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Complete identity verification to unlock transfers, private markets, and institutional research.
+            </p>
+          )}
+        </div>
+        <RouterLink
+          to="/verify"
+          className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-medium text-primary-foreground"
+          style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
+        >
+          {verified ? "Review profile" : "Continue verification"}
+        </RouterLink>
+      </div>
+    </section>
+  );
+}
