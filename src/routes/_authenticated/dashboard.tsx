@@ -18,6 +18,7 @@ import {
   Send,
   Settings,
   Shield,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   Wallet,
