@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Atom, BatteryCharging, Bot, Cpu, Factory, Network, Radar, Rocket } from "lucide-react";
+import { ArrowRight, Atom, BatteryCharging, Bot, Cpu, Factory, Gauge, Globe2, Network, Radar, Rocket, ShieldCheck, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { GlassCard } from "@/components/section";
 import heroImage from "@/assets/g3-hero.jpg";
+import facilityAerial from "@/assets/g3-facility-aerial.jpg.asset.json";
+import productionLine from "@/assets/g3-production-line.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
