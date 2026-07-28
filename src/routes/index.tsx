@@ -7,24 +7,32 @@ import heroImage from "@/assets/g3-hero.jpg";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
-  head: () => ({
-    meta: [
-      { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
-      {
-        name: "description",
-        content:
-          "Gigafactory 3 builds AI-powered manufacturing ecosystems — robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
-      },
-      { property: "og:title", content: "Gigafactory 3 — Intelligent Industry" },
-      {
-        property: "og:description",
-        content:
-          "AI-powered manufacturing ecosystems integrating robotics, automation and clean energy to transform global industry.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    const OG_IMAGE =
+      "https://id-preview--bf5c2b79-d0e2-46e2-8025-708d09651abd.lovable.app/og-image.jpg";
+    return {
+      meta: [
+        { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
+        {
+          name: "description",
+          content:
+            "Gigafactory 3 builds AI-powered manufacturing ecosystems — robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
+        },
+        { property: "og:title", content: "Gigafactory 3 — Intelligent Industry" },
+        {
+          property: "og:description",
+          content:
+            "AI-powered manufacturing ecosystems integrating robotics, automation and clean energy to transform global industry.",
+        },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: OG_IMAGE },
+        { property: "og:image:width", content: "1920" },
+        { property: "og:image:height", content: "1088" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: OG_IMAGE },
+      ],
+    };
+  },
 });
 
 const TECHS = [
