@@ -138,6 +138,7 @@ function Sidebar() {
       ? [
           { icon: Share2, label: "Social media", to: "/admin/social" as const },
           { icon: Database, label: "External data", to: "/admin/external" as const },
+          { icon: FileCheck2, label: "KYC documents", to: "/admin/kyc" as const },
         ]
       : []),
     { icon: Shield, label: "Security" },
