@@ -23,7 +23,7 @@ const RESEND_COOLDOWN_SECONDS = parseResetLimitValue(
   RESET_LIMIT_DEFAULTS.RESET_LIMIT_COOLDOWN_SECONDS,
 );
 
-type Mode = "sign-in" | "sign-up" | "otp";
+type Mode = "sign-in" | "otp";
 type OtpStep = "request" | "verify";
 
 function AuthPage() {
@@ -31,7 +31,7 @@ function AuthPage() {
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -48,23 +48,9 @@ function AuthPage() {
     setNotice(null);
     setLoading(true);
     try {
-      if (mode === "sign-up") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { full_name: name || email.split("@")[0] },
-          },
-        });
-        if (error) throw error;
-        setNotice("Check your inbox to confirm your account, then sign in.");
-        setMode("sign-in");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/dashboard", replace: true });
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate({ to: "/dashboard", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
