@@ -249,7 +249,7 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) throw error;
       startCooldown();
@@ -270,7 +270,7 @@ function OtpFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => v
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+        options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) throw error;
       startCooldown();
