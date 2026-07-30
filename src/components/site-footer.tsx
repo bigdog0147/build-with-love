@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/g3-logo.png";
+import { SocialLinksBar } from "@/components/social-links-bar";
 
 export function SiteFooter() {
   return (
@@ -16,6 +17,9 @@ export function SiteFooter() {
             Engineering the future of intelligent industry — AI-powered manufacturing,
             clean energy and digital infrastructure at global scale.
           </p>
+          <div className="mt-6">
+            <SocialLinksBar />
+          </div>
         </div>
 
         <FooterCol

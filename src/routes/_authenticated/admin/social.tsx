@@ -2,19 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Facebook,
-  Github,
-  Instagram,
-  Linkedin,
-  Link as LinkIcon,
-  Plus,
-  Save,
-  Trash2,
-  Twitter,
-  Youtube,
-} from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { SocialIcon } from "@/components/social-icon";
 import {
   listAllSocialLinks,
   saveSocialLink,
@@ -36,26 +25,6 @@ export const Route = createFileRoute("/_authenticated/admin/social")({
     ],
   }),
 });
-
-export function socialIcon(key: string) {
-  const cls = "h-4 w-4";
-  switch (key) {
-    case "linkedin":
-      return <Linkedin className={cls} />;
-    case "twitter":
-      return <Twitter className={cls} />;
-    case "youtube":
-      return <Youtube className={cls} />;
-    case "instagram":
-      return <Instagram className={cls} />;
-    case "facebook":
-      return <Facebook className={cls} />;
-    case "github":
-      return <Github className={cls} />;
-    default:
-      return <LinkIcon className={cls} />;
-  }
-}
 
 function SocialAdminPage() {
   const fetchAdmin = useServerFn(getAdminStatus);
@@ -192,7 +161,7 @@ function SocialEditor({ rows }: { rows: SocialLink[] }) {
         >
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-lg border border-border text-[var(--gold)]">
-              {socialIcon(row.icon_key)}
+              <SocialIcon iconKey={row.icon_key} />
             </span>
             <input
               value={row.label}
