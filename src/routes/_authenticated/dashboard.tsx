@@ -18,6 +18,7 @@ import {
   Send,
   Settings,
   Share2,
+  Database,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -134,7 +135,10 @@ function Sidebar() {
     { icon: Gem, label: "Private markets" },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
     ...(admin.data?.isAdmin
-      ? [{ icon: Share2, label: "Social media", to: "/admin/social" as const }]
+      ? [
+          { icon: Share2, label: "Social media", to: "/admin/social" as const },
+          { icon: Database, label: "External data", to: "/admin/external" as const },
+        ]
       : []),
     { icon: Shield, label: "Security" },
     { icon: Settings, label: "Settings" },
