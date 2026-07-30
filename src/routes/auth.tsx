@@ -112,13 +112,9 @@ function AuthPage() {
             />
           ) : (
             <>
-              <h1 className="font-display text-3xl">
-                {mode === "sign-in" ? "Welcome back" : "Open your account"}
-              </h1>
+              <h1 className="font-display text-3xl">Welcome back</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {mode === "sign-in"
-                  ? "Access your portfolio, wallets and cards."
-                  : "A dashboard tailored to your holdings will be provisioned instantly."}
+                Sign in to access your portfolio, wallets and cards.
               </p>
 
               <button
@@ -136,17 +132,6 @@ function AuthPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-3">
-                {mode === "sign-up" && (
-                  <Field label="Full name">
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Elena Marchetti"
-                      className="w-full rounded-xl border border-border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--gold)]/60"
-                    />
-                  </Field>
-                )}
                 <Field label="Email">
                   <input
                     type="email"
@@ -186,7 +171,7 @@ function AuthPage() {
                   className="w-full rounded-xl py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
                   style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
                 >
-                  {loading ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
+                  {loading ? "Please wait…" : "Sign in"}
                 </button>
               </form>
 
@@ -201,18 +186,9 @@ function AuthPage() {
                 Sign in with email code
               </button>
 
-              <div className="mt-6 text-center text-xs text-muted-foreground">
-                {mode === "sign-in" ? "New here?" : "Already have an account?"}{" "}
-                <button
-                  onClick={() => {
-                    setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-                    setError(null);
-                    setNotice(null);
-                  }}
-                  className="text-[var(--gold)] hover:underline"
-                >
-                  {mode === "sign-in" ? "Open an account" : "Sign in"}
-                </button>
+              <div className="mt-6 rounded-lg border border-border bg-[var(--surface)] px-3 py-2.5 text-center text-xs text-muted-foreground">
+                New registrations are not available yet. Access is currently
+                limited to existing customers.
               </div>
             </>
           )}
