@@ -23,6 +23,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
 
 const TechnologiesRoute = TechnologiesRouteImport.update({
   id: '/technologies',
@@ -93,6 +94,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminSocialRoute =
+  AuthenticatedAdminSocialRouteImport.update({
+    id: '/admin/social',
+    path: '/admin/social',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
+  '/admin/social': typeof AuthenticatedAdminSocialRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +131,7 @@ export interface FileRoutesByTo {
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
+  '/admin/social': typeof AuthenticatedAdminSocialRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,6 +149,7 @@ export interface FileRoutesById {
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
+  '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/dashboard'
     | '/verify'
+    | '/admin/social'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/dashboard'
     | '/verify'
+    | '/admin/social'
   id:
     | '__root__'
     | '/'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/_authenticated/dashboard'
     | '/_authenticated/verify'
+    | '/_authenticated/admin/social'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -305,17 +318,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/social': {
+      id: '/_authenticated/admin/social'
+      path: '/admin/social'
+      fullPath: '/admin/social'
+      preLoaderRoute: typeof AuthenticatedAdminSocialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
+  AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
+  AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
