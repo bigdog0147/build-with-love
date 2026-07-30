@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+export type ExternalRow = Record<string, Json>;
+
 /**
  * Typed RPC surface over the external Supabase project.
  * The secret key never leaves the server: it is loaded inside each handler.
