@@ -121,6 +121,8 @@ function DashboardInner() {
 }
 
 function Sidebar() {
+  const fetchAdmin = useServerFn(getAdminStatus);
+  const admin = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchAdmin({}) });
   const nav = [
     { icon: LayoutDashboard, label: "Overview", active: true },
     { icon: Wallet, label: "Wallets" },
@@ -128,7 +130,10 @@ function Sidebar() {
     { icon: CreditCard, label: "Cards" },
     { icon: Landmark, label: "Transfers" },
     { icon: Gem, label: "Private markets" },
-    { icon: ShieldCheck, label: "Verification", to: "/verify" },
+    { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
+    ...(admin.data?.isAdmin
+      ? [{ icon: Share2, label: "Social media", to: "/admin/social" as const }]
+      : []),
     { icon: Shield, label: "Security" },
     { icon: Settings, label: "Settings" },
   ];
