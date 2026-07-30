@@ -19,6 +19,7 @@ import {
   Settings,
   Share2,
   Database,
+  FileCheck2,
   Shield,
   ShieldCheck,
   Sparkles,
