@@ -17,6 +17,7 @@ import {
   Search,
   Send,
   Settings,
+  Share2,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -26,6 +27,7 @@ import {
 import { Suspense, useState } from "react";
 import { getDashboard, type Allocation, type Card, type Transaction, type Wallet as WalletT } from "@/lib/dashboard.functions";
 import { computeCompletion, getKyc, statusMeta } from "@/lib/kyc.functions";
+import { getAdminStatus } from "@/lib/social.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 const dashboardQuery = queryOptions({
