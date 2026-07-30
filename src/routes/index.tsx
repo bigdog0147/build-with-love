@@ -31,8 +31,7 @@ import { PrefetchOnApproach } from "@/components/prefetch-on-approach";
 export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => {
-    const OG_IMAGE =
-      "https://id-preview--bf5c2b79-d0e2-46e2-8025-708d09651abd.lovable.app/og-image.jpg";
+    const OG_IMAGE = "https://gf3x.space/og-image.jpg";
     return {
       meta: [
         { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
