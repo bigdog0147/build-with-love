@@ -18,6 +18,7 @@ import {
   Send,
   Settings,
   Share2,
+  Database,
   Shield,
   ShieldCheck,
   Sparkles,
