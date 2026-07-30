@@ -54,5 +54,5 @@ export const readExternalTable = createServerFn({ method: "POST" })
       .select("*")
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    return { rows: (rows ?? []) as Record<string, unknown>[] };
+    return { rows: (rows ?? []) as ExternalRow[] };
   });
