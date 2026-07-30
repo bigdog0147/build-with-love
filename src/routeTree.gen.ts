@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
 import { Route as IndustriesRouteImport } from './routes/industries'
@@ -31,6 +32,11 @@ const TechnologiesRoute = TechnologiesRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/register'
     | '/sitemap.xml'
     | '/technologies'
     | '/dashboard'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/register'
     | '/sitemap.xml'
     | '/technologies'
     | '/dashboard'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/register'
     | '/sitemap.xml'
     | '/technologies'
     | '/_authenticated/dashboard'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   IndustriesRoute: typeof IndustriesRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
+  RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologiesRoute: typeof TechnologiesRoute
 }
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -311,9 +331,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndustriesRoute: IndustriesRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
+  RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologiesRoute: TechnologiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
