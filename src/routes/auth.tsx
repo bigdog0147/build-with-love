@@ -187,8 +187,11 @@ function AuthPage() {
               </button>
 
               <div className="mt-6 rounded-lg border border-border bg-[var(--surface)] px-3 py-2.5 text-center text-xs text-muted-foreground">
-                New registrations are not available yet. Access is currently
-                limited to existing customers.
+                New registrations are not available yet.{" "}
+                <Link to="/register" className="text-[var(--gold)] hover:underline">
+                  Request access
+                </Link>{" "}
+                and we'll notify you when onboarding opens.
               </div>
             </>
           )}
