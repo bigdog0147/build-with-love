@@ -16,13 +16,7 @@ export const checkExternalSupabase = createServerFn({ method: "GET" })
     });
     if (!isAdmin) throw new Error("Forbidden");
 
-    const { externalSupabaseAdmin } = await import("./external-supabase.server");
-    const client = externalSupabaseAdmin();
-
     // PostgREST root returns the OpenAPI doc listing exposed tables.
-    const res = await client.rpc("nonexistent_probe_fn").select?.();
-    void res;
-
     const url = process.env.EXT_SUPABASE_URL!;
     const key = process.env.EXT_SUPABASE_SECRET_KEY!;
     const openapi = await fetch(`${url}/rest/v1/`, {
