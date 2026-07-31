@@ -4,8 +4,16 @@ import { Diamond } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { parseResetLimitValue, RESET_LIMIT_DEFAULTS } from "@/lib/reset-limits";
+import {
+  bootstrapSuperAdmin,
+  checkAdminLoginGate,
+  completeLogin,
+  reportLoginFailure,
+} from "@/lib/admin-account.functions";
 
 export const Route = createFileRoute("/auth")({
+  // First-startup provisioning of the Super Administrator (idempotent).
+  loader: () => bootstrapSuperAdmin(),
   component: AuthPage,
   head: () => ({
     meta: [
@@ -14,6 +22,7 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
 });
+
 
 // Cooldown (seconds) between resend attempts. Sourced from
 // RESET_LIMIT_COOLDOWN_SECONDS (with safe fallback to the shared default) so
