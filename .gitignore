@@ -1,3 +1,7 @@
+# Environment files — copy .env.example to .env locally
+.env
+.env.*.local
+
 # Logs
 logs
 *.log

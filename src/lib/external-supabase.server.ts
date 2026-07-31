@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { requireExternalSupabaseEnv } from "./env-validation";
 
 /**
  * Clients for the external Supabase project (qoxnctanpljukzkdeekj).
@@ -18,6 +19,7 @@ function withApiKey(key: string) {
 }
 
 function make(key: string): SupabaseClient {
+  requireExternalSupabaseEnv();
   const url = process.env.EXT_SUPABASE_URL;
   if (!url || !key) {
     throw new Error(

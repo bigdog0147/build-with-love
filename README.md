@@ -125,7 +125,7 @@ Gigafactory 3X is a premium industrial-technology company website and customer d
 
 3. **Set up environment variables**
 
-   Copy `.env` values from your Lovable project settings or use the variables listed in the next section. Do **not** commit secrets.
+   Copy `.env.example` to `.env` and fill in the values from your Lovable project settings. Do **not** commit secrets.
 
 4. **Start the dev server**
 
@@ -145,18 +145,25 @@ Gigafactory 3X is a premium industrial-technology company website and customer d
 
 ## Environment variables
 
-Create a `.env` file in the project root. The following variables are required:
+Create a `.env` file in the project root by copying `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+The following variables are required:
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
 | `SUPABASE_PROJECT_ID` | Primary Lovable Cloud project ID | `goiavkuonwcgfxwblttt` |
 | `SUPABASE_URL` | Primary Supabase API URL | `https://<project-ref>.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Primary anon/public key | `sb_publishable_...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Primary service-role key (server-only) | `sb_secret_...` |
 | `VITE_SUPABASE_PROJECT_ID` | Browser-visible project ID | same as `SUPABASE_PROJECT_ID` |
 | `VITE_SUPABASE_URL` | Browser-visible Supabase URL | same as `SUPABASE_URL` |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser-visible public key | same as `SUPABASE_PUBLISHABLE_KEY` |
 
-Optional variables for the **external backend**:
+Optional variables for the **external backend** (validated at runtime):
 
 | Variable | Purpose |
 |----------|---------|
@@ -171,7 +178,7 @@ Optional app-tuning variables:
 |----------|---------|---------|
 | `VITE_RESET_LIMIT_COOLDOWN_SECONDS` | OTP resend cooldown in seconds | `60` |
 
-> **Security note:** `EXT_SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are server-only and must never be exposed to the browser. Lovable stores these as encrypted secrets; if you deploy outside Lovable, inject them through your hosting provider’s secret manager.
+> **Security note:** `.env` is gitignored. `SUPABASE_SERVICE_ROLE_KEY` and `EXT_SUPABASE_SECRET_KEY` are server-only and must never be exposed to the browser. Lovable stores these as encrypted secrets; if you deploy outside Lovable, inject them through your hosting provider’s secret manager.
 
 ---
 
