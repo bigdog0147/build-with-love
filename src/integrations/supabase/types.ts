@@ -290,6 +290,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          detail: string
+          id: string
+          kind: string
+          read_at: string | null
+          title: string
+          tone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title: string
+          tone?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          title?: string
+          tone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
