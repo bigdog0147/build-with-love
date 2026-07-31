@@ -19,6 +19,7 @@ function withApiKey(key: string) {
 }
 
 function make(key: string): SupabaseClient {
+  requireExternalSupabaseEnv();
   const url = process.env.EXT_SUPABASE_URL;
   if (!url || !key) {
     throw new Error(
