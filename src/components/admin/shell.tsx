@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { ADMIN_NAV, ALL_NAV_ITEMS, navHref, type NavGroup } from "@/lib/admin-nav";
 import { getAdminStatus } from "@/lib/social.functions";
+import { getMyAdminAccount } from "@/lib/admin-account.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { cx, Badge } from "./kit";
 
@@ -203,6 +205,19 @@ export function AdminShell({
   const navigate = useNavigate();
   const fetchAdmin = useServerFn(getAdminStatus);
   const admin = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchAdmin({}), retry: false });
+  const fetchAdminAccount = useServerFn(getMyAdminAccount);
+  const adminAccount = useQuery({
+    queryKey: ["admin-account"],
+    queryFn: () => fetchAdminAccount({}),
+    retry: false,
+  });
+
+  // Force rotation of the initial administrator password before anything else.
+  useEffect(() => {
+    if (adminAccount.data?.must_change_password) {
+      navigate({ to: "/change-password", replace: true });
+    }
+  }, [adminAccount.data?.must_change_password, navigate]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -214,6 +229,7 @@ export function AdminShell({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
 
   if (admin.isSuccess && !admin.data.isAdmin) {
     return (

@@ -29,6 +29,7 @@ import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
@@ -146,6 +147,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChangePasswordRoute =
+  AuthenticatedChangePasswordRouteImport.update({
+    id: '/change-password',
+    path: '/change-password',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
   id: '/cards',
   path: '/cards',
@@ -253,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
+  '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -290,6 +298,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
+  '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -329,6 +338,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
+  '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/technologies'
     | '/cards'
+    | '/change-password'
     | '/dashboard'
     | '/portfolio'
     | '/private-markets'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/technologies'
     | '/cards'
+    | '/change-password'
     | '/dashboard'
     | '/portfolio'
     | '/private-markets'
@@ -443,6 +455,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/technologies'
     | '/_authenticated/cards'
+    | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
     | '/_authenticated/portfolio'
     | '/_authenticated/private-markets'
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/change-password': {
+      id: '/_authenticated/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof AuthenticatedChangePasswordRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/cards': {
       id: '/_authenticated/cards'
       path: '/cards'
@@ -742,6 +762,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
+  AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
@@ -769,6 +790,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
+  AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
@@ -814,13 +836,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

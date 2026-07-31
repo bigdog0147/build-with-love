@@ -4,8 +4,16 @@ import { Diamond } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { parseResetLimitValue, RESET_LIMIT_DEFAULTS } from "@/lib/reset-limits";
+import {
+  bootstrapSuperAdmin,
+  checkAdminLoginGate,
+  completeLogin,
+  reportLoginFailure,
+} from "@/lib/admin-account.functions";
 
 export const Route = createFileRoute("/auth")({
+  // First-startup provisioning of the Super Administrator (idempotent).
+  loader: () => bootstrapSuperAdmin(),
   component: AuthPage,
   head: () => ({
     meta: [
@@ -14,6 +22,7 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
 });
+
 
 // Cooldown (seconds) between resend attempts. Sourced from
 // RESET_LIMIT_COOLDOWN_SECONDS (with safe fallback to the shared default) so
@@ -48,15 +57,41 @@ function AuthPage() {
     setNotice(null);
     setLoading(true);
     try {
+      const gate = await checkAdminLoginGate({ data: { email } });
+      if (!gate.allowed) {
+        setError(
+          gate.retryAfterSeconds > 0
+            ? `${gate.reason} Try again in ${Math.ceil(gate.retryAfterSeconds / 60)} minute(s).`
+            : (gate.reason ?? "Sign-in temporarily unavailable.")
+        );
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      navigate({ to: "/dashboard", replace: true });
+      if (error) {
+        const failure = await reportLoginFailure({
+          data: { email, reason: error.message },
+        });
+        setError(
+          failure.locked
+            ? "Too many failed attempts. This account is locked for 15 minutes."
+            : error.message
+        );
+        return;
+      }
+
+      const result = await completeLogin({ data: undefined });
+      navigate({
+        to: result.mustChangePassword ? "/change-password" : result.isAdmin ? "/admin" : "/dashboard",
+        replace: true,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
+
 
   async function handleGoogle() {
     setError(null);
