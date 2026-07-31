@@ -18,6 +18,8 @@ async function admin() {
   return supabaseAdmin;
 }
 
+export type Row = Record<string, string | number | boolean | null>;
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type CustomerRow = {
@@ -258,11 +260,11 @@ export const listCustomers = createServerFn({ method: "GET" })
 
 export type CustomerDetail = {
   customer: CustomerRow;
-  kyc: Record<string, unknown> | null;
-  wallets: Record<string, unknown>[];
-  cards: Record<string, unknown>[];
-  transactions: Record<string, unknown>[];
-  allocations: Record<string, unknown>[];
+  kyc: Row | null;
+  wallets: Row[];
+  cards: Row[];
+  transactions: Row[];
+  allocations: Row[];
   roles: string[];
   logins: Record<string, unknown>[];
 };
@@ -317,11 +319,11 @@ export const getCustomerDetail = createServerFn({ method: "GET" })
         tx_count: (tx.data ?? []).length,
         risk_score: status === "verified" ? 8 : status === "rejected" ? 82 : 42,
       },
-      kyc: (kyc.data as Record<string, unknown> | null) ?? null,
-      wallets: (wallets.data ?? []) as Record<string, unknown>[],
-      cards: (cards.data ?? []) as Record<string, unknown>[],
-      transactions: (tx.data ?? []) as Record<string, unknown>[],
-      allocations: (alloc.data ?? []) as Record<string, unknown>[],
+      kyc: (kyc.data as Row | null) ?? null,
+      wallets: (wallets.data ?? []) as unknown as Row[],
+      cards: (cards.data ?? []) as unknown as Row[],
+      transactions: (tx.data ?? []) as unknown as Row[],
+      allocations: (alloc.data ?? []) as unknown as Row[],
       roles: (roles.data ?? []).map((r) => r.role as string),
       logins: (logins.data ?? []) as Record<string, unknown>[],
     };
@@ -336,7 +338,7 @@ export const updateCustomer = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context as unknown as Ctx);
     const db = await admin();
-    const patch: Record<string, string> = {};
+    const patch: { tier?: string; membership?: string; role?: string } = {};
     if (data.tier) patch.tier = data.tier.slice(0, 40);
     if (data.membership) patch.membership = data.membership.slice(0, 40);
     if (data.role) patch.role = data.role.slice(0, 60);
@@ -420,11 +422,11 @@ export const listFinance = createServerFn({ method: "GET" })
         status: t.status as string,
       })) as FinanceRow[],
       wallets: (wallets.data ?? []).map((w) => ({
-        ...(w as Record<string, unknown>),
+        ...(w as unknown as Row),
         customer: names.get(w.user_id as string) ?? "Unknown",
       })),
       cards: (cards.data ?? []).map((c) => ({
-        ...(c as Record<string, unknown>),
+        ...(c as unknown as Row),
         customer: names.get(c.user_id as string) ?? "Unknown",
       })),
     };
