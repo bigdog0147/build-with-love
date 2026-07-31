@@ -32,6 +32,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
 import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
@@ -167,6 +168,12 @@ const AuthenticatedPortfolioRoute = AuthenticatedPortfolioRouteImport.update({
   path: '/portfolio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -296,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
@@ -339,6 +347,7 @@ export interface FileRoutesByTo {
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
@@ -384,6 +393,7 @@ export interface FileRoutesById {
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/_authenticated/security': typeof AuthenticatedSecurityRoute
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/change-password'
     | '/dashboard'
+    | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
@@ -472,6 +483,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/change-password'
     | '/dashboard'
+    | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
@@ -516,6 +528,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/notifications'
     | '/_authenticated/portfolio'
     | '/_authenticated/private-markets'
     | '/_authenticated/security'
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortfolioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -864,6 +884,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
   AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
@@ -893,6 +914,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
   AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
