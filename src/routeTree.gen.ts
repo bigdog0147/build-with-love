@@ -37,6 +37,7 @@ import { Route as AuthenticatedAdminOperationsRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminLocalizationRouteImport } from './routes/_authenticated/admin/localization'
 import { Route as AuthenticatedAdminKycRouteImport } from './routes/_authenticated/admin/kyc'
 import { Route as AuthenticatedAdminInvestmentsRouteImport } from './routes/_authenticated/admin/investments'
+import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin/integrations'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin/finance'
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
@@ -189,6 +190,12 @@ const AuthenticatedAdminInvestmentsRoute =
     path: '/admin/investments',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIntegrationsRoute =
+  AuthenticatedAdminIntegrationsRouteImport.update({
+    id: '/admin/integrations',
+    path: '/admin/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFinanceRoute =
   AuthenticatedAdminFinanceRouteImport.update({
     id: '/admin/finance',
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/admin/investments': typeof AuthenticatedAdminInvestmentsRoute
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
@@ -287,6 +295,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/admin/investments': typeof AuthenticatedAdminInvestmentsRoute
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
@@ -324,6 +333,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
   '/_authenticated/admin/investments': typeof AuthenticatedAdminInvestmentsRoute
   '/_authenticated/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/_authenticated/admin/localization': typeof AuthenticatedAdminLocalizationRoute
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/external'
     | '/admin/finance'
+    | '/admin/integrations'
     | '/admin/investments'
     | '/admin/kyc'
     | '/admin/localization'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/external'
     | '/admin/finance'
+    | '/admin/integrations'
     | '/admin/investments'
     | '/admin/kyc'
     | '/admin/localization'
@@ -432,6 +444,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/finance'
+    | '/_authenticated/admin/integrations'
     | '/_authenticated/admin/investments'
     | '/_authenticated/admin/kyc'
     | '/_authenticated/admin/localization'
@@ -655,6 +668,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInvestmentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/integrations': {
+      id: '/_authenticated/admin/integrations'
+      path: '/admin/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AuthenticatedAdminIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/finance': {
       id: '/_authenticated/admin/finance'
       path: '/admin/finance'
@@ -715,6 +735,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
+  AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRoute
   AuthenticatedAdminInvestmentsRoute: typeof AuthenticatedAdminInvestmentsRoute
   AuthenticatedAdminKycRoute: typeof AuthenticatedAdminKycRoute
   AuthenticatedAdminLocalizationRoute: typeof AuthenticatedAdminLocalizationRoute
@@ -740,6 +761,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
+  AuthenticatedAdminIntegrationsRoute: AuthenticatedAdminIntegrationsRoute,
   AuthenticatedAdminInvestmentsRoute: AuthenticatedAdminInvestmentsRoute,
   AuthenticatedAdminKycRoute: AuthenticatedAdminKycRoute,
   AuthenticatedAdminLocalizationRoute: AuthenticatedAdminLocalizationRoute,
