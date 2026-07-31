@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       admin_accounts: {
         Row: {
+          admin_role: string
           created_at: string
           email: string
           email_verified: boolean
@@ -27,12 +28,14 @@ export type Database = {
           locked_until: string | null
           must_change_password: boolean
           permissions: string[]
+          trusted_devices: string[]
           two_factor_enabled: boolean
           two_factor_required: boolean
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_role?: string
           created_at?: string
           email: string
           email_verified?: boolean
@@ -44,12 +47,14 @@ export type Database = {
           locked_until?: string | null
           must_change_password?: boolean
           permissions?: string[]
+          trusted_devices?: string[]
           two_factor_enabled?: boolean
           two_factor_required?: boolean
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_role?: string
           created_at?: string
           email?: string
           email_verified?: boolean
@@ -61,6 +66,7 @@ export type Database = {
           locked_until?: string | null
           must_change_password?: boolean
           permissions?: string[]
+          trusted_devices?: string[]
           two_factor_enabled?: boolean
           two_factor_required?: boolean
           updated_at?: string
