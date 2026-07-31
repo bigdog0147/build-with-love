@@ -57,6 +57,13 @@ function DocumentsPage() {
           ))}
         </ul>
       </div>
+      <div className="flex flex-wrap gap-3">
+      <Link
+        to="/verification-status"
+        className="inline-block rounded-xl border border-border px-4 py-2.5 text-sm hover:border-[var(--gold)]/60"
+      >
+        View review status
+      </Link>
       <Link
         to="/verify"
         className="inline-block rounded-xl px-4 py-2.5 text-sm font-medium text-primary-foreground"
@@ -64,6 +71,7 @@ function DocumentsPage() {
       >
         Manage verification
       </Link>
+      </div>
     </DashShell>
   );
 }

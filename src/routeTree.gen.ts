@@ -27,6 +27,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
+import { Route as AuthenticatedVerificationStatusRouteImport } from './routes/_authenticated/verification-status'
 import { Route as AuthenticatedTransfersRouteImport } from './routes/_authenticated/transfers'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -144,6 +145,12 @@ const AuthenticatedVerifyRoute = AuthenticatedVerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVerificationStatusRoute =
+  AuthenticatedVerificationStatusRouteImport.update({
+    id: '/verification-status',
+    path: '/verification-status',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTransfersRoute = AuthenticatedTransfersRouteImport.update({
   id: '/transfers',
   path: '/transfers',
@@ -323,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/transfers': typeof AuthenticatedTransfersRoute
+  '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -369,6 +377,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/transfers': typeof AuthenticatedTransfersRoute
+  '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -417,6 +426,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
+  '/_authenticated/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/transfers'
+    | '/verification-status'
     | '/verify'
     | '/wallets'
     | '/admin/login'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/transfers'
+    | '/verification-status'
     | '/verify'
     | '/wallets'
     | '/admin/login'
@@ -558,6 +570,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/support'
     | '/_authenticated/transfers'
+    | '/_authenticated/verification-status'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
     | '/admin/login'
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/verify'
       preLoaderRoute: typeof AuthenticatedVerifyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/verification-status': {
+      id: '/_authenticated/verification-status'
+      path: '/verification-status'
+      fullPath: '/verification-status'
+      preLoaderRoute: typeof AuthenticatedVerificationStatusRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/transfers': {
@@ -930,6 +950,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
+  AuthenticatedVerificationStatusRoute: typeof AuthenticatedVerificationStatusRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
@@ -962,6 +983,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
+  AuthenticatedVerificationStatusRoute: AuthenticatedVerificationStatusRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,

@@ -2,6 +2,7 @@ import { Link as RouterLink, useNavigate, useRouterState } from "@tanstack/react
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  BadgeCheck,
   Bell,
   FileText,
   LifeBuoy,
@@ -38,6 +39,7 @@ export function Sidebar() {
     { icon: Landmark, label: "Transfers", to: "/transfers" as const },
     { icon: Gem, label: "Private markets", to: "/private-markets" as const },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
+    { icon: BadgeCheck, label: "Review status", to: "/verification-status" as const },
     { icon: Bell, label: "Notifications", to: "/notifications" as const },
     { icon: FileText, label: "Documents", to: "/documents" as const },
     { icon: LifeBuoy, label: "Support", to: "/support" as const },
@@ -104,6 +106,7 @@ export function MobileNav() {
     { label: "Transfers", to: "/transfers" as const },
     { label: "Private markets", to: "/private-markets" as const },
     { label: "Verification", to: "/verify" as const },
+    { label: "Review status", to: "/verification-status" as const },
     { label: "Notifications", to: "/notifications" as const },
     { label: "Documents", to: "/documents" as const },
     { label: "Support", to: "/support" as const },
