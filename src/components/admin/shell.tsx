@@ -235,13 +235,17 @@ export function AdminShell({
     return (
       <main className="mx-auto grid min-h-screen max-w-md place-items-center px-6 text-center">
         <div>
-          <Lock className="mx-auto h-8 w-8 text-[var(--gold)]" />
-          <h1 className="mt-4 font-display text-2xl">Restricted console</h1>
+          <Lock className="mx-auto h-8 w-8 text-[var(--danger)]" />
+          <h1 className="mt-4 font-display text-3xl">403 Access Denied</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            The GF3X control center is limited to accounts holding the administrator role.
+            The GF3X administration portal is isolated from customer accounts. This session has no
+            administrator privileges and the attempt has been logged.
           </p>
-          <Link to="/dashboard" className="mt-5 inline-block rounded-lg border border-white/12 px-4 py-2 text-sm hover:bg-white/5">
-            Return to your dashboard
+          <Link
+            to="/dashboard"
+            className="mt-5 inline-block rounded-lg border border-white/12 px-4 py-2 text-sm hover:bg-white/5"
+          >
+            Return to your customer dashboard
           </Link>
         </div>
       </main>
@@ -250,8 +254,9 @@ export function AdminShell({
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/admin/login", replace: true });
   }
+
 
   return (
     <div className="min-h-screen">
