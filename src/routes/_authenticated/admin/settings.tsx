@@ -39,7 +39,16 @@ function SettingsPage() {
   const fetchOverview = useServerFn(getAdminOverview);
   const q = useQuery({ queryKey: ["admin-overview"], queryFn: () => fetchOverview({}), retry: false });
 
-  const { values, set, save, saved } = useSettings("admin-general", {
+  const [values, patch] = useSettings<{
+    site_name: string;
+    tagline: string;
+    support_email: string;
+    primary_domain: string;
+    default_currency: string;
+    registration_open: boolean;
+    maintenance_mode: boolean;
+    maintenance_note: string;
+  }>("admin-general", {
     site_name: "Gigafactory 3X",
     tagline: "Engineering the Future of Intelligent Industry",
     support_email: "support@gf3x.space",
@@ -49,6 +58,13 @@ function SettingsPage() {
     maintenance_mode: false,
     maintenance_note: "Settlement services are briefly offline for scheduled maintenance.",
   });
+  const [saved, setSaved] = useState(false);
+  const set = <K extends keyof typeof values>(key: K, v: (typeof values)[K]) => {
+    patch({ [key]: v } as never);
+    setSaved(false);
+  };
+  const save = () => setSaved(true);
+
 
   return (
     <AdminShell
