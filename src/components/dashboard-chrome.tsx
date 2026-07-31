@@ -4,9 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   Bell,
   CreditCard,
-  Database,
   Diamond,
-  FileCheck2,
   Gem,
   Landmark,
   LayoutDashboard,
@@ -14,14 +12,12 @@ import {
   LogOut,
   Search,
   Settings,
-  Share2,
   Shield,
   ShieldCheck,
   Sparkles,
   Wallet,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { getAdminStatus } from "@/lib/social.functions";
 import { getDashboard } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,8 +26,6 @@ export function cx(...c: (string | false | undefined)[]) {
 }
 
 export function Sidebar() {
-  const fetchAdmin = useServerFn(getAdminStatus);
-  const admin = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchAdmin({}) });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const nav = [
@@ -42,13 +36,6 @@ export function Sidebar() {
     { icon: Landmark, label: "Transfers", to: "/transfers" as const },
     { icon: Gem, label: "Private markets", to: "/private-markets" as const },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
-    ...(admin.data?.isAdmin
-      ? [
-          { icon: Share2, label: "Social media", to: "/admin/social" as const },
-          { icon: Database, label: "External data", to: "/admin/external" as const },
-          { icon: FileCheck2, label: "KYC documents", to: "/admin/kyc" as const },
-        ]
-      : []),
     { icon: Shield, label: "Security", to: "/security" as const },
     { icon: Settings, label: "Settings", to: "/settings" as const },
   ];
@@ -146,7 +133,7 @@ export function TopBar() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/login", replace: true });
   }
 
   return (

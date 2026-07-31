@@ -323,12 +323,6 @@ export function AdminShell({
                   <Activity className="h-3 w-3" /> Live
                 </Badge>
               </span>
-              <Link
-                to="/dashboard"
-                className="hidden rounded-lg border border-white/12 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground sm:block"
-              >
-                Client view
-              </Link>
               <button onClick={signOut} aria-label="Sign out" className="rounded-lg border border-white/12 p-2 text-muted-foreground hover:text-foreground">
                 <LogOut className="h-4 w-4" />
               </button>
