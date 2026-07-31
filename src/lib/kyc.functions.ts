@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeCompletion } from "@/lib/kyc-utils";
-import type { KycProfile, KycDocType, KycStatus } from "@/lib/kyc-utils";
+import type { KycProfile } from "@/lib/kyc-utils";
 
 export { computeCompletion, statusMeta } from "@/lib/kyc-utils";
 export type { KycProfile, KycDocType, KycStatus } from "@/lib/kyc-utils";
