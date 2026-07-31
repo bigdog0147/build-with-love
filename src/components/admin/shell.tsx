@@ -89,8 +89,8 @@ function NavTree({ onNavigate }: { onNavigate?: () => void }) {
                   return (
                     <li key={item.label + href}>
                       <Link
-                        to={item.to}
-                        search={item.tab ? { tab: item.tab } : undefined}
+                        to={item.to as never}
+                        search={(item.tab ? { tab: item.tab } : {}) as never}
                         onClick={onNavigate}
                         className={cx(
                           "flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-all duration-200",
@@ -168,7 +168,7 @@ function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void 
             <li key={r.group + r.label}>
               <button
                 onClick={() => {
-                  navigate({ to: r.to, search: r.tab ? { tab: r.tab } : undefined });
+                  navigate({ to: r.to as never, search: (r.tab ? { tab: r.tab } : {}) as never });
                   onClose();
                 }}
                 className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-white/8"
