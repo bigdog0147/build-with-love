@@ -63,7 +63,7 @@ export const getMyAdminAccount = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("admin_accounts")
       .select(
-        "user_id, email, full_name, is_super_admin, permissions, two_factor_enabled, two_factor_required, email_verified, is_active, must_change_password, last_login_at, locked_until",
+        "user_id, email, full_name, is_super_admin, permissions, admin_role, two_factor_enabled, two_factor_required, email_verified, is_active, must_change_password, last_login_at, locked_until",
       )
       .eq("user_id", context.userId)
       .maybeSingle();

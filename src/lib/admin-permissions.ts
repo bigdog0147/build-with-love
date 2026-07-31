@@ -70,6 +70,8 @@ export type AdminAccount = {
   email_verified: boolean;
   is_active: boolean;
   must_change_password: boolean;
+  admin_role: string;
+  trusted_devices?: string[];
   last_login_at: string | null;
   locked_until: string | null;
 };
