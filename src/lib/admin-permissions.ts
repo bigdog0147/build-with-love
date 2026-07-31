@@ -73,3 +73,59 @@ export type AdminAccount = {
   last_login_at: string | null;
   locked_until: string | null;
 };
+
+/** Role-based access control levels for the administration portal. */
+export const ADMIN_ROLES = [
+  "super_admin",
+  "administrator",
+  "finance_manager",
+  "compliance_officer",
+  "support_agent",
+  "moderator",
+  "viewer",
+] as const;
+
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+
+export const ADMIN_ROLE_LABELS: Record<AdminRole, string> = {
+  super_admin: "Super Admin",
+  administrator: "Administrator",
+  finance_manager: "Finance Manager",
+  compliance_officer: "Compliance Officer",
+  support_agent: "Support Agent",
+  moderator: "Moderator",
+  viewer: "Viewer",
+};
+
+/** Default permission grants per role. Super Admin implicitly holds everything. */
+export const ROLE_PERMISSIONS: Record<AdminRole, readonly AdminPermission[]> = {
+  super_admin: ADMIN_PERMISSIONS,
+  administrator: ADMIN_PERMISSIONS.filter((p) => p !== "roles_permissions"),
+  finance_manager: [
+    "dashboard",
+    "investments",
+    "wallet_management",
+    "deposits",
+    "withdrawals",
+    "cards",
+    "loans",
+    "transactions",
+    "reports",
+    "analytics",
+  ],
+  compliance_officer: ["dashboard", "customer_management", "kyc_verification", "audit_logs", "security", "reports"],
+  support_agent: ["dashboard", "customer_management", "notifications", "transactions"],
+  moderator: ["dashboard", "customer_management", "notifications"],
+  viewer: ["dashboard", "reports", "analytics"],
+};
+
+export function roleHasPermission(
+  role: string | null | undefined,
+  permission: AdminPermission,
+  explicit: string[] = [],
+): boolean {
+  if (role === "super_admin") return true;
+  if (explicit.includes(permission)) return true;
+  const grants = ROLE_PERMISSIONS[(role ?? "viewer") as AdminRole];
+  return Boolean(grants?.includes(permission));
+}

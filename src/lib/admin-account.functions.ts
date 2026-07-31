@@ -111,3 +111,51 @@ export const setTwoFactorEnabled = createServerFn({ method: "POST" })
     });
     return { ok: true, enabled: data.enabled };
   });
+
+/** True when the current administrator previously marked this device as trusted. */
+export const checkAdminDeviceTrust = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { deviceId: string }) => ({
+    deviceId: String(input.deviceId ?? "").slice(0, 128),
+  }))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("admin_accounts")
+      .select("trusted_devices")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw error;
+    const devices = (row?.trusted_devices ?? []) as string[];
+    return { trusted: Boolean(data.deviceId) && devices.includes(data.deviceId) };
+  });
+
+/** Adds the current device to the administrator's trusted-device list. */
+export const rememberAdminDevice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { deviceId: string }) => ({
+    deviceId: String(input.deviceId ?? "").slice(0, 128),
+  }))
+  .handler(async ({ data, context }) => {
+    if (!data.deviceId) return { ok: false };
+    const { data: row } = await context.supabase
+      .from("admin_accounts")
+      .select("trusted_devices")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    const devices = new Set(((row?.trusted_devices ?? []) as string[]).slice(-9));
+    devices.add(data.deviceId);
+    const { error } = await context.supabase
+      .from("admin_accounts")
+      .update({ trusted_devices: Array.from(devices) })
+      .eq("user_id", context.userId);
+    if (error) throw error;
+
+    const { writeAuditLog } = await import("./admin-account.server");
+    await writeAuditLog({
+      event_type: "admin_device_trusted",
+      user_id: context.userId,
+      success: true,
+      ...(await requestMeta()),
+    });
+    return { ok: true };
+  });
