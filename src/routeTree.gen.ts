@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
 import { Route as IndustriesRouteImport } from './routes/industries'
@@ -60,6 +61,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
@@ -334,6 +342,7 @@ export interface FileRoutesById {
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
     | '/sitemap.xml'
     | '/technologies'
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
     | '/sitemap.xml'
     | '/technologies'
@@ -451,6 +462,7 @@ export interface FileRouteTypes {
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
     | '/sitemap.xml'
     | '/technologies'
@@ -491,6 +503,7 @@ export interface RootRouteChildren {
   IndustriesRoute: typeof IndustriesRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
+  LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologiesRoute: typeof TechnologiesRoute
@@ -517,6 +530,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -829,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndustriesRoute: IndustriesRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
+  LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologiesRoute: TechnologiesRoute,
@@ -836,13 +857,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
