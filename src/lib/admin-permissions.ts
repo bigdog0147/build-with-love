@@ -49,7 +49,7 @@ export const PERMISSION_LABELS: Record<AdminPermission, string> = {
   system_settings: "System Settings",
 };
 
-export const SUPER_ADMIN_EMAIL = "gigafactory3x@zohomail.com";
+export const SUPER_ADMIN_EMAIL = "gigafactory3x@gmail.com";
 export const SUPER_ADMIN_NAME = "Gigafactory 3X System Administrator";
 
 /** Failed sign-in attempts before the administrator account is locked. */
