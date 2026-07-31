@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { requireExternalSupabaseEnv } from "./env-validation";
 
 /**
  * Clients for the external Supabase project (qoxnctanpljukzkdeekj).
