@@ -128,3 +128,125 @@ export function statusMeta(status: KycStatus) {
       return { label: "Not started", className: "border border-border text-muted-foreground" };
   }
 }
+
+export type KycTimelineStep = {
+  key: string;
+  label: string;
+  detail: string;
+  state: "done" | "current" | "pending" | "failed";
+  at: string | null;
+};
+
+export type KycDocumentSlot = {
+  key: "doc_front_path" | "doc_back_path" | "selfie_path";
+  label: string;
+  path: string | null;
+  required: boolean;
+};
+
+export type KycStatusView = {
+  profile: KycProfile;
+  completion: number;
+  updated_at: string | null;
+  documents: KycDocumentSlot[];
+  timeline: KycTimelineStep[];
+};
+
+/** Read-only status view for the signed-in customer's verification review. */
+export const getKycStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<KycStatusView> => {
+    const { supabase, userId } = context;
+    const { data, error } = await supabase
+      .from("kyc_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+
+    const profile = (data ?? {
+      user_id: userId,
+      id_status: "not_started",
+      current_step: 1,
+      email_verified: false,
+      phone_verified: false,
+      two_factor_enabled: false,
+    }) as KycProfile;
+
+    const status = profile.id_status;
+    const needsBack = profile.doc_type && profile.doc_type !== "passport";
+    const updated_at = (data as { updated_at?: string } | null)?.updated_at ?? null;
+
+    const documents: KycDocumentSlot[] = [
+      { key: "doc_front_path", label: "Identity document — front", path: profile.doc_front_path, required: true },
+      { key: "doc_back_path", label: "Identity document — back", path: profile.doc_back_path, required: Boolean(needsBack) },
+      { key: "selfie_path", label: "Liveness selfie", path: profile.selfie_path, required: false },
+    ];
+
+    const submitted = status !== "not_started";
+    const reviewing = status === "under_review";
+    const decided = status === "verified" || status === "rejected";
+
+    const timeline: KycTimelineStep[] = [
+      {
+        key: "profile",
+        label: "Personal details",
+        detail: profile.full_legal_name ? `Recorded for ${profile.full_legal_name}` : "Awaiting your personal information",
+        state: profile.full_legal_name ? "done" : "current",
+        at: null,
+      },
+      {
+        key: "documents",
+        label: "Documents uploaded",
+        detail: `${documents.filter((d) => d.path).length} of ${documents.filter((d) => d.required).length} required file(s) on file`,
+        state: documents.filter((d) => d.required).every((d) => d.path) ? "done" : profile.full_legal_name ? "current" : "pending",
+        at: null,
+      },
+      {
+        key: "submitted",
+        label: "Submitted for review",
+        detail: submitted ? "Your application reached our compliance queue." : "Submit your application from the verification wizard.",
+        state: submitted ? "done" : "pending",
+        at: submitted ? updated_at : null,
+      },
+      {
+        key: "review",
+        label: "Compliance review",
+        detail: reviewing
+          ? "A compliance officer is reviewing your documents. This usually takes 1–2 business days."
+          : decided
+            ? "Review complete."
+            : "Starts automatically once you submit.",
+        state: decided ? "done" : reviewing ? "current" : "pending",
+        at: reviewing || decided ? updated_at : null,
+      },
+      {
+        key: "decision",
+        label: "Decision",
+        detail:
+          status === "verified"
+            ? "Approved — your account is fully verified."
+            : status === "rejected"
+              ? "We could not verify your documents. Please re-upload clearer images and resubmit."
+              : "Pending review outcome.",
+        state: status === "verified" ? "done" : status === "rejected" ? "failed" : "pending",
+        at: decided ? updated_at : null,
+      },
+    ];
+
+    return { profile, completion: computeCompletion(profile), updated_at, documents, timeline };
+  });
+
+/** Short-lived signed URL for one of the caller's own verification documents. */
+export const getOwnKycDocumentUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { path: string }) => ({ path: String(input.path ?? "") }))
+  .handler(async ({ data, context }): Promise<{ url: string }> => {
+    const { supabase, userId } = context;
+    if (!data.path.startsWith(`${userId}/`)) throw new Error("Not permitted.");
+    const { data: signed, error } = await supabase.storage
+      .from("kyc-documents")
+      .createSignedUrl(data.path, 300);
+    if (error || !signed) throw new Error(error?.message ?? "Could not create link.");
+    return { url: signed.signedUrl };
+  });
