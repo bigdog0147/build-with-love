@@ -266,7 +266,7 @@ export type CustomerDetail = {
   transactions: Row[];
   allocations: Row[];
   roles: string[];
-  logins: Record<string, unknown>[];
+  logins: Row[];
 };
 
 export const getCustomerDetail = createServerFn({ method: "GET" })
@@ -325,7 +325,7 @@ export const getCustomerDetail = createServerFn({ method: "GET" })
       transactions: (tx.data ?? []) as unknown as Row[],
       allocations: (alloc.data ?? []) as unknown as Row[],
       roles: (roles.data ?? []).map((r) => r.role as string),
-      logins: (logins.data ?? []) as Record<string, unknown>[],
+      logins: (logins.data ?? []) as unknown as Row[],
     };
   });
 
