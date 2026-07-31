@@ -125,7 +125,7 @@ Gigafactory 3X is a premium industrial-technology company website and customer d
 
 3. **Set up environment variables**
 
-   Copy `.env` values from your Lovable project settings or use the variables listed in the next section. Do **not** commit secrets.
+   Copy `.env.example` to `.env` and fill in the values from your Lovable project settings. Do **not** commit secrets.
 
 4. **Start the dev server**
 
