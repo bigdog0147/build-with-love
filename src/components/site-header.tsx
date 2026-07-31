@@ -49,7 +49,20 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-3 lg:flex">
+          <Link
+            to="/auth"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            activeProps={{ className: "text-foreground" }}
+          >
+            Sign in
+          </Link>
+          <Link
+            to="/register"
+            className="rounded-lg border border-border bg-[var(--surface-elevated)] px-3 py-2 text-sm font-medium transition-colors hover:border-[var(--gold)]/60"
+          >
+            Register
+          </Link>
           <Link
             to="/investors"
             className="rounded-lg px-4 py-2 text-sm font-medium text-primary-foreground"
@@ -82,6 +95,23 @@ export function SiteHeader() {
                 {n.label}
               </Link>
             ))}
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border/60 pt-3">
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center rounded-lg border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center rounded-lg py-2.5 text-sm font-medium text-primary-foreground"
+                style={{ background: "var(--gradient-gold)" }}
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
       )}
