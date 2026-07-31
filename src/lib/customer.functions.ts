@@ -49,18 +49,20 @@ export type CustomerNotification = {
   detail: string;
   at: string;
   tone: "info" | "success" | "warning";
+  read: boolean;
 };
 
-/** Activity feed derived from verification state, transactions and support tickets. */
+/** Activity feed: automated KYC status notices plus transactions and support tickets. */
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CustomerNotification[]> => {
-    const [kyc, tx, tickets] = await Promise.all([
+    const [alerts, tx, tickets] = await Promise.all([
       context.supabase
-        .from("kyc_profiles")
-        .select("id_status, current_step, updated_at")
+        .from("notifications")
+        .select("id, title, detail, tone, read_at, created_at")
         .eq("user_id", context.userId)
-        .maybeSingle(),
+        .order("created_at", { ascending: false })
+        .limit(20),
       context.supabase
         .from("transactions")
         .select("id, name, kind, amount, currency, status, occurred_at")
@@ -77,17 +79,14 @@ export const listNotifications = createServerFn({ method: "GET" })
 
     const items: CustomerNotification[] = [];
 
-    if (kyc.data) {
-      const status = kyc.data.id_status;
+    for (const a of alerts.data ?? []) {
       items.push({
-        id: `kyc-${status}`,
-        title: `Identity verification — ${status.replace(/_/g, " ")}`,
-        detail:
-          status === "verified"
-            ? "Your identity is verified. All account features are unlocked."
-            : `Verification is at step ${kyc.data.current_step} of 6. Complete it to unlock transfers and cards.`,
-        at: kyc.data.updated_at,
-        tone: status === "verified" ? "success" : "warning",
+        id: `alert-${a.id}`,
+        title: a.title,
+        detail: a.detail,
+        at: a.created_at,
+        tone: (a.tone as CustomerNotification["tone"]) ?? "info",
+        read: Boolean(a.read_at),
       });
     }
 
@@ -98,6 +97,7 @@ export const listNotifications = createServerFn({ method: "GET" })
         detail: `${Number(t.amount).toLocaleString("en-US")} ${t.currency} · ${t.status}`,
         at: t.occurred_at,
         tone: t.status === "Cleared" ? "success" : "info",
+        read: true,
       });
     }
 
@@ -108,11 +108,26 @@ export const listNotifications = createServerFn({ method: "GET" })
         detail: t.subject,
         at: t.created_at,
         tone: "info",
+        read: true,
       });
     }
 
     return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 20);
   });
+
+/** Marks every automated notification for the signed-in customer as read. */
+export const markNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await context.supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .eq("user_id", context.userId)
+      .is("read_at", null);
+    if (error) throw error;
+    return { ok: true };
+  });
+
 
 export type CustomerDocument = {
   key: string;
