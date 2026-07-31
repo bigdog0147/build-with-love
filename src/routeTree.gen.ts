@@ -21,6 +21,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
@@ -86,6 +87,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
+  id: '/wallets',
+  path: '/wallets',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVerifyRoute = AuthenticatedVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
+  '/wallets': typeof AuthenticatedWalletsRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/technologies': typeof TechnologiesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/verify': typeof AuthenticatedVerifyRoute
+  '/wallets': typeof AuthenticatedWalletsRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
+  '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/dashboard'
     | '/verify'
+    | '/wallets'
     | '/admin/external'
     | '/admin/kyc'
     | '/admin/social'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/dashboard'
     | '/verify'
+    | '/wallets'
     | '/admin/external'
     | '/admin/kyc'
     | '/admin/social'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/_authenticated/dashboard'
     | '/_authenticated/verify'
+    | '/_authenticated/wallets'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/kyc'
     | '/_authenticated/admin/social'
@@ -329,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/wallets': {
+      id: '/_authenticated/wallets'
+      path: '/wallets'
+      fullPath: '/wallets'
+      preLoaderRoute: typeof AuthenticatedWalletsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/verify': {
       id: '/_authenticated/verify'
       path: '/verify'
@@ -370,6 +389,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
+  AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminKycRoute: typeof AuthenticatedAdminKycRoute
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
@@ -378,6 +398,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
+  AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminKycRoute: AuthenticatedAdminKycRoute,
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
