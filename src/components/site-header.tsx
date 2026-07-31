@@ -51,7 +51,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <Link
-            to="/auth"
+            to="/login"
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             activeProps={{ className: "text-foreground" }}
           >
@@ -97,7 +97,7 @@ export function SiteHeader() {
             ))}
             <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border/60 pt-3">
               <Link
-                to="/auth"
+                to="/login"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center rounded-lg border border-border bg-[var(--surface-elevated)] py-2.5 text-sm font-medium"
               >
