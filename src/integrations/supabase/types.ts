@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_accounts: {
+        Row: {
+          created_at: string
+          email: string
+          email_verified: boolean
+          failed_login_attempts: number
+          full_name: string
+          is_active: boolean
+          is_super_admin: boolean
+          last_login_at: string | null
+          locked_until: string | null
+          must_change_password: boolean
+          permissions: string[]
+          two_factor_enabled: boolean
+          two_factor_required: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          email_verified?: boolean
+          failed_login_attempts?: number
+          full_name?: string
+          is_active?: boolean
+          is_super_admin?: boolean
+          last_login_at?: string | null
+          locked_until?: string | null
+          must_change_password?: boolean
+          permissions?: string[]
+          two_factor_enabled?: boolean
+          two_factor_required?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          email_verified?: boolean
+          failed_login_attempts?: number
+          full_name?: string
+          is_active?: boolean
+          is_super_admin?: boolean
+          last_login_at?: string | null
+          locked_until?: string | null
+          must_change_password?: boolean
+          permissions?: string[]
+          two_factor_enabled?: boolean
+          two_factor_required?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       allocations: {
         Row: {
           color: string
