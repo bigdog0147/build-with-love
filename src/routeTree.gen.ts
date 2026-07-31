@@ -11,23 +11,30 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
 import { Route as IndustriesRouteImport } from './routes/industries'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedTransfersRouteImport } from './routes/_authenticated/transfers'
+import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
 import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
@@ -42,6 +49,7 @@ import { Route as AuthenticatedAdminInvestmentsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin/integrations'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin/finance'
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
@@ -57,9 +65,19 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvestorsRoute = InvestorsRouteImport.update({
@@ -75,6 +93,11 @@ const InnovationRoute = InnovationRouteImport.update({
 const IndustriesRoute = IndustriesRouteImport.update({
   id: '/industries',
   path: '/industries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -106,6 +129,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
@@ -119,6 +147,11 @@ const AuthenticatedVerifyRoute = AuthenticatedVerifyRouteImport.update({
 const AuthenticatedTransfersRoute = AuthenticatedTransfersRouteImport.update({
   id: '/transfers',
   path: '/transfers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -140,6 +173,17 @@ const AuthenticatedPrivateMarketsRoute =
 const AuthenticatedPortfolioRoute = AuthenticatedPortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -222,6 +266,12 @@ const AuthenticatedAdminExternalRoute =
     path: '/admin/external',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/admin/dashboard',
+    path: '/admin/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCustomersRoute =
   AuthenticatedAdminCustomersRouteImport.update({
     id: '/admin/customers',
@@ -253,25 +303,33 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documents': typeof AuthenticatedDocumentsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -291,25 +349,33 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documents': typeof AuthenticatedDocumentsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -331,25 +397,33 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/_authenticated/security': typeof AuthenticatedSecurityRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
+  '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -371,25 +445,33 @@ export interface FileRouteTypes {
     | '/auth'
     | '/careers'
     | '/contact'
+    | '/forgot-password'
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/technologies'
     | '/cards'
     | '/change-password'
     | '/dashboard'
+    | '/documents'
+    | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
     | '/settings'
+    | '/support'
     | '/transfers'
     | '/verify'
     | '/wallets'
+    | '/admin/login'
     | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
+    | '/admin/dashboard'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -409,25 +491,33 @@ export interface FileRouteTypes {
     | '/auth'
     | '/careers'
     | '/contact'
+    | '/forgot-password'
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/technologies'
     | '/cards'
     | '/change-password'
     | '/dashboard'
+    | '/documents'
+    | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
     | '/settings'
+    | '/support'
     | '/transfers'
     | '/verify'
     | '/wallets'
+    | '/admin/login'
     | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
+    | '/admin/dashboard'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -448,25 +538,33 @@ export interface FileRouteTypes {
     | '/auth'
     | '/careers'
     | '/contact'
+    | '/forgot-password'
     | '/industries'
     | '/innovation'
     | '/investors'
+    | '/login'
     | '/register'
+    | '/reset-password'
     | '/sitemap.xml'
     | '/technologies'
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/documents'
+    | '/_authenticated/notifications'
     | '/_authenticated/portfolio'
     | '/_authenticated/private-markets'
     | '/_authenticated/security'
     | '/_authenticated/settings'
+    | '/_authenticated/support'
     | '/_authenticated/transfers'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
+    | '/admin/login'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/assets'
     | '/_authenticated/admin/customers'
+    | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/finance'
     | '/_authenticated/admin/integrations'
@@ -488,12 +586,16 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   IndustriesRoute: typeof IndustriesRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
+  LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologiesRoute: typeof TechnologiesRoute
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -512,11 +614,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/investors': {
@@ -538,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/industries'
       fullPath: '/industries'
       preLoaderRoute: typeof IndustriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -582,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/wallets': {
       id: '/_authenticated/wallets'
       path: '/wallets'
@@ -601,6 +731,13 @@ declare module '@tanstack/react-router' {
       path: '/transfers'
       fullPath: '/transfers'
       preLoaderRoute: typeof AuthenticatedTransfersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/support': {
+      id: '/_authenticated/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AuthenticatedSupportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -629,6 +766,20 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/portfolio'
       preLoaderRoute: typeof AuthenticatedPortfolioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documents': {
+      id: '/_authenticated/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AuthenticatedDocumentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -729,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExternalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/dashboard': {
+      id: '/_authenticated/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/customers': {
       id: '/_authenticated/admin/customers'
       path: '/admin/customers'
@@ -764,16 +922,20 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
   AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRoute
@@ -792,16 +954,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
   AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
+  AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIntegrationsRoute: AuthenticatedAdminIntegrationsRoute,
@@ -826,12 +992,16 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   IndustriesRoute: IndustriesRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
+  LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologiesRoute: TechnologiesRoute,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

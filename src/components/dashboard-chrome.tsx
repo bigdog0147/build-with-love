@@ -3,10 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bell,
+  FileText,
+  LifeBuoy,
   CreditCard,
-  Database,
   Diamond,
-  FileCheck2,
   Gem,
   Landmark,
   LayoutDashboard,
@@ -14,14 +14,12 @@ import {
   LogOut,
   Search,
   Settings,
-  Share2,
   Shield,
   ShieldCheck,
   Sparkles,
   Wallet,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { getAdminStatus } from "@/lib/social.functions";
 import { getDashboard } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,8 +28,6 @@ export function cx(...c: (string | false | undefined)[]) {
 }
 
 export function Sidebar() {
-  const fetchAdmin = useServerFn(getAdminStatus);
-  const admin = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchAdmin({}) });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const nav = [
@@ -42,13 +38,9 @@ export function Sidebar() {
     { icon: Landmark, label: "Transfers", to: "/transfers" as const },
     { icon: Gem, label: "Private markets", to: "/private-markets" as const },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
-    ...(admin.data?.isAdmin
-      ? [
-          { icon: Share2, label: "Social media", to: "/admin/social" as const },
-          { icon: Database, label: "External data", to: "/admin/external" as const },
-          { icon: FileCheck2, label: "KYC documents", to: "/admin/kyc" as const },
-        ]
-      : []),
+    { icon: Bell, label: "Notifications", to: "/notifications" as const },
+    { icon: FileText, label: "Documents", to: "/documents" as const },
+    { icon: LifeBuoy, label: "Support", to: "/support" as const },
     { icon: Shield, label: "Security", to: "/security" as const },
     { icon: Settings, label: "Settings", to: "/settings" as const },
   ];
@@ -112,6 +104,9 @@ export function MobileNav() {
     { label: "Transfers", to: "/transfers" as const },
     { label: "Private markets", to: "/private-markets" as const },
     { label: "Verification", to: "/verify" as const },
+    { label: "Notifications", to: "/notifications" as const },
+    { label: "Documents", to: "/documents" as const },
+    { label: "Support", to: "/support" as const },
     { label: "Security", to: "/security" as const },
     { label: "Settings", to: "/settings" as const },
   ];
@@ -146,7 +141,7 @@ export function TopBar() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate({ to: "/login", replace: true });
   }
 
   return (
@@ -160,7 +155,7 @@ export function TopBar() {
         />
       </div>
       <RouterLink
-        to="/security"
+        to="/notifications"
         aria-label="Notifications"
         className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground"
       >
