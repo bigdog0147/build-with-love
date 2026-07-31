@@ -15,9 +15,9 @@ const REQUIRED_EXT_VARS = [
 ] as const;
 
 function isNonEmptyString(value: unknown): value is string {
-  const result = typeof value === "string" && value.trim().length > 0 && !value.includes("your-");
-  console.log("isNonEmptyString", { value, result, includesYour: typeof value === "string" ? value.includes("your-") : null });
-  return result;
+  if (typeof value !== "string" || value.trim().length === 0) return false;
+  // Reject obvious copy-pasted placeholders such as "your-project-ref" or "your_project_ref".
+  return !/your[-_]/i.test(value);
 }
 
 function looksLikeSupabaseUrl(value: string): boolean {
