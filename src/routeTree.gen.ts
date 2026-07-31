@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 import { Route as AuthenticatedAdminCustomerIdRouteImport } from './routes/_authenticated/admin/customer.$id'
 
 const TechnologiesRoute = TechnologiesRouteImport.update({
@@ -198,6 +199,12 @@ const AuthenticatedAdminAssetsRoute =
     path: '/admin/assets',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCustomerIdRoute =
   AuthenticatedAdminCustomerIdRouteImport.update({
     id: '/admin/customer/$id',
@@ -226,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
@@ -292,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/transfers'
     | '/verify'
     | '/wallets'
+    | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
     | '/admin/external'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/transfers'
     | '/verify'
     | '/wallets'
+    | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
     | '/admin/external'
@@ -391,6 +403,7 @@ export interface FileRouteTypes {
     | '/_authenticated/transfers'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/assets'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/external'
@@ -630,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAssetsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/customer/$id': {
       id: '/_authenticated/admin/customer/$id'
       path: '/admin/customer/$id'
@@ -650,6 +670,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
@@ -672,6 +693,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
