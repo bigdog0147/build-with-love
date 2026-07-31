@@ -1,36 +1,17 @@
-import { createFileRoute, useNavigate, Link as RouterLink } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
-  Bell,
   CreditCard,
-  Diamond,
   Eye,
   EyeOff,
-  Gem,
-  Landmark,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  Plus,
-  Search,
-  Send,
-  Settings,
-  Share2,
-  Database,
-  FileCheck2,
   Shield,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  Wallet,
 } from "lucide-react";
 import { Suspense, useState } from "react";
 import { getDashboard, type Allocation, type Card, type Transaction, type Wallet as WalletT } from "@/lib/dashboard.functions";
 import { computeCompletion, getKyc, statusMeta } from "@/lib/kyc.functions";
-import { getAdminStatus } from "@/lib/social.functions";
-import { supabase } from "@/integrations/supabase/client";
+import { DashShell, cx as classNames, money } from "@/components/dashboard-chrome";
+import { QuickActions } from "@/components/quick-actions";
 
 const dashboardQuery = queryOptions({
   queryKey: ["dashboard"],
@@ -42,7 +23,9 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — Gigafactory 3" },
-      { name: "description", content: "Your private banking cockpit." },
+      { name: "description", content: "Your private banking cockpit: balances, performance, cards and transfers." },
+      { property: "og:title", content: "Dashboard — Gigafactory 3" },
+      { property: "og:description", content: "Balances, performance, cards and transfers." },
     ],
   }),
   pendingComponent: () => (
@@ -50,31 +33,25 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   ),
 });
 
-// A hand-authored 30-day performance path for the SVG chart.
-const perfPath = [
-  38, 41, 39, 44, 47, 45, 49, 52, 50, 54, 58, 55, 60, 63, 61, 66, 64, 69, 72, 70,
-  74, 78, 75, 80, 83, 81, 86, 88, 92, 96,
-];
+// Hand-authored performance series per timeframe for the SVG chart.
+const PERF_SERIES: Record<string, number[]> = {
+  "1W": [72, 74, 73, 77, 79, 78, 82],
+  "1M": [
+    38, 41, 39, 44, 47, 45, 49, 52, 50, 54, 58, 55, 60, 63, 61, 66, 64, 69, 72, 70,
+    74, 78, 75, 80, 83, 81, 86, 88, 92, 96,
+  ],
+  "3M": [20, 26, 24, 31, 36, 33, 42, 48, 45, 55, 62, 58, 68, 74, 71, 80, 88, 96],
+  "1Y": [10, 18, 15, 26, 34, 30, 41, 52, 47, 60, 72, 68, 79, 88, 96],
+  All: [4, 9, 7, 16, 25, 22, 34, 45, 41, 57, 68, 64, 78, 85, 91, 100],
+};
 
-function money(n: number, currency = "USD", frac?: number) {
-  const isCrypto = currency === "BTC" || currency === "ETH";
-  if (isCrypto || currency === "XAU") {
-    return `${n.toLocaleString("en-US", { maximumFractionDigits: frac ?? (isCrypto ? 4 : 2) })} ${currency}`;
-  }
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: frac ?? 2,
-    }).format(n);
-  } catch {
-    return `${n.toLocaleString("en-US")} ${currency}`;
-  }
-}
-
-function classNames(...c: (string | false | undefined)[]) {
-  return c.filter(Boolean).join(" ");
-}
+const PERF_STATS: Record<string, { ret: string; vol: string; sharpe: string }> = {
+  "1W": { ret: "+2.86%", vol: "4.2%", sharpe: "1.94" },
+  "1M": { ret: "+18.42%", vol: "6.1%", sharpe: "2.31" },
+  "3M": { ret: "+34.10%", vol: "8.4%", sharpe: "2.08" },
+  "1Y": { ret: "+62.75%", vol: "11.9%", sharpe: "1.87" },
+  All: { ret: "+184.20%", vol: "14.3%", sharpe: "1.71" },
+};
 
 function DashboardPage() {
   return (
@@ -98,158 +75,38 @@ function DashboardInner() {
   }, 0);
 
   return (
-    <div className="min-h-screen text-foreground">
-      <div className="mx-auto flex max-w-[1440px] gap-6 px-4 py-6 lg:px-8">
-        <Sidebar />
-        <main className="min-w-0 flex-1 space-y-6">
-          <TopBar displayName={data.profile.display_name} initials={data.profile.initials} tier={data.profile.tier} />
-          <AccountStatusPanel />
-          <HeroPortfolio
-            total={totalUsd}
-            show={showBalances}
-            onToggle={() => setShowBalances((s) => !s)}
-          />
-          <div className="grid gap-6 xl:grid-cols-3">
-            <PerformanceCard />
-            <AllocationCard allocations={data.allocations} />
-          </div>
-          <WalletsGrid wallets={data.wallets} show={showBalances} />
-          <div className="grid gap-6 xl:grid-cols-3">
-            <TransactionsCard transactions={data.transactions} show={showBalances} />
-            <CardsColumn cards={data.cards} />
-          </div>
-        </main>
+    <DashShell>
+      <AccountStatusPanel />
+      <HeroPortfolio
+        total={totalUsd}
+        show={showBalances}
+        wallets={data.wallets}
+        onToggle={() => setShowBalances((s) => !s)}
+      />
+      <div className="grid gap-6 xl:grid-cols-3">
+        <PerformanceCard />
+        <AllocationCard allocations={data.allocations} />
       </div>
-    </div>
+      <WalletsGrid wallets={data.wallets} show={showBalances} />
+      <div className="grid gap-6 xl:grid-cols-3">
+        <TransactionsCard transactions={data.transactions} show={showBalances} />
+        <CardsColumn cards={data.cards} />
+      </div>
+    </DashShell>
   );
 }
 
-function Sidebar() {
-  const fetchAdmin = useServerFn(getAdminStatus);
-  const admin = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchAdmin({}) });
-  const nav = [
-    { icon: LayoutDashboard, label: "Overview", active: true },
-    { icon: Wallet, label: "Wallets" },
-    { icon: LineChart, label: "Portfolio" },
-    { icon: CreditCard, label: "Cards" },
-    { icon: Landmark, label: "Transfers" },
-    { icon: Gem, label: "Private markets" },
-    { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
-    ...(admin.data?.isAdmin
-      ? [
-          { icon: Share2, label: "Social media", to: "/admin/social" as const },
-          { icon: Database, label: "External data", to: "/admin/external" as const },
-          { icon: FileCheck2, label: "KYC documents", to: "/admin/kyc" as const },
-        ]
-      : []),
-    { icon: Shield, label: "Security" },
-    { icon: Settings, label: "Settings" },
-  ];
-  return (
-    <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-60 shrink-0 flex-col justify-between rounded-2xl p-5 lg:flex glass">
-      <div>
-        <div className="mb-8 flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg" style={{ background: "var(--gradient-gold)" }}>
-            <Diamond className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <div className="font-display text-base leading-none">Gigafactory 3</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Private Bank</div>
-          </div>
-        </div>
-        <nav className="space-y-1">
-          {nav.map(({ icon: Icon, label, active, to }) => {
-            const cls = classNames(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-            );
-            const content = (
-              <>
-                <Icon className="h-4 w-4" />
-                {label}
-                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />}
-              </>
-            );
-            return to ? (
-              <RouterLink key={label} to={to} className={cls}>
-                {content}
-              </RouterLink>
-            ) : (
-              <button key={label} className={cls}>
-                {content}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-      <div className="rounded-xl border border-border/70 p-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-[var(--gold)]" />
-          Concierge
-        </div>
-        <div className="mt-1 text-sm">Available 24/7</div>
-        <button className="mt-3 w-full rounded-md bg-foreground/95 px-3 py-1.5 text-xs font-medium text-background">
-          Call your advisor
-        </button>
-      </div>
-    </aside>
-  );
-}
-
-function TopBar({ displayName, initials, tier }: { displayName: string; initials: string; tier: string }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
-
-  return (
-    <div className="flex items-center gap-3">
-      <div className="relative flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          placeholder="Search accounts, holdings, transactions…"
-          className="w-full rounded-xl border border-border bg-[var(--surface)] py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-[var(--gold)]/60"
-        />
-      </div>
-      <button className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground">
-        <Bell className="h-4 w-4" />
-      </button>
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-[var(--surface)] py-1.5 pl-1.5 pr-3">
-        <div
-          className="grid h-8 w-8 place-items-center rounded-lg font-display text-sm text-primary-foreground"
-          style={{ background: "var(--gradient-gold)" }}
-        >
-          {initials}
-        </div>
-        <div className="hidden text-xs leading-tight sm:block">
-          <div className="font-medium">{displayName}</div>
-          <div className="text-muted-foreground">Tier · {tier}</div>
-        </div>
-      </div>
-      <button
-        onClick={signOut}
-        title="Sign out"
-        className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground"
-      >
-        <LogOut className="h-4 w-4" />
-      </button>
-    </div>
-  );
-}
-
-function HeroPortfolio({ total, show, onToggle }: { total: number; show: boolean; onToggle: () => void }) {
-  const actions = [
-    { icon: Send, label: "Transfer" },
-    { icon: Plus, label: "Deposit" },
-    { icon: TrendingUp, label: "Invest" },
-    { icon: CreditCard, label: "New card" },
-  ];
+function HeroPortfolio({
+  total,
+  show,
+  onToggle,
+  wallets,
+}: {
+  total: number;
+  show: boolean;
+  onToggle: () => void;
+  wallets: WalletT[];
+}) {
   return (
     <section
       className="relative overflow-hidden rounded-3xl border border-border p-8"
@@ -283,38 +140,23 @@ function HeroPortfolio({ total, show, onToggle }: { total: number; show: boolean
             <span className="text-muted-foreground">Live across all wallets</span>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {actions.map(({ icon: Icon, label }, i) => (
-            <button
-              key={label}
-              className={classNames(
-                "group flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm transition-all hover:-translate-y-0.5",
-                i === 0 && "text-primary-foreground",
-              )}
-              style={
-                i === 0
-                  ? { background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }
-                  : { background: "color-mix(in oklab, var(--surface-elevated) 80%, transparent)" }
-              }
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </button>
-          ))}
-        </div>
+        <QuickActions wallets={wallets} />
       </div>
     </section>
   );
 }
 
 function PerformanceCard() {
+  const [range, setRange] = useState("1M");
+  const series = PERF_SERIES[range];
+  const stats = PERF_STATS[range];
   const w = 640;
   const h = 220;
-  const max = Math.max(...perfPath);
-  const min = Math.min(...perfPath);
-  const step = w / (perfPath.length - 1);
-  const y = (v: number) => h - ((v - min) / (max - min)) * (h - 20) - 10;
-  const d = perfPath.map((v, i) => `${i === 0 ? "M" : "L"}${i * step},${y(v)}`).join(" ");
+  const max = Math.max(...series);
+  const min = Math.min(...series);
+  const step = w / (series.length - 1);
+  const y = (v: number) => h - ((v - min) / (max - min || 1)) * (h - 20) - 10;
+  const d = series.map((v, i) => `${i === 0 ? "M" : "L"}${i * step},${y(v)}`).join(" ");
   const area = `${d} L${w},${h} L0,${h} Z`;
 
   return (
@@ -322,15 +164,19 @@ function PerformanceCard() {
       <div className="flex items-center justify-between">
         <div>
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Performance</div>
-          <div className="mt-1 font-display text-2xl">Last 30 days</div>
+          <div className="mt-1 font-display text-2xl">
+            {range === "All" ? "All time" : `Last ${range}`}
+          </div>
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-border p-1 text-xs">
-          {["1W", "1M", "3M", "1Y", "All"].map((r, i) => (
+          {Object.keys(PERF_SERIES).map((r) => (
             <button
               key={r}
+              onClick={() => setRange(r)}
+              aria-pressed={range === r}
               className={classNames(
                 "rounded-md px-3 py-1.5 transition-colors",
-                i === 1 ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground",
+                range === r ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
               {r}
@@ -355,9 +201,9 @@ function PerformanceCard() {
         </svg>
       </div>
       <div className="mt-2 grid grid-cols-3 gap-4 text-sm">
-        <Stat label="Return" value="+18.42%" positive />
-        <Stat label="Volatility" value="6.1%" />
-        <Stat label="Sharpe" value="2.31" positive />
+        <Stat label="Return" value={stats.ret} positive />
+        <Stat label="Volatility" value={stats.vol} />
+        <Stat label="Sharpe" value={stats.sharpe} positive />
       </div>
     </div>
   );
@@ -379,8 +225,15 @@ function AllocationCard({ allocations }: { allocations: Allocation[] }) {
   const C = 2 * Math.PI * R;
   return (
     <div className="rounded-2xl border border-border p-6 glass">
-      <div className="text-xs uppercase tracking-widest text-muted-foreground">Allocation</div>
-      <div className="mt-1 font-display text-2xl">Asset mix</div>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">Allocation</div>
+          <div className="mt-1 font-display text-2xl">Asset mix</div>
+        </div>
+        <RouterLink to="/portfolio" className="text-xs text-muted-foreground hover:text-foreground">
+          Details →
+        </RouterLink>
+      </div>
       <div className="mt-6 flex items-center gap-6">
         <svg viewBox="0 0 180 180" className="h-40 w-40 -rotate-90">
           <circle cx="90" cy="90" r={R} stroke="var(--muted)" strokeWidth="18" fill="none" />
@@ -428,7 +281,9 @@ function WalletsGrid({ wallets, show }: { wallets: WalletT[]; show: boolean }) {
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Wallets</div>
           <h2 className="font-display text-xl">Multi-currency holdings</h2>
         </div>
-        <button className="text-xs text-muted-foreground hover:text-foreground">View all →</button>
+        <RouterLink to="/wallets" className="text-xs text-muted-foreground hover:text-foreground">
+          View all →
+        </RouterLink>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {wallets.map((w) => {
@@ -439,7 +294,11 @@ function WalletsGrid({ wallets, show }: { wallets: WalletT[]; show: boolean }) {
           const balance = Number(w.balance);
           const fiat = w.fiat_value == null ? null : Number(w.fiat_value);
           return (
-            <div key={w.id} className="group relative overflow-hidden rounded-2xl border border-border p-5 glass">
+            <RouterLink
+              to="/wallets"
+              key={w.id}
+              className="group relative block overflow-hidden rounded-2xl border border-border p-5 glass transition-transform hover:-translate-y-0.5"
+            >
               <div
                 className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-25 blur-2xl transition-opacity group-hover:opacity-40"
                 style={{ background: tintColor }}
@@ -483,7 +342,7 @@ function WalletsGrid({ wallets, show }: { wallets: WalletT[]; show: boolean }) {
                   </div>
                 )}
               </div>
-            </div>
+            </RouterLink>
           );
         })}
       </div>
@@ -499,7 +358,9 @@ function TransactionsCard({ transactions, show }: { transactions: Transaction[];
           <div className="text-xs uppercase tracking-widest text-muted-foreground">Activity</div>
           <div className="mt-1 font-display text-2xl">Recent transactions</div>
         </div>
-        <button className="text-xs text-muted-foreground hover:text-foreground">View statement →</button>
+        <RouterLink to="/transfers" className="text-xs text-muted-foreground hover:text-foreground">
+          View statement →
+        </RouterLink>
       </div>
       <div className="mt-5 divide-y divide-border/60">
         {transactions.length === 0 && (
@@ -555,13 +416,21 @@ function CardsColumn({ cards }: { cards: Card[] }) {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border p-6 glass">
-        <div className="text-xs uppercase tracking-widest text-muted-foreground">Cards</div>
-        <div className="mt-1 font-display text-2xl">Your metal collection</div>
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">Cards</div>
+            <div className="mt-1 font-display text-2xl">Your metal collection</div>
+          </div>
+          <RouterLink to="/cards" className="text-xs text-muted-foreground hover:text-foreground">
+            Manage →
+          </RouterLink>
+        </div>
         <div className="mt-5 space-y-3">
           {cards.map((c) => (
-            <div
+            <RouterLink
+              to="/cards"
               key={c.id}
-              className="relative overflow-hidden rounded-xl p-4 text-white"
+              className="relative block overflow-hidden rounded-xl p-4 text-white"
               style={{ background: c.gradient, minHeight: 120 }}
             >
               <div className="flex items-start justify-between">
@@ -574,8 +443,9 @@ function CardsColumn({ cards }: { cards: Card[] }) {
               <div className="mt-6 font-mono text-sm tracking-widest opacity-90">
                 •••• •••• •••• {c.last4}
               </div>
-            </div>
+            </RouterLink>
           ))}
+          {cards.length === 0 && <p className="text-sm text-muted-foreground">No cards yet.</p>}
         </div>
       </div>
 
@@ -593,20 +463,18 @@ function CardsColumn({ cards }: { cards: Card[] }) {
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">
             Private-market allocations, custody in Zurich, dedicated advisor. By invitation.
           </p>
-          <button
-            className="mt-4 rounded-xl px-4 py-2 text-xs font-medium text-primary-foreground"
+          <RouterLink
+            to="/private-markets"
+            className="mt-4 inline-block rounded-xl px-4 py-2 text-xs font-medium text-primary-foreground"
             style={{ background: "var(--gradient-gold)", boxShadow: "var(--shadow-glow)" }}
           >
             Request access
-          </button>
+          </RouterLink>
         </div>
       </div>
     </div>
   );
 }
-
-// Suppress unused-import warning for useServerFn if router preloader tree-shakes it.
-void useServerFn;
 
 function AccountStatusPanel() {
   const { data: kyc } = useQuery({ queryKey: ["kyc"], queryFn: () => getKyc() });
