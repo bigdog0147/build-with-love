@@ -24,6 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedTransfersRouteImport } from './routes/_authenticated/transfers'
+import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
@@ -105,6 +106,12 @@ const AuthenticatedTransfersRoute = AuthenticatedTransfersRouteImport.update({
   path: '/transfers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrivateMarketsRoute =
+  AuthenticatedPrivateMarketsRouteImport.update({
+    id: '/private-markets',
+    path: '/private-markets',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPortfolioRoute = AuthenticatedPortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -153,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/cards': typeof AuthenticatedCardsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
+  '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
@@ -175,6 +183,7 @@ export interface FileRoutesByTo {
   '/cards': typeof AuthenticatedCardsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
+  '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
@@ -199,6 +208,7 @@ export interface FileRoutesById {
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
+  '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/dashboard'
     | '/portfolio'
+    | '/private-markets'
     | '/transfers'
     | '/verify'
     | '/wallets'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/cards'
     | '/dashboard'
     | '/portfolio'
+    | '/private-markets'
     | '/transfers'
     | '/verify'
     | '/wallets'
@@ -268,6 +280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cards'
     | '/_authenticated/dashboard'
     | '/_authenticated/portfolio'
+    | '/_authenticated/private-markets'
     | '/_authenticated/transfers'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransfersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/private-markets': {
+      id: '/_authenticated/private-markets'
+      path: '/private-markets'
+      fullPath: '/private-markets'
+      preLoaderRoute: typeof AuthenticatedPrivateMarketsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/portfolio': {
       id: '/_authenticated/portfolio'
       path: '/portfolio'
@@ -447,6 +467,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
+  AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
@@ -459,6 +480,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
+  AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
