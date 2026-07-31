@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bell,
+  FileText,
+  LifeBuoy,
   CreditCard,
   Diamond,
   Gem,
@@ -36,6 +38,9 @@ export function Sidebar() {
     { icon: Landmark, label: "Transfers", to: "/transfers" as const },
     { icon: Gem, label: "Private markets", to: "/private-markets" as const },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
+    { icon: Bell, label: "Notifications", to: "/notifications" as const },
+    { icon: FileText, label: "Documents", to: "/documents" as const },
+    { icon: LifeBuoy, label: "Support", to: "/support" as const },
     { icon: Shield, label: "Security", to: "/security" as const },
     { icon: Settings, label: "Settings", to: "/settings" as const },
   ];
@@ -99,6 +104,9 @@ export function MobileNav() {
     { label: "Transfers", to: "/transfers" as const },
     { label: "Private markets", to: "/private-markets" as const },
     { label: "Verification", to: "/verify" as const },
+    { label: "Notifications", to: "/notifications" as const },
+    { label: "Documents", to: "/documents" as const },
+    { label: "Support", to: "/support" as const },
     { label: "Security", to: "/security" as const },
     { label: "Settings", to: "/settings" as const },
   ];
@@ -147,7 +155,7 @@ export function TopBar() {
         />
       </div>
       <RouterLink
-        to="/security"
+        to="/notifications"
         aria-label="Notifications"
         className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground"
       >
