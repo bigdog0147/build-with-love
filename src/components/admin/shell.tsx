@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { ADMIN_NAV, ALL_NAV_ITEMS, navHref, type NavGroup } from "@/lib/admin-nav";
 import { getAdminStatus } from "@/lib/social.functions";
+import { getMyAdminAccount } from "@/lib/admin-account.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { cx, Badge } from "./kit";
 
