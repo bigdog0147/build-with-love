@@ -32,6 +32,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated/admin/security'
 import { Route as AuthenticatedAdminOperationsRouteImport } from './routes/_authenticated/admin/operations'
 import { Route as AuthenticatedAdminLocalizationRouteImport } from './routes/_authenticated/admin/localization'
@@ -161,6 +162,12 @@ const AuthenticatedAdminSocialRoute =
     path: '/admin/social',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/admin/settings',
+    path: '/admin/settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSecurityRoute =
   AuthenticatedAdminSecurityRouteImport.update({
     id: '/admin/security',
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -339,6 +348,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/_authenticated/admin/operations': typeof AuthenticatedAdminOperationsRoute
   '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -377,6 +387,7 @@ export interface FileRouteTypes {
     | '/admin/localization'
     | '/admin/operations'
     | '/admin/security'
+    | '/admin/settings'
     | '/admin/social'
     | '/admin/'
     | '/admin/customer/$id'
@@ -413,6 +424,7 @@ export interface FileRouteTypes {
     | '/admin/localization'
     | '/admin/operations'
     | '/admin/security'
+    | '/admin/settings'
     | '/admin/social'
     | '/admin'
     | '/admin/customer/$id'
@@ -450,6 +462,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/localization'
     | '/_authenticated/admin/operations'
     | '/_authenticated/admin/security'
+    | '/_authenticated/admin/settings'
     | '/_authenticated/admin/social'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customer/$id'
@@ -633,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSocialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/security': {
       id: '/_authenticated/admin/security'
       path: '/admin/security'
@@ -741,6 +761,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminLocalizationRoute: typeof AuthenticatedAdminLocalizationRoute
   AuthenticatedAdminOperationsRoute: typeof AuthenticatedAdminOperationsRoute
   AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
@@ -767,6 +788,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminLocalizationRoute: AuthenticatedAdminLocalizationRoute,
   AuthenticatedAdminOperationsRoute: AuthenticatedAdminOperationsRoute,
   AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
