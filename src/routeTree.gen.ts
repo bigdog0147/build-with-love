@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
 import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -33,10 +34,12 @@ import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminForgotPasswordRouteImport } from './routes/admin.forgot-password'
+import { Route as AuthenticatedWithdrawalsRouteImport } from './routes/_authenticated/withdrawals'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedVerificationStatusRouteImport } from './routes/_authenticated/verification-status'
 import { Route as AuthenticatedTransfersRouteImport } from './routes/_authenticated/transfers'
+import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
@@ -48,6 +51,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin/withdrawals'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated/admin/security'
@@ -69,6 +73,11 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as AuthenticatedAdminCustomerIdRouteImport } from './routes/_authenticated/admin/customer.$id'
 
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TechnologiesRoute = TechnologiesRouteImport.update({
   id: '/technologies',
   path: '/technologies',
@@ -189,6 +198,12 @@ const AdminForgotPasswordRoute = AdminForgotPasswordRouteImport.update({
   path: '/admin/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWithdrawalsRoute =
+  AuthenticatedWithdrawalsRouteImport.update({
+    id: '/withdrawals',
+    path: '/withdrawals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
@@ -210,6 +225,12 @@ const AuthenticatedTransfersRoute = AuthenticatedTransfersRouteImport.update({
   path: '/transfers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTransactionsRoute =
+  AuthenticatedTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -268,6 +289,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminWithdrawalsRoute =
+  AuthenticatedAdminWithdrawalsRouteImport.update({
+    id: '/admin/withdrawals',
+    path: '/admin/withdrawals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSocialRoute =
   AuthenticatedAdminSocialRouteImport.update({
     id: '/admin/social',
@@ -404,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -414,10 +442,12 @@ export interface FileRoutesByFullPath {
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -440,6 +470,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
+  '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -464,6 +495,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -474,10 +506,12 @@ export interface FileRoutesByTo {
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/support': typeof AuthenticatedSupportRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -500,6 +534,7 @@ export interface FileRoutesByTo {
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
+  '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -526,6 +561,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -536,10 +572,12 @@ export interface FileRoutesById {
   '/_authenticated/security': typeof AuthenticatedSecurityRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
+  '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
   '/_authenticated/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
+  '/_authenticated/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -562,6 +600,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
+  '/_authenticated/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -588,6 +627,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sustainability'
     | '/technologies'
+    | '/verify-email'
     | '/cards'
     | '/change-password'
     | '/dashboard'
@@ -598,10 +638,12 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/support'
+    | '/transactions'
     | '/transfers'
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -624,6 +666,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/social'
+    | '/admin/withdrawals'
     | '/admin/'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -648,6 +691,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sustainability'
     | '/technologies'
+    | '/verify-email'
     | '/cards'
     | '/change-password'
     | '/dashboard'
@@ -658,10 +702,12 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/support'
+    | '/transactions'
     | '/transfers'
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -684,6 +730,7 @@ export interface FileRouteTypes {
     | '/admin/security'
     | '/admin/settings'
     | '/admin/social'
+    | '/admin/withdrawals'
     | '/admin'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -709,6 +756,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sustainability'
     | '/technologies'
+    | '/verify-email'
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
@@ -719,10 +767,12 @@ export interface FileRouteTypes {
     | '/_authenticated/security'
     | '/_authenticated/settings'
     | '/_authenticated/support'
+    | '/_authenticated/transactions'
     | '/_authenticated/transfers'
     | '/_authenticated/verification-status'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
+    | '/_authenticated/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -745,6 +795,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/security'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/social'
+    | '/_authenticated/admin/withdrawals'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -771,6 +822,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SustainabilityRoute: typeof SustainabilityRoute
   TechnologiesRoute: typeof TechnologiesRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
@@ -784,6 +836,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/technologies': {
       id: '/technologies'
       path: '/technologies'
@@ -952,6 +1011,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/withdrawals': {
+      id: '/_authenticated/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/withdrawals'
+      preLoaderRoute: typeof AuthenticatedWithdrawalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/wallets': {
       id: '/_authenticated/wallets'
       path: '/wallets'
@@ -978,6 +1044,13 @@ declare module '@tanstack/react-router' {
       path: '/transfers'
       fullPath: '/transfers'
       preLoaderRoute: typeof AuthenticatedTransfersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/transactions': {
+      id: '/_authenticated/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedTransactionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/support': {
@@ -1055,6 +1128,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/withdrawals': {
+      id: '/_authenticated/admin/withdrawals'
+      path: '/admin/withdrawals'
+      fullPath: '/admin/withdrawals'
+      preLoaderRoute: typeof AuthenticatedAdminWithdrawalsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/social': {
@@ -1211,10 +1291,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
+  AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
   AuthenticatedVerificationStatusRoute: typeof AuthenticatedVerificationStatusRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
+  AuthenticatedWithdrawalsRoute: typeof AuthenticatedWithdrawalsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
@@ -1231,6 +1313,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
+  AuthenticatedAdminWithdrawalsRoute: typeof AuthenticatedAdminWithdrawalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
 }
@@ -1246,10 +1329,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
+  AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
   AuthenticatedVerificationStatusRoute: AuthenticatedVerificationStatusRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
+  AuthenticatedWithdrawalsRoute: AuthenticatedWithdrawalsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
@@ -1266,6 +1351,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
+  AuthenticatedAdminWithdrawalsRoute: AuthenticatedAdminWithdrawalsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
 }
@@ -1292,6 +1378,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SustainabilityRoute: SustainabilityRoute,
   TechnologiesRoute: TechnologiesRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   AdminForgotPasswordRoute: AdminForgotPasswordRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,

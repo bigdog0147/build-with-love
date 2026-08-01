@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   BadgeCheck,
+  Banknote,
+  History,
   Bell,
   FileText,
   LifeBuoy,
@@ -37,6 +39,8 @@ export function Sidebar() {
     { icon: LineChart, label: "Portfolio", to: "/portfolio" as const },
     { icon: CreditCard, label: "Cards", to: "/cards" as const },
     { icon: Landmark, label: "Transfers", to: "/transfers" as const },
+    { icon: Banknote, label: "Withdrawals", to: "/withdrawals" as const },
+    { icon: History, label: "Transactions", to: "/transactions" as const },
     { icon: Gem, label: "Private markets", to: "/private-markets" as const },
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
     { icon: BadgeCheck, label: "Review status", to: "/verification-status" as const },
@@ -104,6 +108,8 @@ export function MobileNav() {
     { label: "Portfolio", to: "/portfolio" as const },
     { label: "Cards", to: "/cards" as const },
     { label: "Transfers", to: "/transfers" as const },
+    { label: "Withdrawals", to: "/withdrawals" as const },
+    { label: "Transactions", to: "/transactions" as const },
     { label: "Private markets", to: "/private-markets" as const },
     { label: "Verification", to: "/verify" as const },
     { label: "Review status", to: "/verification-status" as const },

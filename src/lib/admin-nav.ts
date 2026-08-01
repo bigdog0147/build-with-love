@@ -50,6 +50,11 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: "wallet",
     items: [
       { label: "Deposits", to: "/admin/finance", tab: "deposits" },
+      {
+        label: "Withdrawal Approvals",
+        to: "/admin/withdrawals",
+        keywords: "withdraw payout approve decline pending review hold",
+      },
       { label: "Withdrawals", to: "/admin/finance", tab: "withdrawals" },
       { label: "Transactions", to: "/admin/finance", tab: "transactions" },
       { label: "Fees & Limits", to: "/admin/finance", tab: "limits" },

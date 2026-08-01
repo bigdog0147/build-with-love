@@ -1,6 +1,9 @@
 import type { ComponentType } from 'react'
 import { template as kycStatusTemplate } from './kyc-status'
 import { template as adminPasswordResetTemplate } from './admin-password-reset'
+import { template as withdrawalStatusTemplate } from './withdrawal-status'
+
+
 
 
 export interface TemplateEntry {
@@ -23,5 +26,6 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'kyc-status': kycStatusTemplate,
   'admin-password-reset': adminPasswordResetTemplate,
+  'withdrawal-status': withdrawalStatusTemplate,
 }
 

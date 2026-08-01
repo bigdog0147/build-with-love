@@ -1,54 +1,55 @@
-## Phase 1 — Public Website
+## Phase 2 — Customer Portal
 
-What already exists as public routes (verified): `/`, `/about`, `/technologies`, `/industries`, `/innovation`, `/investors`, `/careers`, `/contact`, `/resources/smart-factory-guide`, plus a shared header/footer and the matte-black + gold identity in `src/components/section.tsx` and `src/styles.css`.
+Most of Phase 2 already ships: registration, login, KYC wizard + status page, dashboard, wallets, investments, deposits, notifications, support tickets and change-password all exist. This plan closes the four real gaps and tightens the portal into one coherent customer experience.
 
-What's missing: Global Infrastructure, Sustainability, News & Press, site search, and the language selector.
+---
 
-### 1. New pages (matte-black / gold, same PageHero + GlassCard system)
+### 1. Withdrawals (new)
 
-- `/infrastructure` — Global Infrastructure: giga-campus map/region grid, facility profiles (production, R&D labs, data/compute, logistics hubs), capacity and footprint metrics, scroll-reveal imagery reusing `Reveal` and `PrefetchOnApproach`.
-- `/sustainability` — clean-energy strategy, decarbonisation roadmap, circular manufacturing, water/waste stewardship, ESG governance, target table with milestone years.
-- `/news` — News & Press index: featured story, filterable list by category (press release, announcement, media coverage), pagination via URL search params.
-- `/news/$slug` — article page with hero image, body, published date, share metadata and `NewsArticle` JSON-LD.
-- `/press` redirects to `/news` (press kit block lives on the news index: brand assets, media contact).
-- `/search` — full search results page.
+**Database** — a `withdrawal_requests` table:
+- wallet reference, amount, currency, destination type (bank / external wallet), destination label + masked details, optional note
+- status: `pending`, `approved`, `rejected`, `cancelled`; reviewer, review note, reviewed timestamp
+- customers can read and create their own rows, and cancel their own while still pending; admins can read all and approve/reject
+- created/updated timestamps with an update trigger, plus the required table grants
 
-Header nav is reorganised so it doesn't overflow: primary items (Company, Technology, Industries, Infrastructure, Sustainability, Investors, News, Careers, Contact) grouped into a compact desktop nav plus the existing mobile sheet; search icon and language selector sit next to the Investor Overview CTA.
+**Customer flow** — new `/withdrawals` page:
+- amount + wallet + destination form, validated client and server side
+- **on submit the amount is held**: the wallet balance is debited immediately and a `Pending` withdrawal transaction is written, so the funds cannot be spent twice
+- blocked with a clear explainer unless identity verification is `verified` (existing KYC status drives this)
+- request list with status chips, timestamps, rejection reasons, and a cancel button for pending requests (cancel returns the held amount and marks the transaction reversed)
 
-Footer gains the new links; `sitemap.xml` and `public/llms.txt` are updated to include them.
+**Admin flow** — new admin module `Admin → Withdrawals`:
+- queue of pending requests with customer, amount, destination and KYC status
+- Approve → transaction flips to `Cleared`, notification + email to the customer
+- Reject (with a required reason) → held amount returns to the wallet, transaction marked reversed, notification + email sent
 
-### 2. News & Press — database + admin editor
+### 2. Email verification (confirm before sign-in)
 
-New table `public.news_posts`: slug, title, excerpt, body (markdown), category, cover image path, author, status (draft/published), published_at, locale, timestamps.
+- Keeps the current behaviour: new accounts must click the emailed confirmation link before they can sign in.
+- New public `/verify-email` page: "check your inbox" state, the address it was sent to, a **resend confirmation** button with a cooldown timer, and aria-live status announcements.
+- Registration redirects there after signup instead of showing an inline message.
+- Login shows a specific, actionable message when sign-in fails because the address is unconfirmed, with a direct link to resend.
 
-Access rules in plain terms:
-- Anyone can read published posts only.
-- Admins can read every post (including drafts) and create, edit and unpublish them.
-- Owner/admin reads go through an authenticated path so drafts are visible in the editor.
+### 3. Transaction history (new full ledger)
 
-Public reads use a public server function with the publishable key (no auth), so `/news` renders during SSR and stays SEO-indexable. Admin CRUD lives at `/admin/news` (registered in `src/lib/admin-nav.ts` under an Editorial/Content group), reusing the existing admin kit components: list with status filters, editor form with slug auto-generation, markdown body, cover upload to a new public `news-media` bucket, preview, publish/unpublish, and delete. A small set of seed posts is inserted so the page is never empty.
+New `/transactions` page:
+- filters for type, status and date range, plus free-text search on the description
+- pagination (server-side, newest first)
+- **CSV export of the currently filtered set**
+- filters live in the URL so a filtered view can be bookmarked and shared
+- dashboard's "Recent transactions" card gets a "View all" link into it
 
-### 3. Site search (public pages + sections)
+### 4. Profile & Security
 
-A static search index built at module level from page titles, section headings and short summaries for every public route, with a lightweight scoring match (title > heading > body keywords). Two surfaces:
-- Command palette (⌘K / search icon) using the existing `components/ui/command.tsx`, keyboard-navigable, grouped by page.
-- `/search?q=` results page with highlighted matches, so results are linkable and crawlable.
+- `/settings` becomes a real profile editor: first/last name, display name, phone, country, organization and interests — all fields the profile already stores but the UI never exposed.
+- `/security` gains a consolidated overview: email-verification state, identity-verification state, two-factor state, password last-changed, and links to change password and to verification.
+- Customer sidebar navigation gains Withdrawals, Transactions and Profile & Security entries so every Phase 2 item is reachable.
 
-News titles are excluded from Phase 1 search (your choice was pages + sections); the index is structured so news can be folded in later.
-
-### 4. Multi-language selector with translated public pages
-
-Lightweight in-house i18n (no new heavy dependency):
-- `src/lib/i18n/` with a `locale` type, dictionaries per language, a `LocaleProvider` + `useT()` hook, and a `?lang=` search-param-driven locale that also persists to `localStorage` so it survives navigation.
-- Locales: **English (default), French, German, Spanish, Arabic, Chinese (Simplified)** — tell me if you want a different set. Arabic sets `dir="rtl"` on the html element and mirrors the layout.
-- All public page copy (hero, section headings, body, nav, footer, CTAs) moves into the dictionaries; components read strings through `useT()` instead of inline literals. Admin/dashboard/auth copy stays English in Phase 1.
-- Selector: a globe dropdown in the header (and footer) listing native language names; changing it updates the URL and re-renders.
-- SEO: each public route emits `hreflang` alternates and a locale-aware `og:locale`; the canonical stays the English URL.
+---
 
 ### Technical notes
 
-- Locale lives in root `validateSearch` so it inherits into every child route and stays SSR-correct — no hydration mismatch from reading `localStorage` during render.
-- `/news` and `/news/$slug` load via `ensureQueryData` + `useSuspenseQuery` against a public (unauthenticated) server function; `$slug` throws `notFound()` for missing/unpublished posts and defines `errorComponent`/`notFoundComponent`.
-- Admin news functions use `requireSupabaseAuth` plus the existing `has_role(auth.uid(),'admin')` gate; nothing admin-only is reachable from a public loader.
-- Every new route defines its own `head()` with unique title, description, og:title/og:description, and og:image only where a real absolute image exists.
-- No changes to existing auth, banking, KYC or email systems.
+- Withdrawal logic lives in a new `src/lib/withdrawals.functions.ts` using `createServerFn` with `requireSupabaseAuth`; admin review functions verify the admin role through the authenticated client before acting. Balance hold/release reuses the existing wallet-adjust and transaction-log helpers in `banking.functions.ts`.
+- Approval/rejection emails reuse the existing branded email template system and retry helper, following the same shape as the KYC decision emails.
+- The transaction ledger reuses the existing CSV builder pattern already unit-tested for email logs, with its own tests for filter/format edge cases.
+- All new customer routes sit under the existing `_authenticated` layout, so they inherit the current auth gate; the verify-email page is public.

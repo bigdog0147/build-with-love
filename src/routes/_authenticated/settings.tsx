@@ -31,14 +31,26 @@ function SettingsPage() {
 
   const [displayName, setDisplayName] = useState("");
   const [initials, setInitials] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [username, setUsername] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name);
       setInitials(profile.initials);
+      setFirstName(profile.first_name ?? "");
+      setLastName(profile.last_name ?? "");
+      setPhone(profile.phone ?? "");
+      setCountry(profile.country ?? "");
+      setOrganization(profile.organization ?? "");
+      setUsername(profile.username ?? "");
     }
-  }, [profile?.display_name, profile?.initials]);
+  }, [profile?.id, profile?.updated_at]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -46,7 +58,16 @@ function SettingsPage() {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: displayName.trim(), initials: initials.trim().slice(0, 3).toUpperCase() })
+      .update({
+        display_name: displayName.trim(),
+        initials: initials.trim().slice(0, 3).toUpperCase(),
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
+        phone: phone.trim() || null,
+        country: country.trim() || null,
+        organization: organization.trim() || null,
+        username: username.trim() || null,
+      })
       .eq("id", profile.id);
     setSaving(false);
     if (error) {
@@ -59,28 +80,95 @@ function SettingsPage() {
 
   return (
     <DashShell>
-      <PageHeading eyebrow="Settings" title="Profile & preferences" sub="How your name appears across the platform." />
-      <form onSubmit={save} className="max-w-md space-y-4 rounded-2xl border border-border p-6 glass">
-        <div>
-          <label className={labelCls} htmlFor="s-name">
-            Display name
-          </label>
-          <input id="s-name" className={inputCls} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
+      <PageHeading
+        eyebrow="Settings"
+        title="Profile & preferences"
+        sub="Your identity details across the platform. Contact and legal-name changes may require re-verification."
+      />
+      <form onSubmit={save} className="max-w-2xl space-y-4 rounded-2xl border border-border p-6 glass">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelCls} htmlFor="s-name">
+              Display name
+            </label>
+            <input
+              id="s-name"
+              className={inputCls}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-initials">
+              Initials
+            </label>
+            <input
+              id="s-initials"
+              className={inputCls}
+              value={initials}
+              maxLength={3}
+              onChange={(e) => setInitials(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-first">
+              First name
+            </label>
+            <input id="s-first" className={inputCls} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-last">
+              Last name
+            </label>
+            <input id="s-last" className={inputCls} value={lastName} onChange={(e) => setLastName(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-username">
+              Username
+            </label>
+            <input
+              id="s-username"
+              className={inputCls}
+              value={username}
+              maxLength={40}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-phone">
+              Phone
+            </label>
+            <input
+              id="s-phone"
+              type="tel"
+              className={inputCls}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-country">
+              Country of residence
+            </label>
+            <input id="s-country" className={inputCls} value={country} onChange={(e) => setCountry(e.target.value)} />
+          </div>
+          <div>
+            <label className={labelCls} htmlFor="s-org">
+              Organization
+            </label>
+            <input
+              id="s-org"
+              className={inputCls}
+              value={organization}
+              onChange={(e) => setOrganization(e.target.value)}
+            />
+          </div>
         </div>
-        <div>
-          <label className={labelCls} htmlFor="s-initials">
-            Initials
-          </label>
-          <input
-            id="s-initials"
-            className={inputCls}
-            value={initials}
-            maxLength={3}
-            onChange={(e) => setInitials(e.target.value)}
-            required
-          />
+        <div className="text-xs text-muted-foreground">
+          Tier · {profile?.tier ?? "—"} · Membership · {profile?.membership ?? "—"}
         </div>
-        <div className="text-xs text-muted-foreground">Tier · {profile?.tier ?? "—"}</div>
         <button
           type="submit"
           disabled={saving}

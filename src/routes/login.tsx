@@ -38,6 +38,7 @@ function CustomerLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unconfirmed, setUnconfirmed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -62,7 +63,13 @@ function CustomerLogin() {
 
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
+        const unconfirmed = /confirm/i.test(signInError.message);
         const failure = await reportLoginFailure({ data: { email, reason: signInError.message } });
+        if (unconfirmed) {
+          setUnconfirmed(true);
+          setError("Your email address is not confirmed yet. Resend the confirmation link below.");
+          return;
+        }
         setError(
           failure.locked
             ? "Too many failed attempts. This account is locked for 15 minutes."
@@ -189,6 +196,16 @@ function CustomerLogin() {
               >
                 {error}
               </div>
+            )}
+
+            {unconfirmed && (
+              <Link
+                to="/verify-email"
+                search={{ email }}
+                className="block rounded-lg border border-[var(--gold)]/40 px-3 py-2 text-center text-xs text-[var(--gold)] hover:bg-[var(--gold)]/10"
+              >
+                Resend confirmation link
+              </Link>
             )}
 
             <button
