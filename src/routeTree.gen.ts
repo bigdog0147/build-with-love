@@ -25,6 +25,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminForgotPasswordRouteImport } from './routes/admin.forgot-password'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedVerificationStatusRouteImport } from './routes/_authenticated/verification-status'
@@ -135,6 +136,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminForgotPasswordRoute = AdminForgotPasswordRouteImport.update({
+  id: '/admin/forgot-password',
+  path: '/admin/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
+  '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/analytics'
     | '/admin/assets'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/analytics'
     | '/admin/assets'
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/_authenticated/verification-status'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
+    | '/admin/forgot-password'
     | '/admin/login'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/assets'
@@ -634,6 +646,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TechnologiesRoute: typeof TechnologiesRoute
+  AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
   AdminLoginRoute: typeof AdminLoginRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -750,6 +763,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/forgot-password': {
+      id: '/admin/forgot-password'
+      path: '/admin/forgot-password'
+      fullPath: '/admin/forgot-password'
+      preLoaderRoute: typeof AdminForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/wallets': {
@@ -1066,6 +1086,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TechnologiesRoute: TechnologiesRoute,
+  AdminForgotPasswordRoute: AdminForgotPasswordRoute,
   AdminLoginRoute: AdminLoginRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }

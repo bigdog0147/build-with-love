@@ -116,7 +116,7 @@ function AdminForgotPassword() {
   );
 }
 
-export const input =
+const input =
   "w-full rounded-xl border border-white/12 bg-black/40 px-3 py-2.5 text-sm outline-none transition-colors focus:border-[var(--gold)]/60";
 
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
