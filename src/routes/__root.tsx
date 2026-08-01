@@ -105,6 +105,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Gigafactory 3X",
+          url: "https://www.gf3x.space/",
+          logo: "https://www.gf3x.space/favicon.png",
+          description:
+            "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry.",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
