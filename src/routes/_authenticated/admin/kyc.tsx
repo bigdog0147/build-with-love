@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { FileCheck2, Loader2, Mail, RefreshCw, Trash2, Upload, Eye } from "lucide-react";
+import { FileCheck2, Loader2, Mail, RefreshCw, Send, Trash2, Upload, Eye } from "lucide-react";
 import {
   deleteExternalKycDocument,
   getExternalKycDocumentUrl,
