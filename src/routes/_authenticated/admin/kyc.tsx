@@ -309,8 +309,12 @@ const EVENT_LABEL: Record<string, string> = {
   unsubscribed: "Unsubscribed",
 };
 
+const RETRYABLE = new Set(["bounced", "rejected", "rate_limited", "complained", "suppressed"]);
+
 function EmailDeliveryPanel({ userId }: { userId: string }) {
   const fetchDelivery = useServerFn(getKycEmailDelivery);
+  const resend = useServerFn(resendKycDecisionEmail);
+  const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const q = useQuery({
     queryKey: ["kyc-email-delivery", userId],
     queryFn: () => fetchDelivery({ data: { userId } }),
@@ -319,6 +323,20 @@ function EmailDeliveryPanel({ userId }: { userId: string }) {
 
   const events = q.data?.events ?? [];
   const latest = events[0];
+  const needsRetry = !latest || RETRYABLE.has(latest.eventType);
+
+  const retry = useMutation({
+    mutationFn: () => resend({ data: { userId } }),
+    onSuccess: (res) => {
+      setNotice(
+        res.ok
+          ? { tone: "ok", text: `Decision email re-sent to ${res.email}.` }
+          : { tone: "error", text: res.reason },
+      );
+      void q.refetch();
+    },
+    onError: (err) => setNotice({ tone: "error", text: (err as Error).message }),
+  });
 
   return (
     <div className="mt-6 rounded-xl border border-border p-4">
@@ -341,6 +359,26 @@ function EmailDeliveryPanel({ userId }: { userId: string }) {
           )}
           <button
             type="button"
+            onClick={() => {
+              setNotice(null);
+              retry.mutate();
+            }}
+            disabled={retry.isPending || !q.data?.email}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs disabled:opacity-50 ${
+              needsRetry
+                ? "border-[var(--gold)]/60 text-[var(--gold)] hover:bg-[var(--gold)]/10"
+                : "border-border hover:border-[var(--gold)]"
+            }`}
+          >
+            {retry.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            {needsRetry ? "Retry send" : "Resend"}
+          </button>
+          <button
+            type="button"
             onClick={() => q.refetch()}
             className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]"
           >
@@ -348,6 +386,16 @@ function EmailDeliveryPanel({ userId }: { userId: string }) {
           </button>
         </div>
       </div>
+
+      {notice && (
+        <p
+          aria-live="polite"
+          className={`mt-3 text-xs ${notice.tone === "ok" ? "text-[var(--success,#4ade80)]" : "text-[var(--danger)]"}`}
+        >
+          {notice.text}
+        </p>
+      )}
+
 
       {q.error ? (
         <p className="mt-3 text-xs text-[var(--danger)]">{(q.error as Error).message}</p>
