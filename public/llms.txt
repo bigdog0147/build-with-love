@@ -10,10 +10,15 @@ Gigafactory 3X builds intelligent industrial infrastructure at giga-scale. The p
 - [About](/about): Who we are, what we build and why we exist.
 - [Core Technologies](/technologies): Artificial intelligence, robotics, advanced manufacturing, battery systems, semiconductors, industrial automation and digital twins.
 - [Industries](/industries): Manufacturing, energy, aerospace, logistics, smart cities, infrastructure and government solutions.
+- [Global Infrastructure](/infrastructure): Campuses, regional capacity, facility types and grid/logistics integration.
+- [Sustainability](/sustainability): Clean generation, circular manufacturing, decarbonisation roadmap and ESG governance.
 - [Innovation](/innovation): Research labs, patents, engineering programs and next-generation technologies.
 - [Investors](/investors): Growth strategy, sustainability, governance and corporate outlook.
+- [News & Press](/news): Press releases, announcements and media coverage.
 - [Careers](/careers): Engineering culture, internships and global opportunities.
 - [Contact](/contact): Global headquarters, regional offices and support.
+- [Search](/search): Search pages and sections across the site.
+
 
 ## Guides
 
