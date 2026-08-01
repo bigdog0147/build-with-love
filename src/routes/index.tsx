@@ -34,24 +34,39 @@ export const Route = createFileRoute("/")({
     const OG_IMAGE = "https://gf3x.space/og-image.jpg";
     return {
       meta: [
-        { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
+        { title: "Gigafactory 3X — Intelligent Industry Engineering" },
         {
           name: "description",
           content:
-            "Gigafactory 3 builds AI-powered manufacturing ecosystems — robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
+            "Gigafactory 3X builds AI-powered manufacturing ecosystems: robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
         },
-        { property: "og:title", content: "Gigafactory 3 — Intelligent Industry" },
+        { property: "og:title", content: "Gigafactory 3X — Intelligent Industry" },
         {
           property: "og:description",
           content:
             "AI-powered manufacturing ecosystems integrating robotics, automation and clean energy to transform global industry.",
         },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://www.gf3x.space/" },
         { property: "og:image", content: OG_IMAGE },
         { property: "og:image:width", content: "1920" },
         { property: "og:image:height", content: "1088" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [{ rel: "canonical", href: "https://www.gf3x.space/" }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Gigafactory 3X",
+            url: "https://www.gf3x.space/",
+            description:
+              "Gigafactory 3X builds AI-powered manufacturing ecosystems: robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
+          }),
+        },
       ],
     };
   },
@@ -256,7 +271,7 @@ function LandingPage() {
                   <div className="mt-5 font-display text-xl leading-tight">{name}</div>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{desc}</p>
                   <div className="mt-6 flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] text-[var(--gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    Learn more <ArrowRight className="h-3.5 w-3.5" />
+                    Explore {name} <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </Reveal>
@@ -601,7 +616,7 @@ function LandingPage() {
                         to="/technologies"
                         className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-4 py-2.5 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--gold)]/60"
                       >
-                        Learn more <ArrowRight className="h-4 w-4" />
+                        Explore {title} <ArrowRight className="h-4 w-4" />
                       </Link>
                     </div>
                   </div>

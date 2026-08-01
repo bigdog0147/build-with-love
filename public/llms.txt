@@ -1,0 +1,16 @@
+# Gigafactory 3X
+
+> Gigafactory 3X engineers AI-powered manufacturing ecosystems — robotics, advanced automation, battery systems, semiconductors, digital twins and clean energy — for global industry.
+
+Gigafactory 3X builds intelligent industrial infrastructure at giga-scale. The public site covers our technologies, the industries we serve, our research and innovation programs, investor outlook, and careers.
+
+## Pages
+
+- [Home](/): Overview of Gigafactory 3X, our intelligent industry platform and global operations.
+- [About](/about): Who we are, what we build and why we exist.
+- [Core Technologies](/technologies): Artificial intelligence, robotics, advanced manufacturing, battery systems, semiconductors, industrial automation and digital twins.
+- [Industries](/industries): Manufacturing, energy, aerospace, logistics, smart cities, infrastructure and government solutions.
+- [Innovation](/innovation): Research labs, patents, engineering programs and next-generation technologies.
+- [Investors](/investors): Growth strategy, sustainability, governance and corporate outlook.
+- [Careers](/careers): Engineering culture, internships and global opportunities.
+- [Contact](/contact): Global headquarters, regional offices and support.

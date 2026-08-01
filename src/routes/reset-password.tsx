@@ -12,8 +12,14 @@ export const Route = createFileRoute("/reset-password")({
         name: "description",
         content: "Choose a new password for your Gigafactory 3X customer account.",
       },
-      { property: "og:title", content: "Set a new password — Gigafactory 3X" },
-      { property: "og:description", content: "Choose a new password for the customer portal." },
+      { property: "og:title", content: "Set a New Password — Gigafactory 3X Portal" },
+      {
+        property: "og:description",
+        content:
+          "Securely choose a new password for your Gigafactory 3X customer portal account.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });

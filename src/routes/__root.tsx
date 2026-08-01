@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Gigafactory 3X | Building the Future" },
-      { name: "description", content: "Gigafactory 3X is an advanced technology company delivering AI-powered industrial automation, intelligent infrastructure, sustainable manufacturing, and next-generation innovation for global markets." },
+      { name: "description", content: "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry." },
       { name: "keywords", content: "Gigafactory 3X, AI, Technology, Manufacturing, Robotics, Automation, Innovation, Infrastructure, Smart Factory, Industrial Technology, Engineering" },
       { name: "author", content: "Gigafactory 3X" },
       { name: "theme-color", content: "#0a0a0a" },
@@ -104,6 +104,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Gigafactory 3X",
+          url: "https://www.gf3x.space/",
+          logo: "https://www.gf3x.space/favicon.png",
+          description:
+            "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry.",
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,
