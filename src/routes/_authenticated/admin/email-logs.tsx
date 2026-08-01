@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Search,
   ChevronRight,
+  Download,
 } from "lucide-react";
 import {
   EMAIL_EVENT_TYPES,
@@ -20,6 +21,7 @@ import {
   type EmailLogRow,
 } from "@/lib/email-logs.functions";
 import { EmailLogDetail } from "@/components/admin/email-log-detail";
+import { downloadEmailLogsCsv, emailLogsCsvFilename } from "@/lib/email-logs-csv";
 
 export const Route = createFileRoute("/_authenticated/admin/email-logs")({
   component: EmailLogsPage,
@@ -101,6 +103,21 @@ function EmailLogsPage() {
             suppressions and rate limits.
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={rows.length === 0}
+          onClick={() =>
+            downloadEmailLogsCsv(
+              rows,
+              emailLogsCsvFilename({ recipient, eventType, days }),
+            )
+          }
+          className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/50 px-3 py-2 text-xs text-[var(--gold)] transition hover:bg-[var(--gold)]/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground disabled:hover:bg-transparent"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export CSV{rows.length ? ` (${rows.length})` : ""}
+        </button>
         <button
           type="button"
           onClick={() => logs.refetch()}
@@ -113,6 +130,7 @@ function EmailLogsPage() {
           )}
           Refresh
         </button>
+        </div>
       </header>
 
       <section className="mt-6 grid gap-3 rounded-xl border border-border p-4 md:grid-cols-3">
