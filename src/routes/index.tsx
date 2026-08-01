@@ -47,11 +47,26 @@ export const Route = createFileRoute("/")({
             "AI-powered manufacturing ecosystems integrating robotics, automation and clean energy to transform global industry.",
         },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://www.gf3x.space/" },
         { property: "og:image", content: OG_IMAGE },
         { property: "og:image:width", content: "1920" },
         { property: "og:image:height", content: "1088" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: OG_IMAGE },
+      ],
+      links: [{ rel: "canonical", href: "https://www.gf3x.space/" }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Gigafactory 3X",
+            url: "https://www.gf3x.space/",
+            description:
+              "Gigafactory 3X builds AI-powered manufacturing ecosystems: robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
+          }),
+        },
       ],
     };
   },
