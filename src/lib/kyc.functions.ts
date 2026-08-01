@@ -58,7 +58,7 @@ export const saveKyc = createServerFn({ method: "POST" })
 export const submitKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<KycProfile> => {
-    const { supabase, userId } = context;
+    const { supabase, userId, claims } = context;
     // Move from submitted -> under_review immediately for demo UX.
     const res = await supabase
       .from("kyc_profiles")
@@ -67,8 +67,26 @@ export const submitKyc = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (res.error) throw new Error(res.error.message);
+
+    const email = (claims as { email?: string })?.email;
+    if (email) {
+      try {
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        await sendTemplateEmail("kyc-status", email, {
+          templateData: {
+            name: (res.data as KycProfile).full_legal_name ?? undefined,
+            status: "under_review",
+          },
+          idempotencyKey: `kyc-status-under_review-${userId}`,
+        });
+      } catch (err) {
+        console.error("KYC status email failed", err);
+      }
+    }
+
     return res.data as KycProfile;
   });
+
 
 export type KycTimelineStep = {
   key: string;

@@ -179,5 +179,24 @@ export const setExternalKycStatus = createServerFn({ method: "POST" })
       .update({ id_status: data.status, updated_at: new Date().toISOString() })
       .eq("user_id", data.userId);
     if (res.error) throw new Error(res.error.message);
+
+    if (data.status !== "not_started") {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: userRes } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+        const email = userRes?.user?.email;
+        if (email) {
+          const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+          await sendTemplateEmail("kyc-status", email, {
+            templateData: { status: data.status },
+            idempotencyKey: `kyc-status-${data.status}-${data.userId}`,
+          });
+        }
+      } catch (err) {
+        console.error("KYC status email failed", err);
+      }
+    }
+
     return { ok: true as const };
   });
+
