@@ -12,12 +12,14 @@ import {
   MailWarning,
   RefreshCw,
   Search,
+  ChevronRight,
 } from "lucide-react";
 import {
   EMAIL_EVENT_TYPES,
   listAdminEmailLogs,
   type EmailLogRow,
 } from "@/lib/email-logs.functions";
+import { EmailLogDetail } from "@/components/admin/email-log-detail";
 
 export const Route = createFileRoute("/_authenticated/admin/email-logs")({
   component: EmailLogsPage,
@@ -68,6 +70,7 @@ function EmailLogsPage() {
   const [recipient, setRecipient] = useState("");
   const [eventType, setEventType] = useState<string>("");
   const [days, setDays] = useState(7);
+  const [selected, setSelected] = useState<EmailLogRow | null>(null);
 
   const logs = useQuery({
     queryKey: ["admin-email-logs", recipient, eventType, days],
@@ -230,7 +233,20 @@ function EmailLogsPage() {
                 </tr>
               ) : (
                 rows.map((r, i) => (
-                  <tr key={`${r.timestamp}-${i}`} className="border-b border-border/60 last:border-0">
+                  <tr
+                    key={`${r.timestamp}-${i}`}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View delivery details for ${r.recipient}`}
+                    onClick={() => setSelected(r)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelected(r);
+                      }
+                    }}
+                    className="cursor-pointer border-b border-border/60 outline-none transition last:border-0 hover:bg-[var(--gold)]/5 focus-visible:bg-[var(--gold)]/5"
+                  >
                     <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                       {fmt(r.timestamp)}
                     </td>
@@ -252,8 +268,11 @@ function EmailLogsPage() {
                     <td className="px-4 py-3 text-muted-foreground">
                       {r.status ?? (r.tags.length ? r.tags.join(", ") : "—")}
                     </td>
-                    <td className="max-w-[220px] truncate px-4 py-3 font-mono text-[11px] text-muted-foreground">
-                      {r.messageId ?? "—"}
+                    <td className="max-w-[220px] px-4 py-3 font-mono text-[11px] text-muted-foreground">
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="truncate">{r.messageId ?? "—"}</span>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--gold)]/70" />
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -271,6 +290,8 @@ function EmailLogsPage() {
         Delivered and opened outcomes are not tracked by the email platform, so a
         “Sent” event means the provider accepted the message for delivery.
       </p>
+
+      <EmailLogDetail row={selected} onClose={() => setSelected(null)} />
     </main>
   );
 }
