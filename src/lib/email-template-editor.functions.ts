@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { KYC_EMAIL_STATUSES, type KycEmailStatus } from "@/lib/email-preview.functions";
+import { assertValidTemplateDraft } from "@/lib/email-template-validation";
+
 
 /**
  * Admin editing of the KYC decision email content (subject, HTML body and
