@@ -24,6 +24,10 @@ export type EmailLogRow = {
   eventType: string;
   status: string | null;
   messageId: string | null;
+  /** Provider/webhook event identifier (`event_id`), when the platform returns one. */
+  eventId: string | null;
+  /** Webhook delivery reference (`delivery_id` / `run_id` / `replay_id`), when present. */
+  deliveryId: string | null;
   tags: string[];
   /**
    * Every field the email platform returned for this event, including any
@@ -33,6 +37,7 @@ export type EmailLogRow = {
    */
   rawJson: string;
 };
+
 
 export type EmailLogsResult = {
   rows: EmailLogRow[];
