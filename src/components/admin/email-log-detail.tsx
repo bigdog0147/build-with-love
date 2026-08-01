@@ -204,6 +204,20 @@ export function EmailLogDetail({
               />
 
               <Block
+                title="Cross-system references"
+                empty="The platform returned no event id or delivery reference for this event."
+                entries={[
+                  ...(row.eventId ? ([["event_id", row.eventId]] as const) : []),
+                  ...(row.deliveryId
+                    ? ([["delivery_id", row.deliveryId]] as const)
+                    : []),
+                  ...(row.messageId ? ([["message_id", row.messageId]] as const) : []),
+                ]}
+              />
+
+
+
+              <Block
                 title="Delivery timestamps"
                 empty="No timestamps beyond the event time."
                 entries={
