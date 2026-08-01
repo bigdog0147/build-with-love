@@ -33,6 +33,7 @@ import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminForgotPasswordRouteImport } from './routes/admin.forgot-password'
+import { Route as AuthenticatedWithdrawalsRouteImport } from './routes/_authenticated/withdrawals'
 import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedVerifyRouteImport } from './routes/_authenticated/verify'
 import { Route as AuthenticatedVerificationStatusRouteImport } from './routes/_authenticated/verification-status'
@@ -189,6 +190,12 @@ const AdminForgotPasswordRoute = AdminForgotPasswordRouteImport.update({
   path: '/admin/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWithdrawalsRoute =
+  AuthenticatedWithdrawalsRouteImport.update({
+    id: '/withdrawals',
+    path: '/withdrawals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
@@ -418,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -478,6 +486,7 @@ export interface FileRoutesByTo {
   '/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/verify': typeof AuthenticatedVerifyRoute
   '/wallets': typeof AuthenticatedWalletsRoute
+  '/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -540,6 +549,7 @@ export interface FileRoutesById {
   '/_authenticated/verification-status': typeof AuthenticatedVerificationStatusRoute
   '/_authenticated/verify': typeof AuthenticatedVerifyRoute
   '/_authenticated/wallets': typeof AuthenticatedWalletsRoute
+  '/_authenticated/withdrawals': typeof AuthenticatedWithdrawalsRoute
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
@@ -602,6 +612,7 @@ export interface FileRouteTypes {
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -662,6 +673,7 @@ export interface FileRouteTypes {
     | '/verification-status'
     | '/verify'
     | '/wallets'
+    | '/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -723,6 +735,7 @@ export interface FileRouteTypes {
     | '/_authenticated/verification-status'
     | '/_authenticated/verify'
     | '/_authenticated/wallets'
+    | '/_authenticated/withdrawals'
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
@@ -951,6 +964,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/forgot-password'
       preLoaderRoute: typeof AdminForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/withdrawals': {
+      id: '/_authenticated/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/withdrawals'
+      preLoaderRoute: typeof AuthenticatedWithdrawalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/wallets': {
       id: '/_authenticated/wallets'
@@ -1215,6 +1235,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVerificationStatusRoute: typeof AuthenticatedVerificationStatusRoute
   AuthenticatedVerifyRoute: typeof AuthenticatedVerifyRoute
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
+  AuthenticatedWithdrawalsRoute: typeof AuthenticatedWithdrawalsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
@@ -1250,6 +1271,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedVerificationStatusRoute: AuthenticatedVerificationStatusRoute,
   AuthenticatedVerifyRoute: AuthenticatedVerifyRoute,
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
+  AuthenticatedWithdrawalsRoute: AuthenticatedWithdrawalsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
