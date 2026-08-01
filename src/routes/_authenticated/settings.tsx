@@ -180,6 +180,4 @@ function SettingsPage() {
       </form>
     </DashShell>
   );
-    </DashShell>
-  );
 }
