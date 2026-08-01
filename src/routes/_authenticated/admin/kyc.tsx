@@ -279,8 +279,11 @@ function AdminKycPage() {
               );
             })}
           </div>
+
+          <EmailDeliveryPanel userId={active.user_id} />
         </section>
       )}
+
     </main>
   );
 }
