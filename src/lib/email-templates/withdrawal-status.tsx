@@ -62,7 +62,7 @@ const container = { margin: '0 auto', padding: '32px 24px', maxWidth: '560px' }
 const brand = {
   fontSize: '11px',
   letterSpacing: '3px',
-  color: '#8a7games' as unknown as string,
+  color: '#8a7a4f',
   margin: '0 0 18px',
 }
 const heading_ = { fontSize: '24px', color: '#111214', margin: '0 0 16px' }
