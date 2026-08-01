@@ -271,7 +271,8 @@ Run through these before announcing a release:
 3. Environment variables validated (see [Environment variables](#environment-variables)).
 4. Sitemap (`/sitemap.xml`) and `robots.txt` reflect any new routes.
 5. **Structured data — Google Rich Results Test.** Open <https://search.google.com/test/rich-results>, test the live URL `https://www.gf3x.space/resources/smart-factory-guide`, and confirm the **FAQ**, **Article** and **Breadcrumbs** items are all detected with **0 errors** (warnings for optional properties are acceptable). Take a screenshot of the results panel showing the detected item types and error count, and attach it to the release notes / PR as the structured-data evidence for that release. If any item is missing or errors, fix the JSON-LD in `src/routes/resources.smart-factory-guide.tsx` and re-test before shipping.
-6. **Internal links to the Smart Factory Guide.** Confirm every entry point still resolves and uses descriptive anchor text (never "click here" / "read more"):
+6. **Structured data — Google Search Console.** After deployment, open <https://search.google.com/search-console> and navigate to **Enhancements** (or the **Structured data** report under *Experience*). Inspect the exact URL `https://www.gf3x.space/resources/smart-factory-guide` and confirm there are **0 structured data errors** and no invalid items for FAQ, Article, or Breadcrumbs. Take a screenshot of the report showing the URL status, valid item count, and error count, and attach it to the release notes as the Search Console evidence. If any errors appear, fix the JSON-LD in `src/routes/resources.smart-factory-guide.tsx`, re-publish, and re-validate the URL in Search Console before shipping.
+7. **Internal links to the Smart Factory Guide.** Confirm every entry point still resolves and uses descriptive anchor text (never "click here" / "read more"):
 
    ```bash
    # every internal reference to the guide — expect all four to be present
@@ -284,8 +285,8 @@ Run through these before announcing a release:
    - `public/llms.txt` — AI-crawler page directory entry with a one-line description.
    - `src/routes/resources.smart-factory-guide.tsx` — self-referencing canonical / `og:url`.
 
-   Then open the deployed site, scroll to the footer, click the link to verify it lands on the guide with a 200 (no redirect), and **screenshot the footer link block** showing the “Smart Factory Guide” anchor. Attach that screenshot to the release notes alongside the Rich Results screenshot. If new pages were added that discuss smart manufacturing, add a contextual in-body link to the guide from at least one of them before shipping.
-7. Spot-check the admin portal (`/admin/login`) and customer portal (`/login`) sign-in flows on the deployed build.
+   Then open the deployed site, scroll to the footer, click the link to verify it lands on the guide with a 200 (no redirect), and **screenshot the footer link block** showing the “Smart Factory Guide” anchor. Attach that screenshot to the release notes alongside the Rich Results and Search Console screenshots. If new pages were added that discuss smart manufacturing, add a contextual in-body link to the guide from at least one of them before shipping.
+8. Spot-check the admin portal (`/admin/login`) and customer portal (`/login`) sign-in flows on the deployed build.
 
 
 ---
