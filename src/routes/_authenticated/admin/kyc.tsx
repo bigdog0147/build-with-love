@@ -13,7 +13,7 @@ import {
   type AdminKycRow,
   type KycSlot,
 } from "@/lib/kyc-admin.functions";
-import { getKycEmailDelivery } from "@/lib/email-status.functions";
+import { getKycEmailDelivery, resendKycDecisionEmail } from "@/lib/email-status.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/kyc")({
   component: AdminKycPage,
