@@ -176,6 +176,48 @@ export type Database = {
         }
         Relationships: []
       }
+      email_template_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          html_body: string
+          id: string
+          is_active: boolean
+          note: string | null
+          status_key: string
+          subject: string
+          template_name: string
+          text_body: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          html_body: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          status_key: string
+          subject: string
+          template_name?: string
+          text_body: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          html_body?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          status_key?: string
+          subject?: string
+          template_name?: string
+          text_body?: string
+          version?: number
+        }
+        Relationships: []
+      }
       kyc_profiles: {
         Row: {
           country_of_residence: string | null
