@@ -152,14 +152,22 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
         <p className="p-4 text-xs text-muted-foreground">Loading the editor…</p>
       ) : (
         <div className="space-y-4 p-4">
-          <label className="block text-xs text-muted-foreground">
-            Subject line
+          <div>
+            <label className="block text-xs text-muted-foreground" htmlFor="tpl-subject">
+              Subject line
+            </label>
             <input
+              id="tpl-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus:border-[var(--gold)]"
+              aria-invalid={!!fieldErrors.subject?.length}
+              aria-describedby={fieldErrors.subject?.length ? "tpl-subject-error" : undefined}
+              className={`mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus:border-[var(--gold)] ${
+                fieldErrors.subject?.length ? "border-[var(--danger)]" : "border-border"
+              }`}
             />
-          </label>
+            <FieldError id="tpl-subject-error" messages={fieldErrors.subject} />
+          </div>
 
           <div className="flex gap-2">
             {(["html", "text"] as const).map((t) => (
@@ -172,30 +180,32 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
                   tab === t
                     ? "border-[var(--gold)] text-[var(--gold)]"
                     : "border-border text-muted-foreground hover:border-[var(--gold)]/60"
-                }`}
+                } ${fieldErrors[t]?.length ? "ring-1 ring-[var(--danger)]" : ""}`}
               >
                 {t === "html" ? "HTML body" : "Plain-text body"}
+                {fieldErrors[t]?.length ? (
+                  <span className="ml-1.5 text-[var(--danger)]">({fieldErrors[t]!.length})</span>
+                ) : null}
               </button>
             ))}
           </div>
 
-          {tab === "html" ? (
+          <div>
             <textarea
-              value={html}
-              onChange={(e) => setHtml(e.target.value)}
+              key={tab}
+              value={tab === "html" ? html : text}
+              onChange={(e) => (tab === "html" ? setHtml(e.target.value) : setText(e.target.value))}
               spellCheck={false}
-              aria-label="HTML body"
-              className="h-[380px] w-full rounded-lg border border-border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)]"
+              aria-label={tab === "html" ? "HTML body" : "Plain-text body"}
+              aria-invalid={!!fieldErrors[tab]?.length}
+              aria-describedby={fieldErrors[tab]?.length ? `tpl-${tab}-error` : undefined}
+              className={`h-[380px] w-full rounded-lg border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)] ${
+                fieldErrors[tab]?.length ? "border-[var(--danger)]" : "border-border"
+              }`}
             />
-          ) : (
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              spellCheck={false}
-              aria-label="Plain-text body"
-              className="h-[380px] w-full rounded-lg border border-border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)]"
-            />
-          )}
+            <FieldError id={`tpl-${tab}-error`} messages={fieldErrors[tab]} />
+          </div>
+
 
           <div className="flex flex-wrap items-center gap-2">
             <input
