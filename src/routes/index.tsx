@@ -34,13 +34,13 @@ export const Route = createFileRoute("/")({
     const OG_IMAGE = "https://gf3x.space/og-image.jpg";
     return {
       meta: [
-        { title: "Gigafactory 3 — Engineering the Future of Intelligent Industry" },
+        { title: "Gigafactory 3X — Intelligent Industry Engineering" },
         {
           name: "description",
           content:
-            "Gigafactory 3 builds AI-powered manufacturing ecosystems — robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
+            "Gigafactory 3X builds AI-powered manufacturing ecosystems: robotics, batteries, semiconductors, digital twins and clean energy at global scale.",
         },
-        { property: "og:title", content: "Gigafactory 3 — Intelligent Industry" },
+        { property: "og:title", content: "Gigafactory 3X — Intelligent Industry" },
         {
           property: "og:description",
           content:

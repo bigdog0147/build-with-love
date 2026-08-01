@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Gigafactory 3X | Building the Future" },
-      { name: "description", content: "Gigafactory 3X is an advanced technology company delivering AI-powered industrial automation, intelligent infrastructure, sustainable manufacturing, and next-generation innovation for global markets." },
+      { name: "description", content: "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry." },
       { name: "keywords", content: "Gigafactory 3X, AI, Technology, Manufacturing, Robotics, Automation, Innovation, Infrastructure, Smart Factory, Industrial Technology, Engineering" },
       { name: "author", content: "Gigafactory 3X" },
       { name: "theme-color", content: "#0a0a0a" },
