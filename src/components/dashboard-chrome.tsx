@@ -108,6 +108,8 @@ export function MobileNav() {
     { label: "Portfolio", to: "/portfolio" as const },
     { label: "Cards", to: "/cards" as const },
     { label: "Transfers", to: "/transfers" as const },
+    { label: "Withdrawals", to: "/withdrawals" as const },
+    { label: "Transactions", to: "/transactions" as const },
     { label: "Private markets", to: "/private-markets" as const },
     { label: "Verification", to: "/verify" as const },
     { label: "Review status", to: "/verification-status" as const },
