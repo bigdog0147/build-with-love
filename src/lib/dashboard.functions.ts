@@ -7,6 +7,15 @@ export type Profile = {
   tier: string;
   initials: string;
   avatar_url: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  country?: string | null;
+  organization?: string | null;
+  username?: string | null;
+  membership?: string | null;
+  role?: string | null;
+  updated_at?: string | null;
 };
 
 export type Wallet = {
