@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { template as kycStatusTemplate } from './kyc-status'
+import { template as adminPasswordResetTemplate } from './admin-password-reset'
 
 
 export interface TemplateEntry {
