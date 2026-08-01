@@ -92,6 +92,12 @@ export const ADMIN_NAV: NavGroup[] = [
         to: "/admin/email-templates",
         keywords: "email preview test send kyc decision template",
       },
+      {
+        label: "Email Delivery Logs",
+        to: "/admin/email-logs",
+        keywords: "otp password reset email delivery bounce rejected troubleshoot logs",
+      },
+
     ],
   },
   {

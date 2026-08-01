@@ -54,6 +54,7 @@ import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin/finance'
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
 import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_authenticated/admin/email-templates'
+import { Route as AuthenticatedAdminEmailLogsRouteImport } from './routes/_authenticated/admin/email-logs'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
@@ -302,6 +303,12 @@ const AuthenticatedAdminEmailTemplatesRoute =
     path: '/admin/email-templates',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminEmailLogsRoute =
+  AuthenticatedAdminEmailLogsRouteImport.update({
+    id: '/admin/email-logs',
+    path: '/admin/email-logs',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
@@ -386,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
@@ -440,6 +448,7 @@ export interface FileRoutesByTo {
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
@@ -496,6 +505,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/_authenticated/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
@@ -552,6 +562,7 @@ export interface FileRouteTypes {
     | '/admin/assets'
     | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/external'
     | '/admin/finance'
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/admin/assets'
     | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/external'
     | '/admin/finance'
@@ -661,6 +673,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/assets'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/email-logs'
     | '/_authenticated/admin/email-templates'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/finance'
@@ -1021,6 +1034,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmailTemplatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/email-logs': {
+      id: '/_authenticated/admin/email-logs'
+      path: '/admin/email-logs'
+      fullPath: '/admin/email-logs'
+      preLoaderRoute: typeof AuthenticatedAdminEmailLogsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/admin/dashboard'
@@ -1099,6 +1119,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminEmailLogsRoute: typeof AuthenticatedAdminEmailLogsRoute
   AuthenticatedAdminEmailTemplatesRoute: typeof AuthenticatedAdminEmailTemplatesRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
@@ -1133,6 +1154,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminEmailLogsRoute: AuthenticatedAdminEmailLogsRoute,
   AuthenticatedAdminEmailTemplatesRoute: AuthenticatedAdminEmailTemplatesRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
@@ -1178,13 +1200,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
