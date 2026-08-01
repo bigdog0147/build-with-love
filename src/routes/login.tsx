@@ -62,7 +62,13 @@ function CustomerLogin() {
 
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
+        const unconfirmed = /confirm/i.test(signInError.message);
         const failure = await reportLoginFailure({ data: { email, reason: signInError.message } });
+        if (unconfirmed) {
+          setUnconfirmed(true);
+          setError("Your email address is not confirmed yet. Resend the confirmation link below.");
+          return;
+        }
         setError(
           failure.locked
             ? "Too many failed attempts. This account is locked for 15 minutes."
