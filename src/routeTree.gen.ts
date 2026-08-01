@@ -29,6 +29,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as ResourcesSmartFactoryGuideRouteImport } from './routes/resources.smart-factory-guide'
+import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminForgotPasswordRouteImport } from './routes/admin.forgot-password'
@@ -168,6 +169,11 @@ const ResourcesSmartFactoryGuideRoute =
     path: '/resources/smart-factory-guide',
     getParentRoute: () => rootRouteImport,
   } as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
   id: '/admin/reset-password',
   path: '/admin/reset-password',
@@ -415,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -474,6 +481,7 @@ export interface FileRoutesByTo {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -535,6 +543,7 @@ export interface FileRoutesById {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -596,6 +605,7 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/admin/analytics'
@@ -655,6 +665,7 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
     | '/news'
     | '/admin/analytics'
@@ -715,6 +726,7 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/_authenticated/admin/analytics'
@@ -762,6 +774,7 @@ export interface RootRouteChildren {
   AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  NewsSlugRoute: typeof NewsSlugRoute
   ResourcesSmartFactoryGuideRoute: typeof ResourcesSmartFactoryGuideRoute
   NewsIndexRoute: typeof NewsIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -909,6 +922,13 @@ declare module '@tanstack/react-router' {
       path: '/resources/smart-factory-guide'
       fullPath: '/resources/smart-factory-guide'
       preLoaderRoute: typeof ResourcesSmartFactoryGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/reset-password': {
@@ -1275,6 +1295,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminForgotPasswordRoute: AdminForgotPasswordRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  NewsSlugRoute: NewsSlugRoute,
   ResourcesSmartFactoryGuideRoute: ResourcesSmartFactoryGuideRoute,
   NewsIndexRoute: NewsIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
