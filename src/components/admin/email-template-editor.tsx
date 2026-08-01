@@ -9,8 +9,33 @@ import {
   saveEmailTemplateVersion,
 } from "@/lib/email-template-editor.functions";
 import { KYC_STATUS_LABEL, type KycEmailStatus } from "@/lib/email-preview.functions";
+import {
+  validateTemplateDraft,
+  type ValidationIssue,
+} from "@/lib/email-template-validation";
 
 type Notice = { tone: "ok" | "error"; text: string } | null;
+type FieldErrors = Partial<Record<ValidationIssue["field"], string[]>>;
+
+function groupIssues(issues: ValidationIssue[]): FieldErrors {
+  const grouped: FieldErrors = {};
+  for (const issue of issues) {
+    (grouped[issue.field] ??= []).push(issue.message);
+  }
+  return grouped;
+}
+
+/** Inline, field-level error list rendered under the offending input. */
+function FieldError({ id, messages }: { id: string; messages?: string[] }) {
+  if (!messages?.length) return null;
+  return (
+    <ul id={id} className="mt-1.5 space-y-1 text-[11px] text-[var(--danger)]">
+      {messages.map((m) => (
+        <li key={m}>{m}</li>
+      ))}
+    </ul>
+  );
+}
 
 export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
   const qc = useQueryClient();
@@ -24,6 +49,7 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [tab, setTab] = useState<"html" | "text">("html");
 
   const state = useQuery({
@@ -39,6 +65,7 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
     setHtml(state.data.html);
     setText(state.data.text);
     setNote("");
+    setFieldErrors({});
   }, [state.data]);
 
   const refresh = async () => {
@@ -46,14 +73,34 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
     await qc.invalidateQueries({ queryKey: ["kyc-email-preview"] });
   };
 
+  /** Focus the tab holding the first rejected body so its error is visible. */
+  const focusFirstBadField = (grouped: FieldErrors) => {
+    if (grouped.html?.length) setTab("html");
+    else if (grouped.text?.length) setTab("text");
+  };
+
   const save = useMutation({
     mutationFn: () => saveVersion({ data: { status, subject, html, text, note } }),
     onSuccess: async (res) => {
+      if (!res.ok) {
+        const grouped = groupIssues(res.issues);
+        setFieldErrors(grouped);
+        focusFirstBadField(grouped);
+        setNotice({
+          tone: "error",
+          text: `This template was not saved — ${res.issues.length} validation ${
+            res.issues.length === 1 ? "problem" : "problems"
+          } need fixing below.`,
+        });
+        return;
+      }
+      setFieldErrors({});
       setNotice({ tone: "ok", text: `Saved as version ${res.version} and now live.` });
       await refresh();
     },
     onError: (err) => setNotice({ tone: "error", text: (err as Error).message }),
   });
+
 
   const rollback = useMutation({
     mutationFn: (versionId: string) => activateVersion({ data: { status, versionId } }),
