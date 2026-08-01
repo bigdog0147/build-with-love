@@ -710,6 +710,78 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          destination_details: string
+          destination_label: string
+          destination_type: Database["public"]["Enums"]["withdrawal_destination"]
+          id: string
+          note: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          destination_details?: string
+          destination_label: string
+          destination_type?: Database["public"]["Enums"]["withdrawal_destination"]
+          id?: string
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          destination_details?: string
+          destination_label?: string
+          destination_type?: Database["public"]["Enums"]["withdrawal_destination"]
+          id?: string
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "withdrawal_requests_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -736,6 +808,8 @@ export type Database = {
         | "under_review"
         | "verified"
         | "rejected"
+      withdrawal_destination: "bank_account" | "external_wallet"
+      withdrawal_status: "pending" | "approved" | "rejected" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -877,6 +951,8 @@ export const Constants = {
         "verified",
         "rejected",
       ],
+      withdrawal_destination: ["bank_account", "external_wallet"],
+      withdrawal_status: ["pending", "approved", "rejected", "cancelled"],
     },
   },
 } as const
