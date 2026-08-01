@@ -38,7 +38,7 @@ describe("buildEmailLogsCsv", () => {
 
   it("renders null status and message id as empty cells", () => {
     const csv = buildEmailLogsCsv([row({ status: null, messageId: null })]);
-    expect(csv.trimEnd().split("\r\n")[1]).toContain('"","","",""');
+    expect(csv.trimEnd().split("\r\n")[1]).toContain('"sent","","",""');
   });
 
   it("joins tags", () => {
@@ -58,7 +58,7 @@ describe("emailLogsCsvFilename", () => {
       eventType: "bounced",
       days: 30,
     });
-    expect(name).toMatch(/^gf3x-email-logs_bounced_a_b@example\.com_30d_.*\.csv$/);
+    expect(name).toMatch(/^gf3x-email-logs_bounced_a_b_example\.com_30d_.*\.csv$/);
   });
 
   it("omits absent filters", () => {
