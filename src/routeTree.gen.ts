@@ -16,6 +16,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
+import { Route as InfrastructureRouteImport } from './routes/infrastructure'
 import { Route as IndustriesRouteImport } from './routes/industries'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -97,6 +98,11 @@ const InvestorsRoute = InvestorsRouteImport.update({
 const InnovationRoute = InnovationRouteImport.update({
   id: '/innovation',
   path: '/innovation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfrastructureRoute = InfrastructureRouteImport.update({
+  id: '/infrastructure',
+  path: '/infrastructure',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndustriesRoute = IndustriesRouteImport.update({
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
@@ -476,6 +484,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
@@ -533,6 +542,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
@@ -588,6 +598,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
@@ -644,6 +655,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   IndustriesRoute: typeof IndustriesRoute
+  InfrastructureRoute: typeof InfrastructureRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
@@ -766,6 +779,13 @@ declare module '@tanstack/react-router' {
       path: '/innovation'
       fullPath: '/innovation'
       preLoaderRoute: typeof InnovationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/infrastructure': {
+      id: '/infrastructure'
+      path: '/infrastructure'
+      fullPath: '/infrastructure'
+      preLoaderRoute: typeof InfrastructureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/industries': {
@@ -1182,6 +1202,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   IndustriesRoute: IndustriesRoute,
+  InfrastructureRoute: InfrastructureRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
