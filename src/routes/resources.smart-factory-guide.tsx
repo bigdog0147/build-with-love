@@ -87,41 +87,58 @@ const METRICS = [
 const FAQS = [
   {
     q: "What is a smart factory?",
-    a: "A smart factory is a production facility where connected assets, a shared data model and machine-learning systems continuously observe manufacturing and act on it — adjusting parameters, sequencing work and triggering maintenance with limited human intervention. The distinguishing feature is not the sensors or the dashboards; it is the closed loop. If insight has to pass through a weekly meeting before anything changes, the plant is instrumented but not yet smart.",
+    a: "A smart factory is a production facility where connected assets, a shared data model and machine-learning systems continuously observe manufacturing and act on it — adjusting process parameters, resequencing work orders and raising maintenance jobs with limited human intervention. The distinguishing feature is not the sensors or the dashboards; it is the closed loop, measured in latency: a smart factory detects a drift and corrects it within seconds to minutes, whereas an instrumented factory reports the same drift in a weekly review after the scrap has already been produced.",
   },
   {
     q: "How is a smart factory different from ordinary factory automation?",
-    a: "Traditional automation repeats a fixed sequence very precisely and needs an engineer to change that sequence. A smart factory adapts the sequence itself in response to conditions — tool wear, material variability, order mix, energy price, upstream delay. Put simply: automation removes manual labour, while a smart factory removes manual decisions.",
+    a: "Traditional automation repeats a fixed sequence very precisely and needs an engineer to change that sequence: a PLC executes the recipe it was given until someone edits the program. A smart factory changes the sequence itself in response to conditions — tool wear measured by spindle load, incoming material variability, order mix, energy tariff windows, an upstream cell running late. Put simply: automation removes manual labour, a smart factory removes manual decisions, and the second one requires a data layer that classic automation projects never needed.",
   },
   {
     q: "Is a smart factory the same as Industry 4.0?",
-    a: "They are related but not interchangeable. Industry 4.0 is the broader industrial paradigm covering cyber-physical systems, IoT, cloud and analytics across whole value chains. A smart factory is the concrete implementation of that paradigm inside one production site, and it is where Industry 4.0 either produces measurable results or remains a strategy slide.",
+    a: "They are related but not interchangeable. Industry 4.0 is the broader industrial paradigm covering cyber-physical systems, IoT, cloud analytics and connected value chains across suppliers and logistics. A smart factory is the concrete implementation of that paradigm inside one production site, with a defined asset scope, a named data architecture and a P&L owner. Industry 4.0 is the strategy; the smart factory is where it either produces a measurable change in cost per good unit or remains a slide.",
   },
   {
     q: "What technologies does a smart factory need?",
-    a: "In practice: industrial IoT sensing with reliable timestamps, deterministic networking such as TSN or private 5G, edge compute for latency-critical inference, a unified namespace or equivalent canonical data layer, digital twins for simulation, robotics and flexible automation, machine vision for in-line quality, and OT-specific cybersecurity. The data layer is the dependency everything else rests on — and the one most often deferred.",
+    a: "In practice, eight building blocks: industrial IoT sensing with synchronised timestamps (sub-millisecond where control loops depend on it); deterministic networking such as TSN or private 5G for cells that cannot tolerate jitter; edge compute for inference that must resolve in under ~50 ms, such as vision-based reject decisions; a unified namespace or equivalent canonical data layer with one authoritative name per signal; digital twins for offline simulation and change rehearsal; robotics and flexible fixturing; machine vision for in-line quality; and OT-specific cybersecurity with signed firmware and device identity. The data layer is the dependency all the others rest on, and it is the one most often deferred.",
   },
   {
     q: "How long does it take to build a smart factory?",
-    a: "A single line reaching closed-loop operation typically takes three to six months once baseline instrumentation exists. Plant-wide orchestration is usually a twelve to twenty-four month programme, and multi-site standardisation is continuous. Brownfield sites move faster than expected on connectivity and slower than expected on data quality and change management.",
+    a: "A single line reaching genuine closed-loop operation typically takes three to six months once baseline instrumentation exists — roughly four to six weeks of sensing and connectivity work, four to eight weeks of data modelling and historian integration, then a supervised model-in-the-loop period before write-back is enabled. Plant-wide orchestration is normally a twelve to twenty-four month programme, and multi-site standardisation is continuous rather than a project with an end date. Brownfield sites move faster than expected on connectivity and slower than expected on data quality, naming conventions and change management.",
   },
   {
     q: "What does a smart factory cost, and what return should we expect?",
-    a: "Costs are dominated by integration effort rather than hardware; sensors and edge compute are usually a minority of the budget. Mature programmes generally report double-digit percentage gains in OEE, meaningful reductions in unplanned downtime and scrap, and shorter changeovers. Model the return on cost per good unit and downtime hours avoided, and require a measured baseline before Phase 1 so the improvement is defensible.",
+    a: "Costs are dominated by integration and systems-engineering effort rather than hardware: in most programmes sensors, gateways and edge compute account for a minority of the budget while integration, data modelling, validation and training consume the majority. Mature programmes generally report double-digit percentage OEE gains, substantial reductions in unplanned downtime and scrap, and materially shorter changeovers. Build the business case on cost per good unit and downtime hours avoided rather than on sensor counts, and insist on a measured baseline captured before Phase 1 — without it the improvement cannot be defended in a finance review.",
   },
   {
     q: "Can an existing brownfield plant become a smart factory?",
-    a: "Yes, and most smart factories are brownfield conversions rather than greenfield builds. Legacy machines can be retrofitted with external sensing and protocol gateways, which means you rarely need to replace working equipment to make it observable. The genuine constraints are data quality, network segmentation and workforce adoption, not machine age.",
+    a: "Yes, and most smart factories are brownfield conversions rather than greenfield builds. Legacy machines that expose no digital interface can be made observable with external sensing — current clamps, vibration and acoustic sensors, retrofit encoders — plus protocol gateways that translate Modbus, Profibus or serial output into MQTT or OPC UA, so you rarely need to replace working equipment. The genuine constraints are inconsistent tag naming, flat unsegmented networks and workforce adoption, not machine age.",
+  },
+  {
+    q: "Where should we start if we have no instrumentation at all?",
+    a: "Start with one constrained, high-value line rather than a plant-wide survey. Instrument its bottleneck asset first, capture a clean four-to-six-week baseline of availability, cycle time, scrap and changeover minutes, and only then introduce analytics. Keep the first closed loop deliberately narrow — one parameter, one asset, human-approved write-back — because the objective of Phase 1 is a trustworthy data path and an organisation that believes the numbers, not model sophistication.",
+  },
+  {
+    q: "What is a unified namespace, and why does it matter?",
+    a: "A unified namespace is a single canonical, event-driven structure — typically MQTT-based — where every asset publishes its current state under one agreed hierarchy, such as site/area/line/cell/signal, and every consumer subscribes rather than polling. It matters because it eliminates the point-to-point integration mesh that makes traditional plant IT brittle: adding a ninth system becomes one subscription instead of eight new interfaces. It also gives models one authoritative name and unit per signal, which is the practical prerequisite for cross-line and cross-site comparison.",
+  },
+  {
+    q: "How accurate does a digital twin need to be?",
+    a: "Accuracy should be set by the decision the twin supports, not by fidelity for its own sake. A twin used for throughput and buffer sizing typically needs cycle times and failure distributions within a few percent of observed reality; a twin used to validate a control parameter change needs to reproduce the relevant physics closely enough that the sign and rough magnitude of the effect hold. Validate against held-back historical periods, publish the error band alongside every result, and retire the twin from decision-making when drift exceeds that band.",
   },
   {
     q: "Does a smart factory reduce the workforce?",
-    a: "It changes the work more than it shrinks it. Repetitive material handling and manual data collection decline, while demand rises for controls engineers, data engineers, maintenance technicians who can interpret model output, and operators who can supervise autonomous cells. Programmes that treat this as a training and role-design problem outperform those that treat it as a headcount exercise.",
+    a: "It changes the work more than it shrinks it. Repetitive material handling, manual gauging and clipboard data collection decline, while demand rises for controls engineers, data engineers, maintenance technicians who can interpret model output and operators who can supervise several autonomous cells at once. Budget for training time per operator in the programme itself and design the new roles explicitly; programmes that treat this as role design outperform those that treat it as a headcount exercise.",
   },
   {
     q: "How do you secure a smart factory?",
-    a: "Segment OT from IT and enforce the boundary; require signed firmware and authenticated device identity; keep immutable audit trails of every parameter write-back; and place model updates under formal change control with rollback. Because a compromised model can damage product quality without ever tripping an IT alarm, treat model integrity as a safety concern rather than only an information-security one.",
+    a: "Segment OT from IT and enforce the boundary with inspected, brokered traffic instead of flat routing; require signed firmware and authenticated per-device identity; keep immutable audit trails of every parameter write-back including which model version issued it; and place model updates under formal change control with a tested rollback path. Because a compromised or silently drifting model can degrade product quality without ever tripping an IT alarm, treat model integrity as a safety concern with the same review discipline you apply to a machine guard.",
+  },
+  {
+    q: "What are the limits of autonomy on a production line?",
+    a: "Autonomy should be bounded by consequence. Parameter trims inside a validated window, dispatch sequencing and maintenance scheduling are reasonable to automate end to end. Actions that alter safety functions, regulated product characteristics or anything that cannot be reversed within one cycle should stay human-approved, with the model recommending and a named person accepting. In every case define the failure mode in advance: what the cell does when confidence drops, when a sensor goes stale and when the network partitions.",
   },
 ];
+
 
 /* ----------------------------------- route ---------------------------------- */
 
