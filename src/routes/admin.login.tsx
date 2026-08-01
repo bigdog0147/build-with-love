@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fingerprint, Lock, ShieldAlert, Terminal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -273,6 +273,13 @@ function AdminLogin() {
               >
                 {loading ? "Authenticating…" : "Authenticate"}
               </button>
+
+              <Link
+                to="/admin/forgot-password"
+                className="block pt-1 text-center text-xs text-muted-foreground hover:text-foreground"
+              >
+                Forgot administrator password?
+              </Link>
             </form>
           ) : (
             <form onSubmit={handleTwoFactor} className="mt-6 space-y-3">
