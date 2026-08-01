@@ -9,8 +9,33 @@ import {
   saveEmailTemplateVersion,
 } from "@/lib/email-template-editor.functions";
 import { KYC_STATUS_LABEL, type KycEmailStatus } from "@/lib/email-preview.functions";
+import {
+  validateTemplateDraft,
+  type ValidationIssue,
+} from "@/lib/email-template-validation";
 
 type Notice = { tone: "ok" | "error"; text: string } | null;
+type FieldErrors = Partial<Record<ValidationIssue["field"], string[]>>;
+
+function groupIssues(issues: ValidationIssue[]): FieldErrors {
+  const grouped: FieldErrors = {};
+  for (const issue of issues) {
+    (grouped[issue.field] ??= []).push(issue.message);
+  }
+  return grouped;
+}
+
+/** Inline, field-level error list rendered under the offending input. */
+function FieldError({ id, messages }: { id: string; messages?: string[] }) {
+  if (!messages?.length) return null;
+  return (
+    <ul id={id} className="mt-1.5 space-y-1 text-[11px] text-[var(--danger)]">
+      {messages.map((m) => (
+        <li key={m}>{m}</li>
+      ))}
+    </ul>
+  );
+}
 
 export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
   const qc = useQueryClient();
@@ -24,6 +49,7 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
   const [text, setText] = useState("");
   const [note, setNote] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [tab, setTab] = useState<"html" | "text">("html");
 
   const state = useQuery({
@@ -39,6 +65,7 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
     setHtml(state.data.html);
     setText(state.data.text);
     setNote("");
+    setFieldErrors({});
   }, [state.data]);
 
   const refresh = async () => {
@@ -46,14 +73,34 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
     await qc.invalidateQueries({ queryKey: ["kyc-email-preview"] });
   };
 
+  /** Focus the tab holding the first rejected body so its error is visible. */
+  const focusFirstBadField = (grouped: FieldErrors) => {
+    if (grouped.html?.length) setTab("html");
+    else if (grouped.text?.length) setTab("text");
+  };
+
   const save = useMutation({
     mutationFn: () => saveVersion({ data: { status, subject, html, text, note } }),
     onSuccess: async (res) => {
+      if (!res.ok) {
+        const grouped = groupIssues(res.issues);
+        setFieldErrors(grouped);
+        focusFirstBadField(grouped);
+        setNotice({
+          tone: "error",
+          text: `This template was not saved — ${res.issues.length} validation ${
+            res.issues.length === 1 ? "problem" : "problems"
+          } need fixing below.`,
+        });
+        return;
+      }
+      setFieldErrors({});
       setNotice({ tone: "ok", text: `Saved as version ${res.version} and now live.` });
       await refresh();
     },
     onError: (err) => setNotice({ tone: "error", text: (err as Error).message }),
   });
+
 
   const rollback = useMutation({
     mutationFn: (versionId: string) => activateVersion({ data: { status, versionId } }),
@@ -105,14 +152,22 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
         <p className="p-4 text-xs text-muted-foreground">Loading the editor…</p>
       ) : (
         <div className="space-y-4 p-4">
-          <label className="block text-xs text-muted-foreground">
-            Subject line
+          <div>
+            <label className="block text-xs text-muted-foreground" htmlFor="tpl-subject">
+              Subject line
+            </label>
             <input
+              id="tpl-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus:border-[var(--gold)]"
+              aria-invalid={!!fieldErrors.subject?.length}
+              aria-describedby={fieldErrors.subject?.length ? "tpl-subject-error" : undefined}
+              className={`mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus:border-[var(--gold)] ${
+                fieldErrors.subject?.length ? "border-[var(--danger)]" : "border-border"
+              }`}
             />
-          </label>
+            <FieldError id="tpl-subject-error" messages={fieldErrors.subject} />
+          </div>
 
           <div className="flex gap-2">
             {(["html", "text"] as const).map((t) => (
@@ -125,30 +180,32 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
                   tab === t
                     ? "border-[var(--gold)] text-[var(--gold)]"
                     : "border-border text-muted-foreground hover:border-[var(--gold)]/60"
-                }`}
+                } ${fieldErrors[t]?.length ? "ring-1 ring-[var(--danger)]" : ""}`}
               >
                 {t === "html" ? "HTML body" : "Plain-text body"}
+                {fieldErrors[t]?.length ? (
+                  <span className="ml-1.5 text-[var(--danger)]">({fieldErrors[t]!.length})</span>
+                ) : null}
               </button>
             ))}
           </div>
 
-          {tab === "html" ? (
+          <div>
             <textarea
-              value={html}
-              onChange={(e) => setHtml(e.target.value)}
+              key={tab}
+              value={tab === "html" ? html : text}
+              onChange={(e) => (tab === "html" ? setHtml(e.target.value) : setText(e.target.value))}
               spellCheck={false}
-              aria-label="HTML body"
-              className="h-[380px] w-full rounded-lg border border-border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)]"
+              aria-label={tab === "html" ? "HTML body" : "Plain-text body"}
+              aria-invalid={!!fieldErrors[tab]?.length}
+              aria-describedby={fieldErrors[tab]?.length ? `tpl-${tab}-error` : undefined}
+              className={`h-[380px] w-full rounded-lg border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)] ${
+                fieldErrors[tab]?.length ? "border-[var(--danger)]" : "border-border"
+              }`}
             />
-          ) : (
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              spellCheck={false}
-              aria-label="Plain-text body"
-              className="h-[380px] w-full rounded-lg border border-border bg-transparent p-3 font-mono text-xs text-foreground outline-none focus:border-[var(--gold)]"
-            />
-          )}
+            <FieldError id={`tpl-${tab}-error`} messages={fieldErrors[tab]} />
+          </div>
+
 
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -161,8 +218,25 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
               type="button"
               onClick={() => {
                 setNotice(null);
+                // Mirror the server checks locally for instant field-level feedback;
+                // the server remains authoritative.
+                const local = validateTemplateDraft({ subject, html, text });
+                if (local.length > 0) {
+                  const grouped = groupIssues(local);
+                  setFieldErrors(grouped);
+                  focusFirstBadField(grouped);
+                  setNotice({
+                    tone: "error",
+                    text: `Fix the ${local.length} highlighted ${
+                      local.length === 1 ? "problem" : "problems"
+                    } before saving.`,
+                  });
+                  return;
+                }
+                setFieldErrors({});
                 save.mutate();
               }}
+
               disabled={save.isPending || !dirty}
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/60 px-4 py-2 text-xs text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
             >

@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { KYC_EMAIL_STATUSES, type KycEmailStatus } from "@/lib/email-preview.functions";
-import { assertValidTemplateDraft } from "@/lib/email-template-validation";
+import {
+  validateTemplateDraft,
+  type ValidationIssue,
+} from "@/lib/email-template-validation";
+
+export type SaveResult =
+  | { ok: true; version: number }
+  | { ok: false; issues: ValidationIssue[] };
+
 
 
 /**
@@ -101,24 +109,27 @@ export const getEmailTemplateEditorState = createServerFn({ method: "POST" })
 export const saveEmailTemplateVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: { status: string; subject: string; html: string; text: string; note?: string }) => {
-      const { subject, html, text } = assertValidTemplateDraft({
-        subject: input.subject ?? "",
-        html: input.html ?? "",
-        text: input.text ?? "",
-      });
-      return {
-        status: parseStatus(input.status),
-        subject,
-        html,
-        text,
-        note: (input.note ?? "").trim().slice(0, 200) || null,
-      };
-    },
+    (input: { status: string; subject: string; html: string; text: string; note?: string }) => ({
+      status: parseStatus(input.status),
+      subject: input.subject ?? "",
+      html: input.html ?? "",
+      text: input.text ?? "",
+      note: (input.note ?? "").trim().slice(0, 200) || null,
+    }),
   )
 
-  .handler(async ({ data, context }): Promise<{ ok: true; version: number }> => {
+  .handler(async ({ data, context }): Promise<SaveResult> => {
     await assertAdmin(context);
+
+    // Authoritative validation: returns field-level issues instead of throwing so
+    // the admin editor can render them inline next to the offending field.
+    const issues = validateTemplateDraft(data);
+    if (issues.length > 0) return { ok: false, issues };
+    const subject = data.subject.trim();
+    const html = data.html.trim();
+    const text = data.text.trim();
+
+
     const { supabase, userId } = context;
 
     const { data: latest, error: latestErr } = await supabase
@@ -144,9 +155,10 @@ export const saveEmailTemplateVersion = createServerFn({ method: "POST" })
       template_name: TEMPLATE,
       status_key: data.status,
       version: nextVersion,
-      subject: data.subject,
-      html_body: data.html,
-      text_body: data.text,
+      subject,
+      html_body: html,
+      text_body: text,
+
       note: data.note,
       is_active: true,
       created_by: userId,
