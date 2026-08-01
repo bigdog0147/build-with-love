@@ -65,6 +65,7 @@ function RegisterPage() {
       });
       if (signUpError) throw signUpError;
       setSent(true);
+      navigate({ to: "/verify-email", search: { email: parsed.data.email } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
