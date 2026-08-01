@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   BadgeCheck,
+  Banknote,
+  History,
   Bell,
   FileText,
   LifeBuoy,
