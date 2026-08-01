@@ -87,6 +87,11 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Support Tickets", to: "/admin/operations", tab: "tickets" },
       { label: "Documents", to: "/admin/operations", tab: "documents" },
       { label: "Reports", to: "/admin/operations", tab: "reports" },
+      {
+        label: "KYC Email Templates",
+        to: "/admin/email-templates",
+        keywords: "email preview test send kyc decision template",
+      },
     ],
   },
   {
