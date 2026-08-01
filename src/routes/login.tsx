@@ -38,6 +38,7 @@ function CustomerLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unconfirmed, setUnconfirmed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
