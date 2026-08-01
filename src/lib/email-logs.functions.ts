@@ -62,6 +62,30 @@ function toJsonSafe(input: Record<string, unknown>): string {
   }
 }
 
+/**
+ * Identifier aliases the email platform may use for the webhook event id and
+ * the delivery reference. The documented event shape omits them, but managed
+ * sends carry them through, and they are what other systems key on.
+ */
+const EVENT_ID_KEYS = ["event_id", "eventId", "id"] as const;
+const DELIVERY_ID_KEYS = [
+  "delivery_id",
+  "deliveryId",
+  "run_id",
+  "replay_id",
+  "request_id",
+] as const;
+
+function firstString(raw: Record<string, unknown>, keys: readonly string[]): string | null {
+  for (const k of keys) {
+    const v = raw[k];
+    if (typeof v === "string" && v.trim() !== "") return v;
+    if (typeof v === "number") return String(v);
+  }
+  return null;
+}
+
+
 export const listAdminEmailLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: Input) => {
