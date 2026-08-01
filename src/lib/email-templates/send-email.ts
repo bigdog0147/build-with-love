@@ -57,13 +57,28 @@ export async function sendTemplateEmail(
   }
 
   const templateData = options.templateData ?? {}
-  const element = React.createElement(template.component, templateData)
-  const html = await render(element)
-  const text = await render(element, { plainText: true })
-  const subject =
-    typeof template.subject === 'function'
-      ? template.subject(templateData)
-      : template.subject
+
+  // Admin-authored overrides (edited in the admin email template editor) take
+  // precedence over the built-in React Email component when one is active.
+  const { resolveTemplateOverride } = await import('@/lib/email-template-overrides.server')
+  const override = await resolveTemplateOverride(templateName, templateData)
+
+  let html: string
+  let text: string
+  let subject: string
+  if (override) {
+    html = override.html
+    text = override.text
+    subject = override.subject
+  } else {
+    const element = React.createElement(template.component, templateData)
+    html = await render(element)
+    text = await render(element, { plainText: true })
+    subject =
+      typeof template.subject === 'function'
+        ? template.subject(templateData)
+        : template.subject
+  }
 
   try {
     await sendLovableEmail(
