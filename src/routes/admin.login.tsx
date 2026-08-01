@@ -273,6 +273,13 @@ function AdminLogin() {
               >
                 {loading ? "Authenticating…" : "Authenticate"}
               </button>
+
+              <Link
+                to="/admin/forgot-password"
+                className="block pt-1 text-center text-xs text-muted-foreground hover:text-foreground"
+              >
+                Forgot administrator password?
+              </Link>
             </form>
           ) : (
             <form onSubmit={handleTwoFactor} className="mt-6 space-y-3">
