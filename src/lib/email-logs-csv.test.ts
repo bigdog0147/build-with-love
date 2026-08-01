@@ -8,10 +8,13 @@ const row = (over: Partial<EmailLogRow> = {}): EmailLogRow => ({
   eventType: "sent",
   status: null,
   messageId: "msg-1",
+  eventId: "evt-1",
+  deliveryId: "dlv-1",
   tags: [],
   rawJson: '{"event_type":"sent"}',
   ...over,
 });
+
 
 describe("buildEmailLogsCsv", () => {
   it("writes a header row and one line per event", () => {
