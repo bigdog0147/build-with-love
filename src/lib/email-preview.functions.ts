@@ -62,6 +62,19 @@ export const renderKycEmailPreview = createServerFn({ method: "POST" })
     if (!entry) throw new Error("The KYC status template is not registered.");
 
     const templateData = { status: data.status, name: data.name ?? "Alex Morgan" };
+
+    // Mirror the send path: an active admin-edited version wins over the built-in.
+    const { resolveTemplateOverride } = await import("@/lib/email-template-overrides.server");
+    const override = await resolveTemplateOverride("kyc-status", templateData);
+    if (override) {
+      return {
+        status: data.status,
+        subject: override.subject,
+        html: override.html,
+        text: override.text,
+      };
+    }
+
     const element = React.createElement(entry.component, templateData);
     const html = await render(element);
     const text = await render(element, { plainText: true });
