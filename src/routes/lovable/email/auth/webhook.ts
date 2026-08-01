@@ -10,7 +10,7 @@ import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
 const SITE_NAME = "Gigafactory 3X"
-const SENDER_DOMAIN = "notify.gf3x.space"
+const SENDER_DOMAIN = "otp.gf3x.space"
 const ROOT_DOMAIN = "gf3x.space"
 const FROM_DOMAIN = "gf3x.space"
 const SITE_URL = `https://${ROOT_DOMAIN}`
