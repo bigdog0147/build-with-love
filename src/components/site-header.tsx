@@ -18,6 +18,8 @@ const NAV = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
+const SECONDARY: readonly string[] = ["/infrastructure", "/sustainability", "/news"];
+
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -83,7 +85,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="grid h-9 w-9 place-items-center rounded-md border border-border lg:hidden"
+          className="grid h-9 w-9 place-items-center rounded-md border border-border xl:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -92,8 +94,12 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-border/60 lg:hidden">
+        <div className="border-t border-border/60 xl:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
+            <div className="mb-2 flex items-center gap-2">
+              <SiteSearchButton />
+              <LanguageSelector />
+            </div>
             {NAV.map((n) => (
               <Link
                 key={n.to}
