@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "build-dream-castles"
+const SITE_NAME = "Gigafactory 3X"
 const SENDER_DOMAIN = "notify.gf3x.space"
 const ROOT_DOMAIN = "gf3x.space"
 const FROM_DOMAIN = "notify.gf3x.space"
