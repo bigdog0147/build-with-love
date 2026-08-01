@@ -10,12 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TechnologiesRouteImport } from './routes/technologies'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InvestorsRouteImport } from './routes/investors'
 import { Route as InnovationRouteImport } from './routes/innovation'
+import { Route as InfrastructureRouteImport } from './routes/infrastructure'
 import { Route as IndustriesRouteImport } from './routes/industries'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -24,7 +27,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as ResourcesSmartFactoryGuideRouteImport } from './routes/resources.smart-factory-guide'
+import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as AdminResetPasswordRouteImport } from './routes/admin.reset-password'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminForgotPasswordRouteImport } from './routes/admin.forgot-password'
@@ -69,9 +74,19 @@ const TechnologiesRoute = TechnologiesRouteImport.update({
   path: '/technologies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -97,6 +112,11 @@ const InvestorsRoute = InvestorsRouteImport.update({
 const InnovationRoute = InnovationRouteImport.update({
   id: '/innovation',
   path: '/innovation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfrastructureRoute = InfrastructureRouteImport.update({
+  id: '/infrastructure',
+  path: '/infrastructure',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndustriesRoute = IndustriesRouteImport.update({
@@ -138,12 +158,22 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourcesSmartFactoryGuideRoute =
   ResourcesSmartFactoryGuideRouteImport.update({
     id: '/resources/smart-factory-guide',
     path: '/resources/smart-factory-guide',
     getParentRoute: () => rootRouteImport,
   } as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
   id: '/admin/reset-password',
   path: '/admin/reset-password',
@@ -364,12 +394,15 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
@@ -388,7 +421,9 @@ export interface FileRoutesByFullPath {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
+  '/news/': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -419,12 +454,15 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
@@ -443,7 +481,9 @@ export interface FileRoutesByTo {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
+  '/news': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -476,12 +516,15 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/industries': typeof IndustriesRoute
+  '/infrastructure': typeof InfrastructureRoute
   '/innovation': typeof InnovationRoute
   '/investors': typeof InvestorsRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
@@ -500,7 +543,9 @@ export interface FileRoutesById {
   '/admin/forgot-password': typeof AdminForgotPasswordRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
+  '/news/': typeof NewsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -533,12 +578,15 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
     | '/register'
     | '/reset-password'
+    | '/search'
     | '/sitemap.xml'
+    | '/sustainability'
     | '/technologies'
     | '/cards'
     | '/change-password'
@@ -557,7 +605,9 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
+    | '/news/'
     | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
@@ -588,12 +638,15 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
     | '/register'
     | '/reset-password'
+    | '/search'
     | '/sitemap.xml'
+    | '/sustainability'
     | '/technologies'
     | '/cards'
     | '/change-password'
@@ -612,7 +665,9 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
+    | '/news'
     | '/admin/analytics'
     | '/admin/assets'
     | '/admin/customers'
@@ -644,12 +699,15 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/industries'
+    | '/infrastructure'
     | '/innovation'
     | '/investors'
     | '/login'
     | '/register'
     | '/reset-password'
+    | '/search'
     | '/sitemap.xml'
+    | '/sustainability'
     | '/technologies'
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
@@ -668,7 +726,9 @@ export interface FileRouteTypes {
     | '/admin/forgot-password'
     | '/admin/login'
     | '/admin/reset-password'
+    | '/news/$slug'
     | '/resources/smart-factory-guide'
+    | '/news/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/assets'
     | '/_authenticated/admin/customers'
@@ -701,17 +761,22 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   IndustriesRoute: typeof IndustriesRoute
+  InfrastructureRoute: typeof InfrastructureRoute
   InnovationRoute: typeof InnovationRoute
   InvestorsRoute: typeof InvestorsRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SustainabilityRoute: typeof SustainabilityRoute
   TechnologiesRoute: typeof TechnologiesRoute
   AdminForgotPasswordRoute: typeof AdminForgotPasswordRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  NewsSlugRoute: typeof NewsSlugRoute
   ResourcesSmartFactoryGuideRoute: typeof ResourcesSmartFactoryGuideRoute
+  NewsIndexRoute: typeof NewsIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -726,11 +791,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TechnologiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -766,6 +845,13 @@ declare module '@tanstack/react-router' {
       path: '/innovation'
       fullPath: '/innovation'
       preLoaderRoute: typeof InnovationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/infrastructure': {
+      id: '/infrastructure'
+      path: '/infrastructure'
+      fullPath: '/infrastructure'
+      preLoaderRoute: typeof InfrastructureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/industries': {
@@ -824,11 +910,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resources/smart-factory-guide': {
       id: '/resources/smart-factory-guide'
       path: '/resources/smart-factory-guide'
       fullPath: '/resources/smart-factory-guide'
       preLoaderRoute: typeof ResourcesSmartFactoryGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/reset-password': {
@@ -1182,17 +1282,22 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   IndustriesRoute: IndustriesRoute,
+  InfrastructureRoute: InfrastructureRoute,
   InnovationRoute: InnovationRoute,
   InvestorsRoute: InvestorsRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SustainabilityRoute: SustainabilityRoute,
   TechnologiesRoute: TechnologiesRoute,
   AdminForgotPasswordRoute: AdminForgotPasswordRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminResetPasswordRoute: AdminResetPasswordRoute,
+  NewsSlugRoute: NewsSlugRoute,
   ResourcesSmartFactoryGuideRoute: ResourcesSmartFactoryGuideRoute,
+  NewsIndexRoute: NewsIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

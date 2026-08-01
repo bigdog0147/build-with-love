@@ -2,16 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/g3-logo.png";
+import { SiteSearchButton } from "@/components/site-search-button";
+import { LanguageSelector } from "@/components/language-selector";
 
 const NAV = [
   { to: "/about", label: "About" },
   { to: "/technologies", label: "Technologies" },
   { to: "/industries", label: "Industries" },
+  { to: "/infrastructure", label: "Infrastructure" },
+  { to: "/sustainability", label: "Sustainability" },
   { to: "/innovation", label: "Innovation" },
   { to: "/investors", label: "Investors" },
+  { to: "/news", label: "News" },
   { to: "/careers", label: "Careers" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+const SECONDARY: readonly string[] = ["/infrastructure", "/sustainability", "/news"];
+
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -36,8 +44,8 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {NAV.map((n) => (
+        <nav className="hidden items-center gap-6 xl:flex">
+          {NAV.filter((n) => !SECONDARY.includes(n.to)).map((n) => (
             <Link
               key={n.to}
               to={n.to}
@@ -49,9 +57,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
+          <SiteSearchButton />
+          <LanguageSelector />
           <Link
             to="/login"
+
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             activeProps={{ className: "text-foreground" }}
           >
@@ -74,7 +85,7 @@ export function SiteHeader() {
 
         <button
           type="button"
-          className="grid h-9 w-9 place-items-center rounded-md border border-border lg:hidden"
+          className="grid h-9 w-9 place-items-center rounded-md border border-border xl:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -83,8 +94,12 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-border/60 lg:hidden">
+        <div className="border-t border-border/60 xl:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-6 py-4">
+            <div className="mb-2 flex items-center gap-2">
+              <SiteSearchButton />
+              <LanguageSelector />
+            </div>
             {NAV.map((n) => (
               <Link
                 key={n.to}
