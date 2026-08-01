@@ -36,6 +36,7 @@ export function SiteFooter() {
           links={[
             { to: "/technologies", label: "Core Technologies" },
             { to: "/industries", label: "Industries" },
+            { to: "/resources/smart-factory-guide", label: "Smart Factory Guide" },
           ]}
         />
         <FooterCol
