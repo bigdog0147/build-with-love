@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { KYC_EMAIL_STATUSES, type KycEmailStatus } from "@/lib/email-preview.functions";
+import { assertValidTemplateDraft } from "@/lib/email-template-validation";
+
 
 /**
  * Admin editing of the KYC decision email content (subject, HTML body and
@@ -100,15 +102,11 @@ export const saveEmailTemplateVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (input: { status: string; subject: string; html: string; text: string; note?: string }) => {
-      const subject = input.subject.trim();
-      const html = input.html.trim();
-      const text = input.text.trim();
-      if (!subject) throw new Error("The subject line cannot be empty.");
-      if (!html) throw new Error("The HTML body cannot be empty.");
-      if (!text) throw new Error("The plain-text body cannot be empty.");
-      if (subject.length > 300) throw new Error("The subject line is too long.");
-      if (html.length > 120_000 || text.length > 60_000)
-        throw new Error("The body content is too large.");
+      const { subject, html, text } = assertValidTemplateDraft({
+        subject: input.subject ?? "",
+        html: input.html ?? "",
+        text: input.text ?? "",
+      });
       return {
         status: parseStatus(input.status),
         subject,
@@ -118,6 +116,7 @@ export const saveEmailTemplateVersion = createServerFn({ method: "POST" })
       };
     },
   )
+
   .handler(async ({ data, context }): Promise<{ ok: true; version: number }> => {
     await assertAdmin(context);
     const { supabase, userId } = context;
