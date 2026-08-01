@@ -25,6 +25,12 @@ export type EmailLogRow = {
   status: string | null;
   messageId: string | null;
   tags: string[];
+  /**
+   * Every field the email platform returned for this event, including any
+   * provider response / header metadata beyond the documented shape. Rendered
+   * verbatim in the log detail drawer for troubleshooting.
+   */
+  raw: Record<string, unknown>;
 };
 
 export type EmailLogsResult = {
@@ -40,6 +46,15 @@ type Input = {
   eventType?: string;
   days?: number;
 };
+
+/** Strips non-serializable values so the row survives the RPC boundary. */
+function toJsonSafe(input: Record<string, unknown>): Record<string, unknown> {
+  try {
+    return JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
 
 export const listAdminEmailLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -90,6 +105,7 @@ export const listAdminEmailLogs = createServerFn({ method: "GET" })
           status: e.status ?? null,
           messageId: e.message_id ?? null,
           tags: e.tags ?? [],
+          raw: toJsonSafe(e as unknown as Record<string, unknown>),
         })),
         historyStartsAt: res.history_starts_at ?? null,
         hasMore: Boolean(res.pagination?.has_more),
