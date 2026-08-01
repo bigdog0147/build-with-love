@@ -218,8 +218,25 @@ export function EmailTemplateEditor({ status }: { status: KycEmailStatus }) {
               type="button"
               onClick={() => {
                 setNotice(null);
+                // Mirror the server checks locally for instant field-level feedback;
+                // the server remains authoritative.
+                const local = validateTemplateDraft({ subject, html, text });
+                if (local.length > 0) {
+                  const grouped = groupIssues(local);
+                  setFieldErrors(grouped);
+                  focusFirstBadField(grouped);
+                  setNotice({
+                    tone: "error",
+                    text: `Fix the ${local.length} highlighted ${
+                      local.length === 1 ? "problem" : "problems"
+                    } before saving.`,
+                  });
+                  return;
+                }
+                setFieldErrors({});
                 save.mutate();
               }}
+
               disabled={save.isPending || !dirty}
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/60 px-4 py-2 text-xs text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
             >
