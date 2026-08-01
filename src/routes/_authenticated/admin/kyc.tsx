@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { FileCheck2, Loader2, RefreshCw, Trash2, Upload, Eye } from "lucide-react";
+import { FileCheck2, Loader2, Mail, RefreshCw, Trash2, Upload, Eye } from "lucide-react";
 import {
   deleteExternalKycDocument,
   getExternalKycDocumentUrl,
@@ -13,6 +13,7 @@ import {
   type AdminKycRow,
   type KycSlot,
 } from "@/lib/kyc-admin.functions";
+import { getKycEmailDelivery } from "@/lib/email-status.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/kyc")({
   component: AdminKycPage,
@@ -285,5 +286,109 @@ function AdminKycPage() {
       )}
 
     </main>
+  );
+}
+
+const EVENT_TONE: Record<string, string> = {
+  sent: "text-[var(--success,#4ade80)] border-[var(--success,#4ade80)]/40",
+  rejected: "text-[var(--danger)] border-[var(--danger)]/40",
+  bounced: "text-[var(--danger)] border-[var(--danger)]/40",
+  complained: "text-[var(--danger)] border-[var(--danger)]/40",
+  suppressed: "text-[var(--gold)] border-[var(--gold)]/40",
+  rate_limited: "text-[var(--gold)] border-[var(--gold)]/40",
+  unsubscribed: "text-muted-foreground border-border",
+};
+
+const EVENT_LABEL: Record<string, string> = {
+  sent: "Sent",
+  rejected: "Rejected",
+  bounced: "Bounced",
+  complained: "Spam complaint",
+  suppressed: "Blocked (suppressed)",
+  rate_limited: "Queued (rate limited)",
+  unsubscribed: "Unsubscribed",
+};
+
+function EmailDeliveryPanel({ userId }: { userId: string }) {
+  const fetchDelivery = useServerFn(getKycEmailDelivery);
+  const q = useQuery({
+    queryKey: ["kyc-email-delivery", userId],
+    queryFn: () => fetchDelivery({ data: { userId } }),
+    retry: false,
+  });
+
+  const events = q.data?.events ?? [];
+  const latest = events[0];
+
+  return (
+    <div className="mt-6 rounded-xl border border-border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-sm font-medium">
+            <Mail className="h-4 w-4 text-[var(--gold)]" /> Decision email delivery
+          </p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            {q.data?.email ?? "Resolving recipient…"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {latest && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-xs ${EVENT_TONE[latest.eventType] ?? "border-border text-muted-foreground"}`}
+            >
+              {EVENT_LABEL[latest.eventType] ?? latest.eventType}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => q.refetch()}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} /> Refresh
+          </button>
+        </div>
+      </div>
+
+      {q.error ? (
+        <p className="mt-3 text-xs text-[var(--danger)]">{(q.error as Error).message}</p>
+      ) : q.isPending ? (
+        <p className="mt-3 text-xs text-muted-foreground">Loading delivery history…</p>
+      ) : q.data?.unavailable ? (
+        <p className="mt-3 text-xs text-muted-foreground">{q.data.unavailable}</p>
+      ) : events.length === 0 ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          No delivery events yet. A queued send appears here once the sending domain is
+          verified and the applicant's status changes.
+        </p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border/60 text-xs">
+          {events.map((e, i) => (
+            <li
+              key={`${e.messageId ?? "evt"}-${e.timestamp}-${i}`}
+              className="flex flex-wrap items-center justify-between gap-2 py-2"
+            >
+              <span className="flex items-center gap-2">
+                <span
+                  className={`rounded-full border px-2 py-0.5 ${EVENT_TONE[e.eventType] ?? "border-border text-muted-foreground"}`}
+                >
+                  {EVENT_LABEL[e.eventType] ?? e.eventType}
+                </span>
+                {e.status && <span className="text-muted-foreground">{e.status}</span>}
+              </span>
+              <span className="text-muted-foreground">
+                {new Date(e.timestamp).toLocaleString()}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {q.data?.historyStartsAt && (
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          History visible from {new Date(q.data.historyStartsAt).toLocaleDateString()}.
+          Delivered and opened outcomes are not tracked by the email platform.
+        </p>
+      )}
+    </div>
   );
 }
