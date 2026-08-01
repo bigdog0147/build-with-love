@@ -2,16 +2,22 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/g3-logo.png";
+import { SiteSearchButton } from "@/components/site-search-button";
+import { LanguageSelector } from "@/components/language-selector";
 
 const NAV = [
   { to: "/about", label: "About" },
   { to: "/technologies", label: "Technologies" },
   { to: "/industries", label: "Industries" },
+  { to: "/infrastructure", label: "Infrastructure" },
+  { to: "/sustainability", label: "Sustainability" },
   { to: "/innovation", label: "Innovation" },
   { to: "/investors", label: "Investors" },
+  { to: "/news", label: "News" },
   { to: "/careers", label: "Careers" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
