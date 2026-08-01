@@ -26,8 +26,17 @@ const CORE_KEYS = new Set([
   "event_type",
   "status",
   "message_id",
+  "event_id",
+  "eventId",
+  "id",
+  "delivery_id",
+  "deliveryId",
+  "run_id",
+  "replay_id",
+  "request_id",
   "tags",
 ]);
+
 
 const HEADER_KEYS = ["headers", "provider_headers", "response_headers", "smtp_headers"];
 const PROVIDER_KEYS = [
