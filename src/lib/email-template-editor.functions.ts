@@ -155,9 +155,10 @@ export const saveEmailTemplateVersion = createServerFn({ method: "POST" })
       template_name: TEMPLATE,
       status_key: data.status,
       version: nextVersion,
-      subject: data.subject,
-      html_body: data.html,
-      text_body: data.text,
+      subject,
+      html_body: html,
+      text_body: text,
+
       note: data.note,
       is_active: true,
       created_by: userId,
