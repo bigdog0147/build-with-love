@@ -22,10 +22,20 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
   head: () => ({
     meta: [
-      { title: "Dashboard — Gigafactory 3" },
-      { name: "description", content: "Your private banking cockpit: balances, performance, cards and transfers." },
-      { property: "og:title", content: "Dashboard — Gigafactory 3" },
-      { property: "og:description", content: "Balances, performance, cards and transfers." },
+      { title: "Member Dashboard — Gigafactory 3X" },
+      {
+        name: "description",
+        content:
+          "Your private Gigafactory 3X member portal: account balances, portfolio performance, cards, transfers and verification status in one secure cockpit.",
+      },
+      { property: "og:title", content: "Member Dashboard — Gigafactory 3X Portal" },
+      {
+        property: "og:description",
+        content:
+          "Secure member portal for Gigafactory 3X account holders: balances, performance, cards, transfers and verification.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   pendingComponent: () => (

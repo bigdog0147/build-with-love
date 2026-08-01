@@ -271,7 +271,7 @@ function LandingPage() {
                   <div className="mt-5 font-display text-xl leading-tight">{name}</div>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{desc}</p>
                   <div className="mt-6 flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] text-[var(--gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    Learn more <ArrowRight className="h-3.5 w-3.5" />
+                    Explore {name} <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </Reveal>
@@ -616,7 +616,7 @@ function LandingPage() {
                         to="/technologies"
                         className="mt-6 inline-flex items-center gap-2 rounded-xl border border-border bg-[var(--surface)] px-4 py-2.5 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--gold)]/60"
                       >
-                        Learn more <ArrowRight className="h-4 w-4" />
+                        Explore {title} <ArrowRight className="h-4 w-4" />
                       </Link>
                     </div>
                   </div>
