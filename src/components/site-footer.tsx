@@ -27,6 +27,7 @@ export function SiteFooter() {
           links={[
             { to: "/about", label: "About" },
             { to: "/innovation", label: "Innovation" },
+            { to: "/sustainability", label: "Sustainability" },
             { to: "/careers", label: "Careers" },
             { to: "/contact", label: "Contact" },
           ]}
@@ -36,16 +37,20 @@ export function SiteFooter() {
           links={[
             { to: "/technologies", label: "Core Technologies" },
             { to: "/industries", label: "Industries" },
+            { to: "/infrastructure", label: "Global Infrastructure" },
             { to: "/resources/smart-factory-guide", label: "Smart Factory Guide" },
           ]}
         />
         <FooterCol
-          title="Investors"
+          title="Investors & Media"
           links={[
-            { to: "/investors", label: "Overview" },
+            { to: "/investors", label: "Investor Overview" },
+            { to: "/news", label: "News & Press" },
+            { to: "/search", label: "Search" },
             { to: "/contact", label: "IR Contact" },
           ]}
         />
+
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-2 px-6 py-6 text-xs text-muted-foreground md:flex-row md:items-center">
