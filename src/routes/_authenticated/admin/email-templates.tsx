@@ -10,6 +10,8 @@ import {
   sendKycEmailTest,
   type KycEmailStatus,
 } from "@/lib/email-preview.functions";
+import { EmailTemplateEditor } from "@/components/admin/email-template-editor";
+
 
 export const Route = createFileRoute("/_authenticated/admin/email-templates")({
   component: EmailTemplatesPage,
@@ -158,6 +160,10 @@ function EmailTemplatesPage() {
           )}
         </div>
       </section>
+
+      <EmailTemplateEditor status={status} />
+
+
 
       <section className="mt-4 rounded-xl border border-border p-4">
         <p className="text-sm font-medium">Send a test copy</p>
