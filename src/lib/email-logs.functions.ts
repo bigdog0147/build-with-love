@@ -27,10 +27,11 @@ export type EmailLogRow = {
   tags: string[];
   /**
    * Every field the email platform returned for this event, including any
-   * provider response / header metadata beyond the documented shape. Rendered
-   * verbatim in the log detail drawer for troubleshooting.
+   * provider response / header metadata beyond the documented shape. Carried as
+   * JSON text so it stays serializable across the RPC boundary; the log detail
+   * drawer parses and renders it.
    */
-  raw: Record<string, unknown>;
+  rawJson: string;
 };
 
 export type EmailLogsResult = {
@@ -47,12 +48,12 @@ type Input = {
   days?: number;
 };
 
-/** Strips non-serializable values so the row survives the RPC boundary. */
-function toJsonSafe(input: Record<string, unknown>): Record<string, unknown> {
+/** Serializes the raw provider event, dropping anything non-serializable. */
+function toJsonSafe(input: Record<string, unknown>): string {
   try {
-    return JSON.parse(JSON.stringify(input)) as Record<string, unknown>;
+    return JSON.stringify(input);
   } catch {
-    return {};
+    return "{}";
   }
 }
 
@@ -105,7 +106,7 @@ export const listAdminEmailLogs = createServerFn({ method: "GET" })
           status: e.status ?? null,
           messageId: e.message_id ?? null,
           tags: e.tags ?? [],
-          raw: toJsonSafe(e as unknown as Record<string, unknown>),
+          rawJson: toJsonSafe(e as unknown as Record<string, unknown>),
         })),
         historyStartsAt: res.history_starts_at ?? null,
         hasMore: Boolean(res.pagination?.has_more),

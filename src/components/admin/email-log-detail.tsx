@@ -138,7 +138,15 @@ export function EmailLogDetail({
   row: EmailLogRow | null;
   onClose: () => void;
 }) {
-  const raw = row?.raw ?? {};
+  const raw = useMemo<Record<string, unknown>>(() => {
+    if (!row) return {};
+    try {
+      const parsed = JSON.parse(row.rawJson) as unknown;
+      return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }, [row]);
 
   const headers = useMemo(() => pick(raw, HEADER_KEYS), [raw]);
   const provider = useMemo(() => pick(raw, PROVIDER_KEYS), [raw]);
@@ -215,10 +223,10 @@ export function EmailLogDetail({
                   <h3 className="text-[11px] uppercase tracking-wider text-muted-foreground">
                     Raw record
                   </h3>
-                  <CopyButton value={JSON.stringify(row.raw, null, 2)} />
+                  <CopyButton value={JSON.stringify(raw, null, 2)} />
                 </div>
                 <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-black/40 p-3 font-mono text-[11px] text-muted-foreground">
-                  {JSON.stringify(row.raw, null, 2)}
+                  {JSON.stringify(raw, null, 2)}
                 </pre>
               </section>
 
