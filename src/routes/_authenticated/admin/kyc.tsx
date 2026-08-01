@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -384,6 +384,12 @@ function EmailDeliveryPanel({ userId }: { userId: string }) {
           >
             <RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} /> Refresh
           </button>
+          <Link
+            to="/admin/email-templates"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]"
+          >
+            <Eye className="h-3.5 w-3.5" /> Preview templates
+          </Link>
         </div>
       </div>
 
