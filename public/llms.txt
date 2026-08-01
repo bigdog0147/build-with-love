@@ -14,3 +14,7 @@ Gigafactory 3X builds intelligent industrial infrastructure at giga-scale. The p
 - [Investors](/investors): Growth strategy, sustainability, governance and corporate outlook.
 - [Careers](/careers): Engineering culture, internships and global opportunities.
 - [Contact](/contact): Global headquarters, regional offices and support.
+
+## Guides
+
+- [Smart Factory Guide](/resources/smart-factory-guide): Smart factory architecture, phased rollout, economics and FAQ on smart manufacturing and Industry 4.0.

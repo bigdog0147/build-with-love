@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import logo from "@/assets/g3-logo.png";
 import { SocialLinksBar } from "@/components/social-links-bar";
 
@@ -36,6 +36,7 @@ export function SiteFooter() {
           links={[
             { to: "/technologies", label: "Core Technologies" },
             { to: "/industries", label: "Industries" },
+            { to: "/resources/smart-factory-guide", label: "Smart Factory Guide" },
           ]}
         />
         <FooterCol
@@ -61,7 +62,7 @@ function FooterCol({
   links,
 }: {
   title: string;
-  links: readonly { to: "/about" | "/innovation" | "/careers" | "/contact" | "/technologies" | "/industries" | "/investors"; label: string }[];
+  links: readonly { to: LinkProps["to"]; label: string }[];
 }) {
   return (
     <div>
