@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { KYC_EMAIL_STATUSES, type KycEmailStatus } from "@/lib/email-preview.functions";
-import { assertValidTemplateDraft } from "@/lib/email-template-validation";
+import {
+  validateTemplateDraft,
+  type ValidationIssue,
+} from "@/lib/email-template-validation";
+
+export type SaveResult =
+  | { ok: true; version: number }
+  | { ok: false; issues: ValidationIssue[] };
+
 
 
 /**
