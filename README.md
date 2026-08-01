@@ -262,7 +262,19 @@ The project is designed to deploy on Lovable’s managed platform. Connect your 
 
 The canonical domain is configured as `https://gf3x.space` in `src/routes/__root.tsx` and `src/routes/sitemap[.]xml.ts`. Update these values if you change domains, and configure DNS to point to your hosting provider.
 
+### Release checklist
+
+Run through these before announcing a release:
+
+1. `bun run build` succeeds and `bun run preview` boots cleanly.
+2. Tests pass (`bunx vitest run`).
+3. Environment variables validated (see [Environment variables](#environment-variables)).
+4. Sitemap (`/sitemap.xml`) and `robots.txt` reflect any new routes.
+5. **Structured data — Google Rich Results Test.** Open <https://search.google.com/test/rich-results>, test the live URL `https://www.gf3x.space/resources/smart-factory-guide`, and confirm the **FAQ**, **Article** and **Breadcrumbs** items are all detected with **0 errors** (warnings for optional properties are acceptable). Take a screenshot of the results panel showing the detected item types and error count, and attach it to the release notes / PR as the structured-data evidence for that release. If any item is missing or errors, fix the JSON-LD in `src/routes/resources.smart-factory-guide.tsx` and re-test before shipping.
+6. Spot-check the admin portal (`/admin/login`) and customer portal (`/login`) sign-in flows on the deployed build.
+
 ---
+
 
 ## Security notes
 
