@@ -42,8 +42,8 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {NAV.map((n) => (
+        <nav className="hidden items-center gap-6 xl:flex">
+          {NAV.filter((n) => !SECONDARY.includes(n.to)).map((n) => (
             <Link
               key={n.to}
               to={n.to}
@@ -55,9 +55,12 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2 xl:flex">
+          <SiteSearchButton />
+          <LanguageSelector />
           <Link
             to="/login"
+
             className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             activeProps={{ className: "text-foreground" }}
           >
