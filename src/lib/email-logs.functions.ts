@@ -24,6 +24,10 @@ export type EmailLogRow = {
   eventType: string;
   status: string | null;
   messageId: string | null;
+  /** Provider/webhook event identifier (`event_id`), when the platform returns one. */
+  eventId: string | null;
+  /** Webhook delivery reference (`delivery_id` / `run_id` / `replay_id`), when present. */
+  deliveryId: string | null;
   tags: string[];
   /**
    * Every field the email platform returned for this event, including any
@@ -33,6 +37,7 @@ export type EmailLogRow = {
    */
   rawJson: string;
 };
+
 
 export type EmailLogsResult = {
   rows: EmailLogRow[];
@@ -56,6 +61,30 @@ function toJsonSafe(input: Record<string, unknown>): string {
     return "{}";
   }
 }
+
+/**
+ * Identifier aliases the email platform may use for the webhook event id and
+ * the delivery reference. The documented event shape omits them, but managed
+ * sends carry them through, and they are what other systems key on.
+ */
+const EVENT_ID_KEYS = ["event_id", "eventId", "id"] as const;
+const DELIVERY_ID_KEYS = [
+  "delivery_id",
+  "deliveryId",
+  "run_id",
+  "replay_id",
+  "request_id",
+] as const;
+
+function firstString(raw: Record<string, unknown>, keys: readonly string[]): string | null {
+  for (const k of keys) {
+    const v = raw[k];
+    if (typeof v === "string" && v.trim() !== "") return v;
+    if (typeof v === "number") return String(v);
+  }
+  return null;
+}
+
 
 export const listAdminEmailLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -99,15 +128,20 @@ export const listAdminEmailLogs = createServerFn({ method: "GET" })
         { apiKey },
       );
       return {
-        rows: res.data.map((e) => ({
-          timestamp: e.timestamp,
-          recipient: e.recipient,
-          eventType: e.event_type,
-          status: e.status ?? null,
-          messageId: e.message_id ?? null,
-          tags: e.tags ?? [],
-          rawJson: toJsonSafe(e as unknown as Record<string, unknown>),
-        })),
+        rows: res.data.map((e) => {
+          const raw = e as unknown as Record<string, unknown>;
+          return {
+            timestamp: e.timestamp,
+            recipient: e.recipient,
+            eventType: e.event_type,
+            status: e.status ?? null,
+            messageId: e.message_id ?? null,
+            eventId: firstString(raw, EVENT_ID_KEYS),
+            deliveryId: firstString(raw, DELIVERY_ID_KEYS),
+            tags: e.tags ?? [],
+            rawJson: toJsonSafe(raw),
+          };
+        }),
         historyStartsAt: res.history_starts_at ?? null,
         hasMore: Boolean(res.pagination?.has_more),
       };

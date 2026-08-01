@@ -8,20 +8,28 @@ const row = (over: Partial<EmailLogRow> = {}): EmailLogRow => ({
   eventType: "sent",
   status: null,
   messageId: "msg-1",
+  eventId: "evt-1",
+  deliveryId: "dlv-1",
   tags: [],
   rawJson: '{"event_type":"sent"}',
   ...over,
 });
+
 
 describe("buildEmailLogsCsv", () => {
   it("writes a header row and one line per event", () => {
     const csv = buildEmailLogsCsv([row(), row({ recipient: "b@example.com" })]);
     const lines = csv.trimEnd().split("\r\n");
     expect(lines[0]).toBe(
-      '"timestamp","recipient","event_type","status","message_id","tags","raw_json"',
+      '"timestamp","recipient","event_type","status","message_id","event_id","delivery_id","tags","raw_json"',
     );
     expect(lines).toHaveLength(3);
     expect(lines[2]).toContain('"b@example.com"');
+  });
+
+  it("includes the webhook event id and delivery reference", () => {
+    const csv = buildEmailLogsCsv([row({ eventId: "evt-9", deliveryId: "run-9" })]);
+    expect(csv).toContain('"evt-9","run-9"');
   });
 
   it("escapes quotes, commas and newlines", () => {
@@ -37,9 +45,12 @@ describe("buildEmailLogsCsv", () => {
   });
 
   it("renders null status and message id as empty cells", () => {
-    const csv = buildEmailLogsCsv([row({ status: null, messageId: null })]);
-    expect(csv.trimEnd().split("\r\n")[1]).toContain('"sent","","",""');
+    const csv = buildEmailLogsCsv([
+      row({ status: null, messageId: null, eventId: null, deliveryId: null }),
+    ]);
+    expect(csv.trimEnd().split("\r\n")[1]).toContain('"sent","","","","",""');
   });
+
 
   it("joins tags", () => {
     const csv = buildEmailLogsCsv([row({ tags: ["otp", "admin"] })]);

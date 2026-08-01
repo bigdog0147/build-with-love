@@ -26,8 +26,17 @@ const CORE_KEYS = new Set([
   "event_type",
   "status",
   "message_id",
+  "event_id",
+  "eventId",
+  "id",
+  "delivery_id",
+  "deliveryId",
+  "run_id",
+  "replay_id",
+  "request_id",
   "tags",
 ]);
+
 
 const HEADER_KEYS = ["headers", "provider_headers", "response_headers", "smtp_headers"];
 const PROVIDER_KEYS = [
@@ -193,6 +202,20 @@ export function EmailLogDetail({
                   ...(row.tags.length ? ([["tags", row.tags.join(", ")]] as const) : []),
                 ]}
               />
+
+              <Block
+                title="Cross-system references"
+                empty="The platform returned no event id or delivery reference for this event."
+                entries={[
+                  ...(row.eventId ? ([["event_id", row.eventId]] as const) : []),
+                  ...(row.deliveryId
+                    ? ([["delivery_id", row.deliveryId]] as const)
+                    : []),
+                  ...(row.messageId ? ([["message_id", row.messageId]] as const) : []),
+                ]}
+              />
+
+
 
               <Block
                 title="Delivery timestamps"

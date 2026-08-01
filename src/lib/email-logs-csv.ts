@@ -11,6 +11,8 @@ const COLUMNS = [
   "event_type",
   "status",
   "message_id",
+  "event_id",
+  "delivery_id",
   "tags",
   "raw_json",
 ] as const;
@@ -32,11 +34,14 @@ export function buildEmailLogsCsv(rows: readonly EmailLogRow[]): string {
         cell(r.eventType),
         cell(r.status ?? ""),
         cell(r.messageId ?? ""),
+        cell(r.eventId ?? ""),
+        cell(r.deliveryId ?? ""),
         cell(r.tags.join(" ")),
         cell(r.rawJson),
       ].join(","),
     );
   }
+
   // Trailing newline keeps the last record intact for strict CSV parsers.
   return `${lines.join("\r\n")}\r\n`;
 }
