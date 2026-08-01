@@ -128,15 +128,20 @@ export const listAdminEmailLogs = createServerFn({ method: "GET" })
         { apiKey },
       );
       return {
-        rows: res.data.map((e) => ({
-          timestamp: e.timestamp,
-          recipient: e.recipient,
-          eventType: e.event_type,
-          status: e.status ?? null,
-          messageId: e.message_id ?? null,
-          tags: e.tags ?? [],
-          rawJson: toJsonSafe(e as unknown as Record<string, unknown>),
-        })),
+        rows: res.data.map((e) => {
+          const raw = e as unknown as Record<string, unknown>;
+          return {
+            timestamp: e.timestamp,
+            recipient: e.recipient,
+            eventType: e.event_type,
+            status: e.status ?? null,
+            messageId: e.message_id ?? null,
+            eventId: firstString(raw, EVENT_ID_KEYS),
+            deliveryId: firstString(raw, DELIVERY_ID_KEYS),
+            tags: e.tags ?? [],
+            rawJson: toJsonSafe(raw),
+          };
+        }),
         historyStartsAt: res.history_starts_at ?? null,
         hasMore: Boolean(res.pagination?.has_more),
       };
