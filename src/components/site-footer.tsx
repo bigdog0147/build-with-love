@@ -62,7 +62,7 @@ function FooterCol({
   links,
 }: {
   title: string;
-  links: readonly { to: "/about" | "/innovation" | "/careers" | "/contact" | "/technologies" | "/industries" | "/investors"; label: string }[];
+  links: readonly { to: LinkProps["to"]; label: string }[];
 }) {
   return (
     <div>
