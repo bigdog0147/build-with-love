@@ -198,6 +198,16 @@ function CustomerLogin() {
               </div>
             )}
 
+            {unconfirmed && (
+              <Link
+                to="/verify-email"
+                search={{ email }}
+                className="block rounded-lg border border-[var(--gold)]/40 px-3 py-2 text-center text-xs text-[var(--gold)] hover:bg-[var(--gold)]/10"
+              >
+                Resend confirmation link
+              </Link>
+            )}
+
             <button
               type="submit"
               disabled={loading}
