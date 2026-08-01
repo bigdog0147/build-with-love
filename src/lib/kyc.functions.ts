@@ -71,14 +71,24 @@ export const submitKyc = createServerFn({ method: "POST" })
     const email = (claims as { email?: string })?.email;
     if (email) {
       try {
-        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
-        await sendTemplateEmail("kyc-status", email, {
-          templateData: {
-            name: (res.data as KycProfile).full_legal_name ?? undefined,
-            status: "under_review",
+        const { sendTemplateEmailWithRetry } = await import("@/lib/email-retry.server");
+        const sendRes = await sendTemplateEmailWithRetry(
+          "kyc-status",
+          email,
+          {
+            templateData: {
+              name: (res.data as KycProfile).full_legal_name ?? undefined,
+              status: "under_review",
+            },
+            idempotencyKey: `kyc-status-under_review-${userId}`,
           },
-          idempotencyKey: `kyc-status-under_review-${userId}`,
-        });
+          { attempts: 4, baseDelayMs: 1000 },
+        );
+        if (!sendRes.sent) {
+          console.error(
+            `KYC status email not delivered after ${sendRes.attempts} attempt(s): ${sendRes.reason}`,
+          );
+        }
       } catch (err) {
         console.error("KYC status email failed", err);
       }

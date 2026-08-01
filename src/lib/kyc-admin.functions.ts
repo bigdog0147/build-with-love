@@ -186,11 +186,21 @@ export const setExternalKycStatus = createServerFn({ method: "POST" })
         const { data: userRes } = await supabaseAdmin.auth.admin.getUserById(data.userId);
         const email = userRes?.user?.email;
         if (email) {
-          const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
-          await sendTemplateEmail("kyc-status", email, {
-            templateData: { status: data.status },
-            idempotencyKey: `kyc-status-${data.status}-${data.userId}`,
-          });
+          const { sendTemplateEmailWithRetry } = await import("@/lib/email-retry.server");
+          const sendRes = await sendTemplateEmailWithRetry(
+            "kyc-status",
+            email,
+            {
+              templateData: { status: data.status },
+              idempotencyKey: `kyc-status-${data.status}-${data.userId}`,
+            },
+            { attempts: 4, baseDelayMs: 1000 },
+          );
+          if (!sendRes.sent) {
+            console.error(
+              `KYC decision email not delivered after ${sendRes.attempts} attempt(s): ${sendRes.reason}`,
+            );
+          }
         }
       } catch (err) {
         console.error("KYC status email failed", err);
