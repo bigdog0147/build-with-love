@@ -117,7 +117,7 @@ export const getChatThreads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "support_tickets");
+    requirePermission(identity, "notifications");
     const db = await serviceClient();
 
     const { data: threads } = await db
@@ -146,7 +146,7 @@ export const getChatThread = createServerFn({ method: "GET" })
   .inputValidator((input: { threadId: string }) => input)
   .handler(async ({ data, context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "support_tickets");
+    requirePermission(identity, "notifications");
     const db = await serviceClient();
 
     const { data: messages } = await db
@@ -165,7 +165,7 @@ export const replyToChat = createServerFn({ method: "POST" })
   .inputValidator((input: { threadId: string; body: string; close?: boolean }) => input)
   .handler(async ({ data, context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "support_tickets");
+    requirePermission(identity, "notifications");
     const db = await serviceClient();
     const body = cleanBody(data.body);
 
