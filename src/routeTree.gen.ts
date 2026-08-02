@@ -46,6 +46,7 @@ import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDepositsRouteImport } from './routes/_authenticated/deposits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -272,6 +273,11 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
@@ -496,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposits': typeof AuthenticatedDepositsRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -569,6 +576,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposits': typeof AuthenticatedDepositsRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -644,6 +652,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deposits': typeof AuthenticatedDepositsRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
@@ -719,6 +728,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deposits'
     | '/documents'
+    | '/library'
     | '/notifications'
     | '/portfolio'
     | '/private-markets'
@@ -792,6 +802,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deposits'
     | '/documents'
+    | '/library'
     | '/notifications'
     | '/portfolio'
     | '/private-markets'
@@ -866,6 +877,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/deposits'
     | '/_authenticated/documents'
+    | '/_authenticated/library'
     | '/_authenticated/notifications'
     | '/_authenticated/portfolio'
     | '/_authenticated/private-markets'
@@ -1208,6 +1220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documents': {
       id: '/_authenticated/documents'
       path: '/documents'
@@ -1463,6 +1482,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepositsRoute: typeof AuthenticatedDepositsRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
@@ -1509,6 +1529,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepositsRoute: AuthenticatedDepositsRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
