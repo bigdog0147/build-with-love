@@ -72,6 +72,7 @@ import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminChatRouteImport } from './routes/_authenticated/admin/chat'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
+import { Route as AuthenticatedAdminApiRouteImport } from './routes/_authenticated/admin/api'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -415,6 +416,11 @@ const AuthenticatedAdminAssetsRoute =
     path: '/admin/assets',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminApiRoute = AuthenticatedAdminApiRouteImport.update({
+  id: '/admin/api',
+  path: '/admin/api',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin/analytics',
@@ -487,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/api': typeof AuthenticatedAdminApiRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -556,6 +563,7 @@ export interface FileRoutesByTo {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/api': typeof AuthenticatedAdminApiRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -627,6 +635,7 @@ export interface FileRoutesById {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/api': typeof AuthenticatedAdminApiRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
   '/_authenticated/admin/chat': typeof AuthenticatedAdminChatRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -698,6 +707,7 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/admin/analytics'
+    | '/admin/api'
     | '/admin/assets'
     | '/admin/chat'
     | '/admin/customers'
@@ -767,6 +777,7 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news'
     | '/admin/analytics'
+    | '/admin/api'
     | '/admin/assets'
     | '/admin/chat'
     | '/admin/customers'
@@ -837,6 +848,7 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/api'
     | '/_authenticated/admin/assets'
     | '/_authenticated/admin/chat'
     | '/_authenticated/admin/customers'
@@ -1339,6 +1351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAssetsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/api': {
+      id: '/_authenticated/admin/api'
+      path: '/admin/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AuthenticatedAdminApiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/analytics': {
       id: '/_authenticated/admin/analytics'
       path: '/admin/analytics'
@@ -1396,6 +1415,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
   AuthenticatedWithdrawalsRoute: typeof AuthenticatedWithdrawalsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminApiRoute: typeof AuthenticatedAdminApiRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
   AuthenticatedAdminChatRoute: typeof AuthenticatedAdminChatRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
@@ -1438,6 +1458,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
   AuthenticatedWithdrawalsRoute: AuthenticatedWithdrawalsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminApiRoute: AuthenticatedAdminApiRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
   AuthenticatedAdminChatRoute: AuthenticatedAdminChatRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
@@ -1498,3 +1519,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

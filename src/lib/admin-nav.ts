@@ -140,7 +140,7 @@ export const ADMIN_NAV: NavGroup[] = [
       },
       { label: "Audit Logs", to: "/admin/security", tab: "audit" },
       { label: "Roles & Permissions", to: "/admin/security", tab: "roles" },
-      { label: "API Keys", to: "/admin/security", tab: "keys" },
+      { label: "API Keys", to: "/admin/api", keywords: "api key token webhook integration" },
     ],
   },
   {
@@ -152,6 +152,7 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "SMTP", to: "/admin/integrations", tab: "smtp" },
       { label: "Zoho", to: "/admin/integrations", tab: "zoho" },
       { label: "SmartSupp", to: "/admin/integrations", tab: "smartsupp" },
+      { label: "Webhooks", to: "/admin/api", keywords: "webhook outbound signed event delivery" },
       { label: "Social media", to: "/admin/social" },
       { label: "External data", to: "/admin/external" },
     ],
@@ -162,7 +163,7 @@ export const ADMIN_NAV: NavGroup[] = [
     items: [
       { label: "Settings", to: "/admin/settings", tab: "general" },
       { label: "Maintenance", to: "/admin/settings", tab: "maintenance" },
-      { label: "Backup & Restore", to: "/admin/settings", tab: "backup" },
+      { label: "Backup & Restore", to: "/admin/api", keywords: "backup snapshot export restore recovery" },
       { label: "System Health", to: "/admin/settings", tab: "health" },
     ],
   },
