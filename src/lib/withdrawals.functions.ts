@@ -63,6 +63,19 @@ export const requestWithdrawal = createServerFn({ method: "POST" })
     if (kyc?.id_status !== "verified")
       throw new Error("Identity verification must be approved before you can withdraw funds.");
 
+    // Fraud controls run before any money moves.
+    const { assertNotBlocked } = await import("./risk-engine.server");
+    const { getRequestIP, getRequestHeader } = await import("@tanstack/react-start/server");
+    const assessment = await assertNotBlocked({
+      userId,
+      kind: "withdrawal",
+      amount: data.amount,
+      currency: "USD",
+      ip: getRequestIP({ xForwardedFor: true }) ?? null,
+      userAgent: getRequestHeader("user-agent") ?? null,
+      subjectType: "withdrawal_request",
+    });
+
     // Hold the amount immediately so it cannot be spent twice.
     const wallet = await moveWalletBalance(supabase, userId, data.walletId, -data.amount);
     const transactionId = await insertHeldTransaction(supabase, userId, {
@@ -92,7 +105,10 @@ export const requestWithdrawal = createServerFn({ method: "POST" })
 
     return {
       ok: true as const,
-      message: `Withdrawal of ${data.amount} ${wallet.code} submitted for review.`,
+      message:
+        assessment.band === "review"
+          ? `Withdrawal of ${data.amount} ${wallet.code} submitted — our compliance desk will complete an additional check.`
+          : `Withdrawal of ${data.amount} ${wallet.code} submitted for review.`,
     };
   });
 
