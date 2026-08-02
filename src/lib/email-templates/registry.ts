@@ -31,5 +31,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'kyc-status': kycStatusTemplate,
   'admin-password-reset': adminPasswordResetTemplate,
   'withdrawal-status': withdrawalStatusTemplate,
+  'deposit-status': depositStatusTemplate,
+  'announcement': announcementTemplate,
+  'admin-invite': adminInviteTemplate,
 }
 
