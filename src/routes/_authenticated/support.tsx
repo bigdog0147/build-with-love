@@ -5,6 +5,7 @@ import { useState } from "react";
 import { LifeBuoy } from "lucide-react";
 import { DashShell, PageHeading } from "@/components/dashboard-chrome";
 import { createSupportTicket, listSupportTickets } from "@/lib/customer.functions";
+import { LiveChat } from "@/components/live-chat";
 
 export const Route = createFileRoute("/_authenticated/support")({
   component: SupportPage,
@@ -49,8 +50,10 @@ function SupportPage() {
       <PageHeading
         eyebrow="Client desk"
         title="Support tickets"
-        sub="Raise a request and track responses from your relationship team."
+        sub="Chat live with the client desk, or raise a ticket and track responses from your relationship team."
       />
+
+      <LiveChat />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <form

@@ -58,7 +58,11 @@ export const ADMIN_NAV: NavGroup[] = [
       { label: "Withdrawals", to: "/admin/finance", tab: "withdrawals" },
       { label: "Transactions", to: "/admin/finance", tab: "transactions" },
       { label: "Fees & Limits", to: "/admin/finance", tab: "limits" },
-      { label: "Exchange Rates", to: "/admin/finance", tab: "rates" },
+      {
+        label: "Exchange Rates",
+        to: "/admin/exchange-rates",
+        keywords: "fx currency rate refresh manual override live",
+      },
     ],
   },
   {
@@ -90,6 +94,7 @@ export const ADMIN_NAV: NavGroup[] = [
     items: [
       { label: "Notifications", to: "/admin/operations", tab: "notifications" },
       { label: "Support Tickets", to: "/admin/operations", tab: "tickets" },
+      { label: "Live Chat", to: "/admin/chat", keywords: "chat message client desk conversation" },
       { label: "Documents", to: "/admin/operations", tab: "documents" },
       { label: "Reports", to: "/admin/operations", tab: "reports" },
       {
@@ -128,7 +133,11 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: "lock",
     items: [
       { label: "Security", to: "/admin/security", tab: "posture" },
-      { label: "Fraud Detection", to: "/admin/security", tab: "fraud" },
+      {
+        label: "Fraud Detection",
+        to: "/admin/risk",
+        keywords: "risk score velocity block review rules fraud",
+      },
       { label: "Audit Logs", to: "/admin/security", tab: "audit" },
       { label: "Roles & Permissions", to: "/admin/security", tab: "roles" },
       { label: "API Keys", to: "/admin/security", tab: "keys" },

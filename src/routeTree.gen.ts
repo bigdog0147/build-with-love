@@ -70,6 +70,7 @@ import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_
 import { Route as AuthenticatedAdminEmailLogsRouteImport } from './routes/_authenticated/admin/email-logs'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
+import { Route as AuthenticatedAdminChatRouteImport } from './routes/_authenticated/admin/chat'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -403,6 +404,11 @@ const AuthenticatedAdminCustomersRoute =
     path: '/admin/customers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminChatRoute = AuthenticatedAdminChatRouteImport.update({
+  id: '/admin/chat',
+  path: '/admin/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminAssetsRoute =
   AuthenticatedAdminAssetsRouteImport.update({
     id: '/admin/assets',
@@ -482,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/news/': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
@@ -550,6 +557,7 @@ export interface FileRoutesByTo {
   '/news': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
@@ -620,6 +628,7 @@ export interface FileRoutesById {
   '/news/': typeof NewsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/_authenticated/admin/chat': typeof AuthenticatedAdminChatRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
@@ -690,6 +699,7 @@ export interface FileRouteTypes {
     | '/news/'
     | '/admin/analytics'
     | '/admin/assets'
+    | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/email-logs'
@@ -758,6 +768,7 @@ export interface FileRouteTypes {
     | '/news'
     | '/admin/analytics'
     | '/admin/assets'
+    | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/email-logs'
@@ -827,6 +838,7 @@ export interface FileRouteTypes {
     | '/news/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/assets'
+    | '/_authenticated/admin/chat'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/email-logs'
@@ -1313,6 +1325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/chat': {
+      id: '/_authenticated/admin/chat'
+      path: '/admin/chat'
+      fullPath: '/admin/chat'
+      preLoaderRoute: typeof AuthenticatedAdminChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/assets': {
       id: '/_authenticated/admin/assets'
       path: '/admin/assets'
@@ -1378,6 +1397,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWithdrawalsRoute: typeof AuthenticatedWithdrawalsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
+  AuthenticatedAdminChatRoute: typeof AuthenticatedAdminChatRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminEmailLogsRoute: typeof AuthenticatedAdminEmailLogsRoute
@@ -1419,6 +1439,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWithdrawalsRoute: AuthenticatedWithdrawalsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
+  AuthenticatedAdminChatRoute: AuthenticatedAdminChatRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminEmailLogsRoute: AuthenticatedAdminEmailLogsRoute,
