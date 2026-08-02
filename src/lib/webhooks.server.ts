@@ -62,14 +62,16 @@ export async function emitWebhook(event: PlatformEvent, payload: Record<string, 
       error = err instanceof Error ? err.message : "Request failed";
     }
 
+    const ok = status != null && status >= 200 && status < 300;
     await db.from("webhook_deliveries").insert({
       endpoint_id: endpoint.id,
       event,
       payload: JSON.parse(body),
-      status_code: status,
-      response_body: responseBody || null,
-      error,
-      ok: status != null && status >= 200 && status < 300,
+      response_status: status,
+      response_body: error ?? responseBody ?? null,
+      status: ok ? "delivered" : "failed",
+      attempts: 1,
+      delivered_at: ok ? new Date().toISOString() : null,
     });
   }
 
