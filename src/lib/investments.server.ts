@@ -47,13 +47,13 @@ export async function priceInWallet(
   if (converted == null)
     throw new Error(`No exchange rate is available to fund a ${productCurrency} subscription from ${walletCode}.`);
 
-  // Spread widens the amount the investor pays, never the amount they receive.
-  const gross = converted + (applySpread(converted, SUBSCRIPTION_SPREAD_PCT) - converted) * -1;
-  const charged = converted + (converted - gross);
+  // The spread widens what the investor pays; it never reduces what they receive.
+  const discounted = applySpread(converted.amount, SUBSCRIPTION_SPREAD_PCT);
+  const charged = converted.amount + (converted.amount - discounted);
   return {
-    walletAmount: Number((charged > 0 ? charged : converted).toFixed(2)),
+    walletAmount: Number(charged.toFixed(2)),
     walletCode,
-    rate: converted / amount,
+    rate: converted.rate,
     spreadPct: SUBSCRIPTION_SPREAD_PCT,
   };
 }
