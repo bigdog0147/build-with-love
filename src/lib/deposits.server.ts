@@ -91,39 +91,28 @@ export async function notifyDepositDecision(
   reviewNote: string,
 ) {
   const approved = outcome === "approved";
-  await admin.from("notifications").insert({
-    user_id: userId,
-    kind: "deposit_status",
-    title: approved ? "Deposit confirmed" : "Deposit declined",
-    detail: approved
-      ? `Your deposit of ${deposit.amount} ${deposit.currency} has been credited to your wallet.`
-      : `Your deposit of ${deposit.amount} ${deposit.currency} could not be confirmed. ${reviewNote}`.trim(),
-    tone: approved ? "success" : "warning",
-  });
-
+  const { dispatchNotification } = await import("./notification-dispatcher.server");
   try {
-    const { data: userRes } = await admin.auth.admin.getUserById(userId);
-    const email = userRes?.user?.email;
-    if (!email) return;
-    const { sendTemplateEmailWithRetry } = await import("./email-retry.server");
-    const res = await sendTemplateEmailWithRetry(
-      "deposit-status",
-      email,
-      {
-        templateData: {
-          outcome,
-          amount: deposit.amount,
-          currency: deposit.currency,
-          method: methodLabel(deposit.method),
-          reference: deposit.reference,
-          reason: reviewNote,
-        },
-        idempotencyKey: `deposit-${outcome}-${userId}-${deposit.amount}-${deposit.currency}-${deposit.reference}`,
+    await dispatchNotification({
+      userId,
+      category: "deposits",
+      title: approved ? "Deposit confirmed" : "Deposit declined",
+      detail: approved
+        ? `Your deposit of ${deposit.amount} ${deposit.currency} has been credited to your wallet.`
+        : `Your deposit of ${deposit.amount} ${deposit.currency} could not be confirmed. ${reviewNote}`.trim(),
+      tone: approved ? "success" : "warning",
+      template: "deposit-status",
+      templateData: {
+        outcome,
+        amount: deposit.amount,
+        currency: deposit.currency,
+        method: methodLabel(deposit.method),
+        reference: deposit.reference,
+        reason: reviewNote,
       },
-      { attempts: 4, baseDelayMs: 1000 },
-    );
-    if (!res.sent) console.error(`Deposit email not delivered: ${res.reason}`);
+      idempotencyKey: `deposit-${outcome}-${userId}-${deposit.amount}-${deposit.currency}-${deposit.reference}`,
+    });
   } catch (error) {
-    console.error("Deposit decision email failed", error);
+    console.error("Deposit decision notification failed", error);
   }
 }

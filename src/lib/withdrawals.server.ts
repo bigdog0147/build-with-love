@@ -132,32 +132,21 @@ export async function notifyWithdrawalDecision(
   reviewNote: string,
 ) {
   const approved = outcome === "approved";
-  await admin.from("notifications").insert({
-    user_id: userId,
-    kind: "withdrawal_status",
-    title: approved ? "Withdrawal approved" : "Withdrawal declined",
-    detail: approved
-      ? `Your withdrawal of ${amount} ${currency} was approved and is being settled.`
-      : `Your withdrawal of ${amount} ${currency} was declined. ${reviewNote}`.trim(),
-    tone: approved ? "success" : "warning",
-  });
-
+  const { dispatchNotification } = await import("./notification-dispatcher.server");
   try {
-    const { data: userRes } = await admin.auth.admin.getUserById(userId);
-    const email = userRes?.user?.email;
-    if (!email) return;
-    const { sendTemplateEmailWithRetry } = await import("./email-retry.server");
-    const res = await sendTemplateEmailWithRetry(
-      "withdrawal-status",
-      email,
-      {
-        templateData: { outcome, amount, currency, reason: reviewNote },
-        idempotencyKey: `withdrawal-${outcome}-${userId}-${amount}-${currency}`,
-      },
-      { attempts: 4, baseDelayMs: 1000 },
-    );
-    if (!res.sent) console.error(`Withdrawal email not delivered: ${res.reason}`);
+    await dispatchNotification({
+      userId,
+      category: "withdrawals",
+      title: approved ? "Withdrawal approved" : "Withdrawal declined",
+      detail: approved
+        ? `Your withdrawal of ${amount} ${currency} was approved and is being settled.`
+        : `Your withdrawal of ${amount} ${currency} was declined. ${reviewNote}`.trim(),
+      tone: approved ? "success" : "warning",
+      template: "withdrawal-status",
+      templateData: { outcome, amount, currency, reason: reviewNote },
+      idempotencyKey: `withdrawal-${outcome}-${userId}-${amount}-${currency}`,
+    });
   } catch (err) {
-    console.error("Withdrawal decision email failed", err);
+    console.error("Withdrawal decision notification failed", err);
   }
 }
