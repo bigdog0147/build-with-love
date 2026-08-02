@@ -79,6 +79,19 @@ export const requestDeposit = createServerFn({ method: "POST" })
     if (walletError) throw new Error(walletError.message);
     if (!wallet) throw new Error("Wallet not found.");
 
+    // Fraud controls score the declaration before it enters the queue.
+    const { assertNotBlocked } = await import("./risk-engine.server");
+    const { getRequestIP, getRequestHeader } = await import("@tanstack/react-start/server");
+    await assertNotBlocked({
+      userId,
+      kind: "deposit",
+      amount: data.amount,
+      currency: wallet.code,
+      ip: getRequestIP({ xForwardedFor: true }) ?? null,
+      userAgent: getRequestHeader("user-agent") ?? null,
+      subjectType: "deposit_request",
+    });
+
     const transactionId = await insertPendingDepositTransaction(supabase, userId, {
       amount: data.amount,
       currency: wallet.code,

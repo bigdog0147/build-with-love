@@ -52,10 +52,12 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
 import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin/withdrawals'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated/admin/security'
+import { Route as AuthenticatedAdminRiskRouteImport } from './routes/_authenticated/admin/risk'
 import { Route as AuthenticatedAdminOperationsRouteImport } from './routes/_authenticated/admin/operations'
 import { Route as AuthenticatedAdminLocalizationRouteImport } from './routes/_authenticated/admin/localization'
 import { Route as AuthenticatedAdminKycRouteImport } from './routes/_authenticated/admin/kyc'
@@ -63,11 +65,14 @@ import { Route as AuthenticatedAdminInvestmentsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin/integrations'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin/finance'
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
+import { Route as AuthenticatedAdminExchangeRatesRouteImport } from './routes/_authenticated/admin/exchange-rates'
 import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_authenticated/admin/email-templates'
 import { Route as AuthenticatedAdminEmailLogsRouteImport } from './routes/_authenticated/admin/email-logs'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
+import { Route as AuthenticatedAdminChatRouteImport } from './routes/_authenticated/admin/chat'
 import { Route as AuthenticatedAdminAssetsRouteImport } from './routes/_authenticated/admin/assets'
+import { Route as AuthenticatedAdminApiRouteImport } from './routes/_authenticated/admin/api'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -295,6 +300,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicFxRefreshRoute = ApiPublicFxRefreshRouteImport.update({
+  id: '/api/public/fx-refresh',
+  path: '/api/public/fx-refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminWithdrawalsRoute =
   AuthenticatedAdminWithdrawalsRouteImport.update({
     id: '/admin/withdrawals',
@@ -319,6 +329,11 @@ const AuthenticatedAdminSecurityRoute =
     path: '/admin/security',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRiskRoute = AuthenticatedAdminRiskRouteImport.update({
+  id: '/admin/risk',
+  path: '/admin/risk',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminOperationsRoute =
   AuthenticatedAdminOperationsRouteImport.update({
     id: '/admin/operations',
@@ -360,6 +375,12 @@ const AuthenticatedAdminExternalRoute =
     path: '/admin/external',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminExchangeRatesRoute =
+  AuthenticatedAdminExchangeRatesRouteImport.update({
+    id: '/admin/exchange-rates',
+    path: '/admin/exchange-rates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEmailTemplatesRoute =
   AuthenticatedAdminEmailTemplatesRouteImport.update({
     id: '/admin/email-templates',
@@ -384,12 +405,22 @@ const AuthenticatedAdminCustomersRoute =
     path: '/admin/customers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminChatRoute = AuthenticatedAdminChatRouteImport.update({
+  id: '/admin/chat',
+  path: '/admin/chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminAssetsRoute =
   AuthenticatedAdminAssetsRouteImport.update({
     id: '/admin/assets',
     path: '/admin/assets',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminApiRoute = AuthenticatedAdminApiRouteImport.update({
+  id: '/admin/api',
+  path: '/admin/api',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin/analytics',
@@ -462,11 +493,14 @@ export interface FileRoutesByFullPath {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/api': typeof AuthenticatedAdminApiRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -474,10 +508,12 @@ export interface FileRoutesByFullPath {
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -527,11 +563,14 @@ export interface FileRoutesByTo {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news': typeof NewsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/api': typeof AuthenticatedAdminApiRoute
   '/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -539,10 +578,12 @@ export interface FileRoutesByTo {
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -594,11 +635,14 @@ export interface FileRoutesById {
   '/resources/smart-factory-guide': typeof ResourcesSmartFactoryGuideRoute
   '/news/': typeof NewsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/api': typeof AuthenticatedAdminApiRoute
   '/_authenticated/admin/assets': typeof AuthenticatedAdminAssetsRoute
+  '/_authenticated/admin/chat': typeof AuthenticatedAdminChatRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/_authenticated/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/_authenticated/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -606,10 +650,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/_authenticated/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/_authenticated/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/_authenticated/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
   '/_authenticated/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -661,11 +707,14 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/admin/analytics'
+    | '/admin/api'
     | '/admin/assets'
+    | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/exchange-rates'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -673,10 +722,12 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/localization'
     | '/admin/operations'
+    | '/admin/risk'
     | '/admin/security'
     | '/admin/settings'
     | '/admin/social'
     | '/admin/withdrawals'
+    | '/api/public/fx-refresh'
     | '/admin/'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -726,11 +777,14 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news'
     | '/admin/analytics'
+    | '/admin/api'
     | '/admin/assets'
+    | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/exchange-rates'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -738,10 +792,12 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/localization'
     | '/admin/operations'
+    | '/admin/risk'
     | '/admin/security'
     | '/admin/settings'
     | '/admin/social'
     | '/admin/withdrawals'
+    | '/api/public/fx-refresh'
     | '/admin'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -792,11 +848,14 @@ export interface FileRouteTypes {
     | '/resources/smart-factory-guide'
     | '/news/'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/api'
     | '/_authenticated/admin/assets'
+    | '/_authenticated/admin/chat'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/email-logs'
     | '/_authenticated/admin/email-templates'
+    | '/_authenticated/admin/exchange-rates'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/finance'
     | '/_authenticated/admin/integrations'
@@ -804,10 +863,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/kyc'
     | '/_authenticated/admin/localization'
     | '/_authenticated/admin/operations'
+    | '/_authenticated/admin/risk'
     | '/_authenticated/admin/security'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/social'
     | '/_authenticated/admin/withdrawals'
+    | '/api/public/fx-refresh'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/customer/$id'
     | '/lovable/email/auth/preview'
@@ -841,6 +902,7 @@ export interface RootRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
   ResourcesSmartFactoryGuideRoute: typeof ResourcesSmartFactoryGuideRoute
   NewsIndexRoute: typeof NewsIndexRoute
+  ApiPublicFxRefreshRoute: typeof ApiPublicFxRefreshRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1149,6 +1211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/fx-refresh': {
+      id: '/api/public/fx-refresh'
+      path: '/api/public/fx-refresh'
+      fullPath: '/api/public/fx-refresh'
+      preLoaderRoute: typeof ApiPublicFxRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/withdrawals': {
       id: '/_authenticated/admin/withdrawals'
       path: '/admin/withdrawals'
@@ -1175,6 +1244,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/security'
       fullPath: '/admin/security'
       preLoaderRoute: typeof AuthenticatedAdminSecurityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/risk': {
+      id: '/_authenticated/admin/risk'
+      path: '/admin/risk'
+      fullPath: '/admin/risk'
+      preLoaderRoute: typeof AuthenticatedAdminRiskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/operations': {
@@ -1226,6 +1302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExternalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/exchange-rates': {
+      id: '/_authenticated/admin/exchange-rates'
+      path: '/admin/exchange-rates'
+      fullPath: '/admin/exchange-rates'
+      preLoaderRoute: typeof AuthenticatedAdminExchangeRatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/email-templates': {
       id: '/_authenticated/admin/email-templates'
       path: '/admin/email-templates'
@@ -1254,11 +1337,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/chat': {
+      id: '/_authenticated/admin/chat'
+      path: '/admin/chat'
+      fullPath: '/admin/chat'
+      preLoaderRoute: typeof AuthenticatedAdminChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/assets': {
       id: '/_authenticated/admin/assets'
       path: '/admin/assets'
       fullPath: '/admin/assets'
       preLoaderRoute: typeof AuthenticatedAdminAssetsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/api': {
+      id: '/_authenticated/admin/api'
+      path: '/admin/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AuthenticatedAdminApiRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/analytics': {
@@ -1318,11 +1415,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRoute
   AuthenticatedWithdrawalsRoute: typeof AuthenticatedWithdrawalsRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminApiRoute: typeof AuthenticatedAdminApiRoute
   AuthenticatedAdminAssetsRoute: typeof AuthenticatedAdminAssetsRoute
+  AuthenticatedAdminChatRoute: typeof AuthenticatedAdminChatRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminEmailLogsRoute: typeof AuthenticatedAdminEmailLogsRoute
   AuthenticatedAdminEmailTemplatesRoute: typeof AuthenticatedAdminEmailTemplatesRoute
+  AuthenticatedAdminExchangeRatesRoute: typeof AuthenticatedAdminExchangeRatesRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRoute
@@ -1330,6 +1430,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminKycRoute: typeof AuthenticatedAdminKycRoute
   AuthenticatedAdminLocalizationRoute: typeof AuthenticatedAdminLocalizationRoute
   AuthenticatedAdminOperationsRoute: typeof AuthenticatedAdminOperationsRoute
+  AuthenticatedAdminRiskRoute: typeof AuthenticatedAdminRiskRoute
   AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
@@ -1357,11 +1458,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWalletsRoute: AuthenticatedWalletsRoute,
   AuthenticatedWithdrawalsRoute: AuthenticatedWithdrawalsRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminApiRoute: AuthenticatedAdminApiRoute,
   AuthenticatedAdminAssetsRoute: AuthenticatedAdminAssetsRoute,
+  AuthenticatedAdminChatRoute: AuthenticatedAdminChatRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminEmailLogsRoute: AuthenticatedAdminEmailLogsRoute,
   AuthenticatedAdminEmailTemplatesRoute: AuthenticatedAdminEmailTemplatesRoute,
+  AuthenticatedAdminExchangeRatesRoute: AuthenticatedAdminExchangeRatesRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIntegrationsRoute: AuthenticatedAdminIntegrationsRoute,
@@ -1369,6 +1473,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminKycRoute: AuthenticatedAdminKycRoute,
   AuthenticatedAdminLocalizationRoute: AuthenticatedAdminLocalizationRoute,
   AuthenticatedAdminOperationsRoute: AuthenticatedAdminOperationsRoute,
+  AuthenticatedAdminRiskRoute: AuthenticatedAdminRiskRoute,
   AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
@@ -1406,6 +1511,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsSlugRoute: NewsSlugRoute,
   ResourcesSmartFactoryGuideRoute: ResourcesSmartFactoryGuideRoute,
   NewsIndexRoute: NewsIndexRoute,
+  ApiPublicFxRefreshRoute: ApiPublicFxRefreshRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
@@ -1413,13 +1519,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
