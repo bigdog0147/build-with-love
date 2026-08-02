@@ -155,7 +155,8 @@ export const subscribeToProduct = createServerFn({ method: "POST" })
       kind: "investment",
       amount,
       currency: product.currency,
-      reference: product.slug,
+      subjectType: "investment_product",
+      subjectId: product.id,
     });
 
     const { holding, charge } = await openHolding(db, userId, {
