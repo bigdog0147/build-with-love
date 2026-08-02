@@ -6,7 +6,7 @@ import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
 import { listMarketplace } from "@/lib/investments.functions";
 import { remainingCapacity } from "@/lib/investments";
 
-export const Route = createFileRoute("/_authenticated/marketplace")({
+export const Route = createFileRoute("/_authenticated/marketplace/")({
   component: MarketplacePage,
   head: () => ({
     meta: [

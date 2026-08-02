@@ -51,6 +51,7 @@ import { Route as AuthenticatedDepositsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
+import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_authenticated/marketplace.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
 import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin/withdrawals'
@@ -295,6 +296,12 @@ const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMarketplaceIndexRoute =
+  AuthenticatedMarketplaceIndexRouteImport.update({
+    id: '/marketplace/',
+    path: '/marketplace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -515,6 +522,7 @@ export interface FileRoutesByFullPath {
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -585,6 +593,7 @@ export interface FileRoutesByTo {
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/marketplace': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -657,6 +666,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -729,6 +739,7 @@ export interface FileRouteTypes {
     | '/admin/withdrawals'
     | '/api/public/fx-refresh'
     | '/admin/'
+    | '/marketplace/'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -799,6 +810,7 @@ export interface FileRouteTypes {
     | '/admin/withdrawals'
     | '/api/public/fx-refresh'
     | '/admin'
+    | '/marketplace'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -870,6 +882,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/withdrawals'
     | '/api/public/fx-refresh'
     | '/_authenticated/admin/'
+    | '/_authenticated/marketplace/'
     | '/_authenticated/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1204,6 +1217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/marketplace/': {
+      id: '/_authenticated/marketplace/'
+      path: '/marketplace'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof AuthenticatedMarketplaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
@@ -1436,6 +1456,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
   AuthenticatedAdminWithdrawalsRoute: typeof AuthenticatedAdminWithdrawalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedMarketplaceIndexRoute: typeof AuthenticatedMarketplaceIndexRoute
   AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
 }
 
@@ -1479,6 +1500,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
   AuthenticatedAdminWithdrawalsRoute: AuthenticatedAdminWithdrawalsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedMarketplaceIndexRoute: AuthenticatedMarketplaceIndexRoute,
   AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
 }
 
