@@ -23,7 +23,7 @@ export const getRiskOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "finance.view");
+    requirePermission(identity, "security");
     const db = await serviceClient();
 
     const [{ data: events }, { data: rules }] = await Promise.all([
@@ -72,7 +72,7 @@ export const decideRiskEvent = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; decision: "cleared" | "blocked"; note?: string }) => input)
   .handler(async ({ data, context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "finance.manage");
+    requirePermission(identity, "security");
     const db = await serviceClient();
 
     const { error } = await db
@@ -103,7 +103,7 @@ export const updateRiskRule = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const identity = await requireAdminIdentity(context as never);
-    requirePermission(identity, "finance.manage");
+    requirePermission(identity, "security");
     const db = await serviceClient();
 
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
