@@ -11,7 +11,7 @@ export type RiskBand = "allow" | "review" | "block";
 
 export type RiskInput = {
   userId: string;
-  kind: "deposit" | "withdrawal" | "conversion" | "transfer";
+  kind: "deposit" | "withdrawal" | "conversion" | "transfer" | "investment";
   amount: number;
   currency: string;
   ip?: string | null;
