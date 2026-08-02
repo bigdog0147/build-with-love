@@ -51,6 +51,7 @@ import { Route as AuthenticatedDepositsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
+import { Route as AuthenticatedCapitalRaisingRouteImport } from './routes/_authenticated/capital-raising'
 import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_authenticated/marketplace.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
@@ -297,6 +298,12 @@ const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCapitalRaisingRoute =
+  AuthenticatedCapitalRaisingRouteImport.update({
+    id: '/capital-raising',
+    path: '/capital-raising',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMarketplaceIndexRoute =
   AuthenticatedMarketplaceIndexRouteImport.update({
     id: '/marketplace/',
@@ -483,6 +490,7 @@ export interface FileRoutesByFullPath {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -555,6 +563,7 @@ export interface FileRoutesByTo {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -629,6 +638,7 @@ export interface FileRoutesById {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/_authenticated/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -703,6 +713,7 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/capital-raising'
     | '/cards'
     | '/change-password'
     | '/dashboard'
@@ -775,6 +786,7 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/capital-raising'
     | '/cards'
     | '/change-password'
     | '/dashboard'
@@ -848,6 +860,7 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/_authenticated/capital-raising'
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
@@ -1230,6 +1243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/capital-raising': {
+      id: '/_authenticated/capital-raising'
+      path: '/capital-raising'
+      fullPath: '/capital-raising'
+      preLoaderRoute: typeof AuthenticatedCapitalRaisingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/marketplace/': {
       id: '/_authenticated/marketplace/'
       path: '/marketplace'
@@ -1437,6 +1457,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCapitalRaisingRoute: typeof AuthenticatedCapitalRaisingRoute
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1482,6 +1503,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCapitalRaisingRoute: AuthenticatedCapitalRaisingRoute,
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
