@@ -169,6 +169,17 @@ export const convertBetweenWallets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { fromWalletId: string; toWalletId: string; amount: number }) => input)
   .handler(async ({ data, context }) => {
+    const { assertNotBlocked } = await import("./risk-engine.server");
+    const { getRequestIP, getRequestHeader } = await import("@tanstack/react-start/server");
+    await assertNotBlocked({
+      userId: context.userId,
+      kind: "conversion",
+      amount: Number(data.amount),
+      currency: "USD",
+      ip: getRequestIP({ xForwardedFor: true }) ?? null,
+      userAgent: getRequestHeader("user-agent") ?? null,
+      subjectType: "wallet_conversion",
+    });
     const { executeWalletConversion } = await import("./fx-transfer.server");
     return executeWalletConversion(context.supabase, context.userId, data);
   });
