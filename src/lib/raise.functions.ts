@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validateCommitment } from "@/lib/investments";
-import { notifyInvestor, openHolding } from "@/lib/investments.server";
+import { notifyInvestor } from "@/lib/investments.server";
 import { moveWalletBalance } from "@/lib/withdrawals.server";
 import { logAdminAction, requireAdminPermission, serviceClient } from "@/lib/admin-guard.server";
 
