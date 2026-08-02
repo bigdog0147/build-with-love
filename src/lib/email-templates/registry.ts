@@ -2,6 +2,10 @@ import type { ComponentType } from 'react'
 import { template as kycStatusTemplate } from './kyc-status'
 import { template as adminPasswordResetTemplate } from './admin-password-reset'
 import { template as withdrawalStatusTemplate } from './withdrawal-status'
+import { template as depositStatusTemplate } from './deposit-status'
+import { template as announcementTemplate } from './announcement'
+import { template as adminInviteTemplate } from './admin-invite'
+
 
 
 
