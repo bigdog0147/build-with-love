@@ -74,6 +74,51 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          id: string
+          ip: string | null
+          target_id: string | null
+          target_label: string | null
+          target_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       admin_password_resets: {
         Row: {
           attempts: number
@@ -221,6 +266,78 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          method: Database["public"]["Enums"]["deposit_method"]
+          note: string | null
+          proof_path: string | null
+          reference: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["deposit_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          id?: string
+          method?: Database["public"]["Enums"]["deposit_method"]
+          note?: string | null
+          proof_path?: string | null
+          reference?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          method?: Database["public"]["Enums"]["deposit_method"]
+          note?: string | null
+          proof_path?: string | null
+          reference?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["deposit_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_requests_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_template_versions: {
         Row: {
           created_at: string
@@ -260,6 +377,145 @@ export type Database = {
           template_name?: string
           text_body?: string
           version?: number
+        }
+        Relationships: []
+      }
+      investment_holdings: {
+        Row: {
+          created_at: string
+          currency: string
+          current_value: number
+          id: string
+          invested: number
+          product_id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["holding_status"]
+          transaction_id: string | null
+          units: number
+          updated_at: string
+          user_id: string
+          wallet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          current_value?: number
+          id?: string
+          invested: number
+          product_id: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["holding_status"]
+          transaction_id?: string | null
+          units?: number
+          updated_at?: string
+          user_id: string
+          wallet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          current_value?: number
+          id?: string
+          invested?: number
+          product_id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["holding_status"]
+          transaction_id?: string | null
+          units?: number
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_holdings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "investment_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investment_holdings_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investment_holdings_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_products: {
+        Row: {
+          capacity: number | null
+          category: string
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          id: string
+          minimum: number
+          name: string
+          sector: string
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["product_status"]
+          summary: string
+          target_yield: number
+          term_months: number
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          id?: string
+          minimum?: number
+          name: string
+          sector?: string
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          summary?: string
+          target_yield?: number
+          term_months?: number
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          id?: string
+          minimum?: number
+          name?: string
+          sector?: string
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["product_status"]
+          summary?: string
+          target_yield?: number
+          term_months?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -428,6 +684,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_broadcasts: {
+        Row: {
+          audience: string
+          created_at: string
+          detail: string
+          email_sent: boolean
+          id: string
+          recipient_count: number
+          sent_by: string | null
+          title: string
+          tone: string
+        }
+        Insert: {
+          audience?: string
+          created_at?: string
+          detail: string
+          email_sent?: boolean
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title: string
+          tone?: string
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          detail?: string
+          email_sent?: boolean
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title?: string
+          tone?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -515,6 +807,42 @@ export type Database = {
           tier?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      report_runs: {
+        Row: {
+          created_at: string
+          generated_by: string | null
+          id: string
+          range_end: string
+          range_start: string
+          report_key: string
+          row_count: number
+          summary: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          range_end: string
+          range_start: string
+          report_key: string
+          row_count?: number
+          summary?: Json
+          title: string
+        }
+        Update: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          range_end?: string
+          range_start?: string
+          report_key?: string
+          row_count?: number
+          summary?: Json
+          title?: string
         }
         Relationships: []
       }
@@ -611,6 +939,57 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          default_currency: string
+          default_locale: string
+          deposit_min: number
+          id: boolean
+          maintenance_message: string
+          maintenance_mode: boolean
+          platform_name: string
+          registration_open: boolean
+          session_timeout_minutes: number
+          support_email: string
+          updated_at: string
+          updated_by: string | null
+          withdrawal_fee_pct: number
+          withdrawal_min: number
+        }
+        Insert: {
+          default_currency?: string
+          default_locale?: string
+          deposit_min?: number
+          id?: boolean
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          platform_name?: string
+          registration_open?: boolean
+          session_timeout_minutes?: number
+          support_email?: string
+          updated_at?: string
+          updated_by?: string | null
+          withdrawal_fee_pct?: number
+          withdrawal_min?: number
+        }
+        Update: {
+          default_currency?: string
+          default_locale?: string
+          deposit_min?: number
+          id?: boolean
+          maintenance_message?: string
+          maintenance_mode?: boolean
+          platform_name?: string
+          registration_open?: boolean
+          session_timeout_minutes?: number
+          support_email?: string
+          updated_at?: string
+          updated_by?: string | null
+          withdrawal_fee_pct?: number
+          withdrawal_min?: number
         }
         Relationships: []
       }
@@ -797,6 +1176,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      deposit_method: "bank_transfer" | "card" | "crypto" | "wire"
+      deposit_status: "pending" | "approved" | "rejected" | "cancelled"
+      holding_status: "pending" | "active" | "closed" | "rejected"
       kyc_doc_type:
         | "passport"
         | "national_id"
@@ -808,6 +1190,7 @@ export type Database = {
         | "under_review"
         | "verified"
         | "rejected"
+      product_status: "draft" | "published" | "retired"
       withdrawal_destination: "bank_account" | "external_wallet"
       withdrawal_status: "pending" | "approved" | "rejected" | "cancelled"
     }
@@ -938,6 +1321,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      deposit_method: ["bank_transfer", "card", "crypto", "wire"],
+      deposit_status: ["pending", "approved", "rejected", "cancelled"],
+      holding_status: ["pending", "active", "closed", "rejected"],
       kyc_doc_type: [
         "passport",
         "national_id",
@@ -951,6 +1337,7 @@ export const Constants = {
         "verified",
         "rejected",
       ],
+      product_status: ["draft", "published", "retired"],
       withdrawal_destination: ["bank_account", "external_wallet"],
       withdrawal_status: ["pending", "approved", "rejected", "cancelled"],
     },
