@@ -163,11 +163,7 @@ export const adminReviewHolding = createServerFn({ method: "POST" })
           .maybeSingle();
         if (wallet) {
           const { priceInWallet } = await import("@/lib/investments.server");
-          const charge = await priceInWallet(db, {
-            amount: invested,
-            productCurrency: holding.currency,
-            walletCode: wallet.code,
-          });
+          const charge = await priceInWallet(db, invested, holding.currency, wallet.code);
           await moveWalletBalance(db, holding.user_id, wallet.id, charge.walletAmount);
         }
       }
@@ -191,15 +187,16 @@ export const adminReviewHolding = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     if (data.decision === "activate") {
-      await postValuation(db, {
-        holdingId: holding.id,
-        userId: holding.user_id,
-        productId: holding.product_id,
-        unitPrice: 1,
-        value: invested,
-        note: "Opening valuation",
-        createdBy: identity.userId,
-      });
+      await postValuation(
+        db,
+        {
+          id: holding.id,
+          user_id: holding.user_id,
+          product_id: holding.product_id,
+          units: invested,
+        },
+        { unitPrice: 1, note: "Opening valuation", createdBy: identity.userId },
+      );
     }
 
     await notifyInvestor({
@@ -270,17 +267,21 @@ export const adminPostValuation = createServerFn({ method: "POST" })
     if (!holding) throw new Error("Holding not found.");
     if (holding.status !== "active") throw new Error("Only active holdings can be revalued.");
 
-    const value = Number((Number(holding.units ?? 0) * data.unitPrice).toFixed(2));
-    await postValuation(db, {
-      holdingId: holding.id,
-      userId: holding.user_id,
-      productId: holding.product_id,
-      unitPrice: data.unitPrice,
-      value,
-      asOf: data.asOf,
-      note: data.note || null,
-      createdBy: identity.userId,
-    });
+    const value = await postValuation(
+      db,
+      {
+        id: holding.id,
+        user_id: holding.user_id,
+        product_id: holding.product_id,
+        units: holding.units,
+      },
+      {
+        unitPrice: data.unitPrice,
+        asOf: data.asOf,
+        note: data.note || undefined,
+        createdBy: identity.userId,
+      },
+    );
 
     await logAdminAction(identity, {
       action: "investments.valuation.posted",
@@ -309,12 +310,33 @@ export const adminPayDistribution = createServerFn({ method: "POST" })
       throw new Error("Enter a distribution amount greater than zero.");
 
     const db = await serviceClient();
-    const result = await payDistribution(db, {
-      holdingId: data.holdingId,
+    const { data: holding } = await db
+      .from("investment_holdings")
+      .select("id, user_id, product_id, currency, wallet_id, status")
+      .eq("id", data.holdingId)
+      .maybeSingle();
+    if (!holding) throw new Error("Holding not found.");
+    if (holding.status === "rejected") throw new Error("This holding cannot receive distributions.");
+
+    await payDistribution(db, holding, {
       amount: data.amount,
       kind: data.kind,
-      note: data.note || null,
+      note: data.note || undefined,
       createdBy: identity.userId,
+    });
+
+    await notifyInvestor({
+      userId: holding.user_id,
+      title: data.kind === "income" ? "Distribution paid" : "Capital returned",
+      detail: `${data.amount.toLocaleString()} ${holding.currency} has been credited to your wallet.${data.note ? ` ${data.note}` : ""}`,
+      tone: "success",
+      template: "distribution-paid",
+      templateData: {
+        amount: data.amount,
+        currency: holding.currency,
+        kind: data.kind,
+        note: data.note || "",
+      },
     });
 
     await logAdminAction(identity, {
@@ -324,5 +346,7 @@ export const adminPayDistribution = createServerFn({ method: "POST" })
       after: { amount: data.amount, kind: data.kind },
     });
 
-    return { message: result.message };
+    return {
+      message: `${data.amount.toLocaleString()} ${holding.currency} ${data.kind === "income" ? "distribution" : "capital return"} paid.`,
+    };
   });
