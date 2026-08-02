@@ -82,7 +82,7 @@ function RatesPage() {
         <StatCard label="Currencies" value={currencies.length} />
         <StatCard label="Enabled" value={currencies.filter((c) => c.is_enabled).length} tone="success" />
         <StatCard label="Manual overrides" value={rates.filter((r) => r.is_manual).length} tone="gold" />
-        <StatCard label="Feed status" value={stale ? "Stale" : "Fresh"} tone={stale ? "gold" : "success"} />
+        <StatCard label="Stale currencies" value={rates.filter((r) => isStale(r.fetched_at)).length} tone={stale ? "gold" : "success"} />
       </div>
 
       <Panel>
@@ -95,7 +95,7 @@ function RatesPage() {
                 }`
               : "No refresh recorded yet."
           }
-          action={
+          right={
             <Button onClick={() => refreshM.mutate()} disabled={refreshM.isPending}>
               {refreshM.isPending ? "Refreshing…" : "Refresh now"}
             </Button>
@@ -140,7 +140,7 @@ function RatesPage() {
                   {rate?.is_manual ? <Badge tone="gold">Manual</Badge> : <Badge>{rate?.source ?? "—"}</Badge>}
                 </div>
                 <div className="flex items-center justify-end gap-2">
-                  <Badge tone={c.is_enabled ? "success" : "default"}>{c.is_enabled ? "Enabled" : "Disabled"}</Badge>
+                  <Badge tone={c.is_enabled ? "success" : "neutral"}>{c.is_enabled ? "Enabled" : "Disabled"}</Badge>
                   <Button
                     variant="ghost"
                     onClick={() => toggleM.mutate({ code: c.code, enabled: !c.is_enabled })}

@@ -64,6 +64,7 @@ import { Route as AuthenticatedAdminInvestmentsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin/integrations'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin/finance'
 import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authenticated/admin/external'
+import { Route as AuthenticatedAdminExchangeRatesRouteImport } from './routes/_authenticated/admin/exchange-rates'
 import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_authenticated/admin/email-templates'
 import { Route as AuthenticatedAdminEmailLogsRouteImport } from './routes/_authenticated/admin/email-logs'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
@@ -366,6 +367,12 @@ const AuthenticatedAdminExternalRoute =
     path: '/admin/external',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminExchangeRatesRoute =
+  AuthenticatedAdminExchangeRatesRouteImport.update({
+    id: '/admin/exchange-rates',
+    path: '/admin/exchange-rates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEmailTemplatesRoute =
   AuthenticatedAdminEmailTemplatesRouteImport.update({
     id: '/admin/email-templates',
@@ -473,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -539,6 +547,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/admin/external': typeof AuthenticatedAdminExternalRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -607,6 +616,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/_authenticated/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
+  '/_authenticated/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
   '/_authenticated/admin/external': typeof AuthenticatedAdminExternalRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRoute
@@ -675,6 +685,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/exchange-rates'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -741,6 +752,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/email-logs'
     | '/admin/email-templates'
+    | '/admin/exchange-rates'
     | '/admin/external'
     | '/admin/finance'
     | '/admin/integrations'
@@ -808,6 +820,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/email-logs'
     | '/_authenticated/admin/email-templates'
+    | '/_authenticated/admin/exchange-rates'
     | '/_authenticated/admin/external'
     | '/_authenticated/admin/finance'
     | '/_authenticated/admin/integrations'
@@ -1246,6 +1259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExternalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/exchange-rates': {
+      id: '/_authenticated/admin/exchange-rates'
+      path: '/admin/exchange-rates'
+      fullPath: '/admin/exchange-rates'
+      preLoaderRoute: typeof AuthenticatedAdminExchangeRatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/email-templates': {
       id: '/_authenticated/admin/email-templates'
       path: '/admin/email-templates'
@@ -1343,6 +1363,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminEmailLogsRoute: typeof AuthenticatedAdminEmailLogsRoute
   AuthenticatedAdminEmailTemplatesRoute: typeof AuthenticatedAdminEmailTemplatesRoute
+  AuthenticatedAdminExchangeRatesRoute: typeof AuthenticatedAdminExchangeRatesRoute
   AuthenticatedAdminExternalRoute: typeof AuthenticatedAdminExternalRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRoute
@@ -1382,6 +1403,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminEmailLogsRoute: AuthenticatedAdminEmailLogsRoute,
   AuthenticatedAdminEmailTemplatesRoute: AuthenticatedAdminEmailTemplatesRoute,
+  AuthenticatedAdminExchangeRatesRoute: AuthenticatedAdminExchangeRatesRoute,
   AuthenticatedAdminExternalRoute: AuthenticatedAdminExternalRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminIntegrationsRoute: AuthenticatedAdminIntegrationsRoute,
