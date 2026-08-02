@@ -1,55 +1,78 @@
-## Phase 2 — Customer Portal
+# Phase 3 — Admin Portal (fully database-backed)
 
-Most of Phase 2 already ships: registration, login, KYC wizard + status page, dashboard, wallets, investments, deposits, notifications, support tickets and change-password all exist. This plan closes the four real gaps and tightens the portal into one coherent customer experience.
+## Current state (verified)
 
----
+Already real (server functions + Cloud database): Super Admin login with lockout and forced password change, admin dashboard KPIs, customer list and detail, KYC review with decision emails, finance transactions with status changes, withdrawal approvals, email templates/logs, social links, external data.
 
-### 1. Withdrawals (new)
+Still demo-only: investments, assets, reports/operations panels, analytics, notification broadcasts, roles & permissions, and system settings (browser-local storage only). The audit view currently shows authentication events only — admin actions are not recorded.
 
-**Database** — a `withdrawal_requests` table:
-- wallet reference, amount, currency, destination type (bank / external wallet), destination label + masked details, optional note
-- status: `pending`, `approved`, `rejected`, `cancelled`; reviewer, review note, reviewed timestamp
-- customers can read and create their own rows, and cancel their own while still pending; admins can read all and approve/reject
-- created/updated timestamps with an update trigger, plus the required table grants
+This phase replaces every one of those with real data.
 
-**Customer flow** — new `/withdrawals` page:
-- amount + wallet + destination form, validated client and server side
-- **on submit the amount is held**: the wallet balance is debited immediately and a `Pending` withdrawal transaction is written, so the funds cannot be spent twice
-- blocked with a clear explainer unless identity verification is `verified` (existing KYC status drives this)
-- request list with status chips, timestamps, rejection reasons, and a cancel button for pending requests (cancel returns the held amount and marks the transaction reversed)
+## 1. Deposits — customer declares, admin approves
 
-**Admin flow** — new admin module `Admin → Withdrawals`:
-- queue of pending requests with customer, amount, destination and KYC status
-- Approve → transaction flips to `Cleared`, notification + email to the customer
-- Reject (with a required reason) → held amount returns to the wallet, transaction marked reversed, notification + email sent
+- New `deposit_requests` table: amount, currency, wallet, method (bank transfer, card, crypto), reference, proof document path, status (pending / approved / rejected / cancelled), review note, reviewer, timestamps.
+- Customer page `/deposits`: submit a deposit intent with reference and optional proof upload, see history, cancel while pending. Requires verified identity, same gate as withdrawals.
+- Admin page `/admin/deposits`: queue with filters, approve (credits the wallet and writes a cleared transaction) or decline with a note.
+- Branded decision email on approve/decline, reusing the existing email pipeline.
 
-### 2. Email verification (confirm before sign-in)
+## 2. Investment management
 
-- Keeps the current behaviour: new accounts must click the emailed confirmation link before they can sign in.
-- New public `/verify-email` page: "check your inbox" state, the address it was sent to, a **resend confirmation** button with a cooldown timer, and aria-live status announcements.
-- Registration redirects there after signup instead of showing an inline message.
-- Login shows a specific, actionable message when sign-in fails because the address is unconfirmed, with a direct link to resend.
+- New tables: `investment_products` (name, category, sector, minimum, target yield, term, status, description, cover image) and `investment_holdings` (customer, product, units, invested amount, current value, status).
+- Admin: create/edit/retire products, publish to the customer portal, view subscriptions per product, adjust valuations.
+- Customer `/private-markets` switches from static content to published products; subscribing debits the wallet and creates a holding pending admin confirmation.
 
-### 3. Transaction history (new full ledger)
+## 3. Reports
 
-New `/transactions` page:
-- filters for type, status and date range, plus free-text search on the description
-- pagination (server-side, newest first)
-- **CSV export of the currently filtered set**
-- filters live in the URL so a filtered view can be bookmarked and shared
-- dashboard's "Recent transactions" card gets a "View all" link into it
+- New `report_runs` table recording generated reports.
+- Admin Reports module generates real datasets from the database — customer growth, KYC funnel, deposits vs withdrawals, transaction volume, investment exposure — for a chosen date range, with CSV download and a stored run history.
 
-### 4. Profile & Security
+## 4. Analytics
 
-- `/settings` becomes a real profile editor: first/last name, display name, phone, country, organization and interests — all fields the profile already stores but the UI never exposed.
-- `/security` gains a consolidated overview: email-verification state, identity-verification state, two-factor state, password last-changed, and links to change password and to verification.
-- Customer sidebar navigation gains Withdrawals, Transactions and Profile & Security entries so every Phase 2 item is reachable.
+- Computed live from the database instead of seeded numbers: signups over time, verification conversion, wallet balances by currency, net flows, top products, support ticket volume.
+- Time-range switcher (7 / 30 / 90 days) with the existing chart components.
 
----
+## 5. Notifications
 
-### Technical notes
+- Admin broadcast composer: send a notification to all customers, or filter by verification status / membership tier, with optional email delivery.
+- Broadcast history table (`notification_broadcasts`) with recipient counts.
+- Per-customer notification send from the customer detail page.
 
-- Withdrawal logic lives in a new `src/lib/withdrawals.functions.ts` using `createServerFn` with `requireSupabaseAuth`; admin review functions verify the admin role through the authenticated client before acting. Balance hold/release reuses the existing wallet-adjust and transaction-log helpers in `banking.functions.ts`.
-- Approval/rejection emails reuse the existing branded email template system and retry helper, following the same shape as the KYC decision emails.
-- The transaction ledger reuses the existing CSV builder pattern already unit-tested for email logs, with its own tests for filter/format edge cases.
-- All new customer routes sit under the existing `_authenticated` layout, so they inherit the current auth gate; the verify-email page is public.
+## 6. Roles & permission management
+
+- Super Admin can invite a new administrator by email (account created server-side, temporary password, forced change on first login), assign role and granular permissions, deactivate/reactivate, force a password reset, and revoke sessions.
+- Permission checks enforced server-side on every admin server function, not just hidden in the UI.
+- The Super Admin account cannot be demoted or deactivated by anyone else.
+
+## 7. Audit logs
+
+- New `admin_audit_log` table: actor, action, target type/id, before/after summary, IP, user agent, timestamp.
+- Every privileged admin action (KYC decision, deposit/withdrawal review, customer edit, role change, settings change, broadcast) writes an entry.
+- Admin audit view: searchable and filterable by actor, action and date, with CSV export. Records are append-only — not editable or deletable from the app.
+
+## 8. System settings
+
+- New `system_settings` table (single-row config): platform name, support email, maintenance mode, registration open/closed, deposit/withdrawal minimums and fees, session timeout, default currency and language.
+- Settings move out of browser storage; changes take effect app-wide (maintenance mode gates the customer portal, registration flag gates signup) and are audit-logged.
+
+## 9. Dashboard & navigation
+
+- Dashboard KPI tiles extended with pending deposits, pending withdrawals, pending KYC and open tickets, each linking to its queue.
+- Admin navigation updated: Deposits, Reports, Analytics, Notifications, Roles & Permissions, Audit Logs and Settings point at the new real modules; retired demo tabs removed so nothing dead-ends.
+
+## Technical notes
+
+- Migrations are grouped by module (deposits, investments, reports, broadcasts, admin audit, system settings), each with grants and row-level security: customers reach only their own rows; admin-wide reads and writes go through permission-checked server functions using the privileged server client.
+- All admin logic lives in server functions with the caller's role and permission verified server-side; a shared audit helper wraps every mutation.
+- Money movements (deposit approval, investment subscription) reuse the existing balance-hold helpers so wallet and ledger stay consistent.
+- Unit tests for report/CSV builders and permission checks; typecheck and existing test suite must stay green.
+
+## Order of work
+
+1. Deposits (table, customer page, admin queue, emails)
+2. Admin audit log + permission enforcement helper
+3. Roles & admin user management
+4. System settings persistence
+5. Investment products and holdings
+6. Notifications broadcast
+7. Reports and analytics from real data
+8. Dashboard tiles + navigation cleanup
