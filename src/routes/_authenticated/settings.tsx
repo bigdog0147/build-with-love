@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { getDashboard } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { DashShell, PageHeading } from "@/components/dashboard-chrome";
+import { NotificationPreferencesPanel } from "@/components/notification-preferences";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -178,6 +179,8 @@ function SettingsPage() {
           {saving ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      <NotificationPreferencesPanel />
     </DashShell>
   );
 }
