@@ -83,7 +83,7 @@ function RiskPage() {
             <li key={e.id} className="grid gap-2 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="min-w-0">
                 <p className="text-sm">
-                  {e.customer} · {e.kind}
+                  {String(e.customer ?? "Customer")} · {e.kind}
                   {e.amount != null ? ` · ${e.amount} ${e.currency ?? ""}` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground">
