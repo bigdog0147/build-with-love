@@ -228,7 +228,7 @@ export const cancelRaiseCommitment = createServerFn({ method: "POST" })
 export const adminGetRaise = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await requireAdminPermission(context, "investments");
+    await requireAdminPermission(context as never, "investments");
     const db = await serviceClient();
     const [rounds, interests, commitments, products, profiles] = await Promise.all([
       db.from("raise_rounds").select(ROUND_SELECT).order("sort_order"),
@@ -274,7 +274,7 @@ export const adminSaveRound = createServerFn({ method: "POST" })
     }) => input,
   )
   .handler(async ({ data, context }) => {
-    const identity = await requireAdminPermission(context, "investments");
+    const identity = await requireAdminPermission(context as never, "investments");
     const db = await serviceClient();
 
     const name = String(data.name ?? "").trim();
@@ -339,7 +339,7 @@ export const adminReviewInterest = createServerFn({ method: "POST" })
     note: (input.note ?? "").slice(0, 500),
   }))
   .handler(async ({ data, context }) => {
-    const identity = await requireAdminPermission(context, "investments");
+    const identity = await requireAdminPermission(context as never, "investments");
     const db = await serviceClient();
 
     const { data: interest } = await db
@@ -419,7 +419,7 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
     note: (input.note ?? "").slice(0, 500),
   }))
   .handler(async ({ data, context }) => {
-    const identity = await requireAdminPermission(context, "investments");
+    const identity = await requireAdminPermission(context as never, "investments");
     const db = await serviceClient();
 
     const { data: commitment } = await db
