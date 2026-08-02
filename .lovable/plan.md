@@ -1,70 +1,76 @@
-## Phase 4 — Enterprise Features
 
-### 1. Multi-currency wallets
+# Phase 5 — Investor Experience
 
-- New `fx_rates` table (base USD, per-currency rate, source, fetched_at) plus `currency_settings` (enabled currencies, symbol, decimals, display order) managed from admin.
-- Wallet USD estimates stop being static ratios: balances convert through the latest stored rate, so every wallet card, the net-worth tile and the portfolio hero recompute from live rates.
-- Cross-currency transfers get a real conversion step: quoted rate, converted amount and optional spread shown before confirmation, and the resulting ledger rows record the rate used.
-- Customers can open a wallet in any enabled currency from `/wallets`; admin can enable/disable currencies platform-wide.
+## Current state (verified)
 
-### 2. Live exchange rates
+The `investment_products` and `investment_holdings` tables were created in Phase 3 but no application code reads or writes them — the only reference is the backup snapshot list. `/private-markets` renders four hardcoded opportunities and a single "request an allocation" button. `/portfolio` shows wallet totals plus the static `allocations` table, with no notion of subscriptions, cost basis or performance. `/documents` lists KYC identity files only. Admin → Investments is still the browser-local demo registry with hardcoded KPIs (12 programmes, $862M committed). There is no raise-round, valuation-history, document-library or investor-statement concept anywhere.
 
-- Server helper fetches fiat rates hourly from a free ECB-backed public API (no API key), upserts into `fx_rates`, and records success/failure.
-- A scheduled job calls a public server route on an hourly cron; if a fetch fails the last good rates stay in use and the admin panel shows staleness.
-- Admin → Exchange rates: current table, last refresh time, manual "Refresh now", and per-currency override for cases where the feed is missing a currency.
+Phase 5 turns all of that into real, database-backed investor product.
 
-### 3. Multi-language support (portal + admin)
+## 1. Project marketplace (`/marketplace`)
 
-- Dictionaries expand from public-site keys to three namespaces: public, customer portal, admin console — all six existing languages (EN, FR, DE, ES, AR, ZH) with English fallback per key.
-- Locale persists per user (profile column) instead of URL-only, so signed-in users keep their language across devices; the URL param still wins when present.
-- Shared formatting helpers for currency, numbers and dates driven by the active locale; RTL handling verified for Arabic in dashboard and admin layouts.
-- Language selector added to the portal and admin headers.
+- Published `investment_products` become the shelf: cover image, sector, category, summary, minimum, target yield, term, capacity and remaining capacity.
+- Filter by sector/category, sort by yield/minimum/term, search by name; state lives in URL search params.
+- Product detail page `/marketplace/$slug`: full description, key terms, funding progress against capacity, valuation history chart, attached documents, and the subscribe panel.
+- Subscribing debits the chosen wallet at the product currency (reusing the FX conversion helper when wallet and product currency differ), runs the fraud guard, and creates a `pending` holding for admin confirmation. Verified identity required, same gate as deposits/withdrawals.
+- Capacity is enforced server-side so a product cannot be oversubscribed.
 
-### 4. Fraud detection (rule-based scoring)
+## 2. Investor dashboard (`/investor`)
 
-- New tables: `risk_events` (subject, kind, score, triggered rules, decision) and `risk_rules` (editable thresholds).
-- Rules evaluated server-side on deposit submission, withdrawal request, login and profile/bank-detail changes: amount vs. history, velocity in a rolling window, first-time destination, country/IP mismatch, unverified-identity attempts, duplicate references.
-- Each event gets a 0–100 score and a band: allow, review (queues it and holds the money movement), or block with a reason.
-- Admin → Risk: review queue with rule breakdown and per-case release/reject, editable thresholds, and every decision written to the existing admin audit log.
+Dedicated investor overview, distinct from the banking dashboard:
 
-### 5. Live chat (both surfaces)
+- Headline tiles: total invested, current value, unrealised gain/loss with percentage, distributions received, weighted average yield, active positions.
+- Value-over-time chart built from valuation snapshots.
+- Exposure breakdowns by sector and by product, replacing the static allocation table on `/portfolio`.
+- Live commitment pipeline: interests submitted, commitments awaiting funding, pending subscriptions.
+- Recent activity: subscriptions, valuation updates, distributions.
 
-- Public marketing pages: a lightweight third-party chat widget, loaded lazily and configurable/disable-able from Admin → Integrations.
-- Customer portal: built-in secure chat — `chat_threads` and `chat_messages` tables, realtime message delivery, typing/read state, file-free text messaging tied to the signed-in user.
-- Admin → Support inbox: thread list with unread counts, reply composer, assign/close, and linkage to the existing support tickets.
+## 3. Portfolio tracking
 
-### 6. Email notification system
+- New `holding_valuations` table (holding, as-of date, unit price, value) plus `distributions` (holding, amount, kind: income / capital return, paid date) so performance is real history rather than a single mutable number.
+- `/portfolio` becomes position-level: each holding shows units, cost basis, current value, gain/loss, yield, status and a mini value sparkline, expandable to its valuation and distribution history.
+- Admin can post valuations per product (fanning out to all holdings) or per holding, and record distributions that credit the investor's wallet and write a ledger transaction.
 
-- A `notification_preferences` table per customer (deposits, withdrawals, KYC, security, announcements — each in-app and/or email).
-- All existing send points route through a single dispatcher that checks preferences and suppression before sending, so a disabled category never emails.
-- Security-event emails added (new-device login, password change, bank detail change) using the existing branded template pipeline.
-- Customer-facing preferences screen under Settings; admin can see per-customer preference state.
+## 4. Capital raising portal (`/raise`) — two stages
 
-### 7. API integrations
+- New `raise_rounds` table: name, linked product (optional), target amount, minimum ticket, currency, open/close dates, status (draft / open / closed / funded), narrative and highlights.
+- New `raise_interests` table (stage 1): non-binding expression of interest with indicative amount, notes and status (submitted / invited / declined). No money movement.
+- New `raise_commitments` table (stage 2): created only after an admin invites an interested investor; the investor confirms a firm amount, which is held from the wallet, and admin then accepts (debits and creates a holding) or releases the hold.
+- Investor view: open rounds with progress against target, submit interest, see invitations, confirm and fund a commitment, track status.
+- Admin view: round editor, interest queue with invite/decline, commitment queue with accept/release, and a funding progress panel. Every stage transition emails the investor via the existing pipeline and writes an audit entry.
 
-- Outbound: `webhook_endpoints` and `webhook_deliveries` tables — admins register a URL and subscribe to events (deposit approved, withdrawal decided, KYC decided, risk flagged); deliveries are HMAC-signed, retried with backoff and inspectable in the admin UI.
-- Inbound: a public API key mechanism (`api_keys`, hashed) with read-only endpoints for wallets/transactions scoped to the issuing customer, rate-limited and documented on an admin reference page.
-- Admin → Integrations gains real, database-backed panels replacing the current demo credential lists.
+## 5. Financial reports
 
-### 8. Backup & recovery
+- Admin Reports module (currently demo) generates real datasets recorded in `report_runs`: investor growth, subscriptions by product, capital deployed vs committed, distributions paid, portfolio valuation over time, raise-round conversion (interest → commitment → funded).
+- Date-range picker, CSV download, and a stored run history.
+- Investor-side reports on `/investor/reports`: portfolio statement, transaction statement and distribution summary for a chosen period, each with CSV export.
 
-- Admin → Backups: on-demand export of the platform's core tables (customers, wallets, transactions, deposits, withdrawals, holdings, settings) to downloadable JSON/CSV bundles, plus a scheduled nightly export recorded in a `backup_runs` table with row counts and checksum.
-- Restore is deliberately review-gated: an import preview shows exactly what would change and requires Super Admin confirmation; audit logged.
-- README gains a documented recovery runbook (what's exported, retention, restore steps, and what remains platform-managed).
+## 6. Downloadable documents
 
-### Technical notes
+- New `documents` table plus a private `investor-documents` bucket: title, category (prospectus / factsheet / term sheet / report / statement / agreement), optional product or investor scoping, visibility (all investors / single investor / product subscribers), file path, size, published date.
+- Admin uploader with scoping controls and a delete/unpublish action.
+- `/documents` gains two sections alongside the existing KYC files: **Library** (admin-uploaded documents the investor is entitled to see, downloaded through short-lived signed URLs) and **Statements** (generated portfolio/transaction statements from section 5).
+- Product detail pages surface their own attached documents.
 
-- Migrations grouped by module (fx, risk, chat, notifications, webhooks, backups), each with grants and RLS: customers reach only their own rows; admin-wide access goes through permission-checked server functions using the existing `admin-guard.server.ts` helpers with audit logging.
-- Money-affecting paths (conversion, risk hold/release) reuse the existing balance-hold helpers so wallet and ledger stay consistent.
-- Rate fetching and webhook delivery run as server routes under `/api/public/*` with signature/key verification; cron uses the anon-key pattern.
-- Unit tests for FX conversion, rule scoring, webhook signing and backup serialisation; typecheck and the existing suite stay green.
+## 7. Navigation and access
 
-### Order of work
+- Customer sidebar gains Investor overview, Marketplace, Capital raising and keeps Portfolio and Documents; `/private-markets` redirects to `/marketplace` so the existing URL keeps working.
+- Admin navigation: Investments points at the real product/holding console, with new Valuations, Distributions, Raise rounds and Documents modules; the demo registry tabs are removed.
 
-1. FX rates + multi-currency wallets and conversion
-2. Notification preferences and dispatcher (+ security emails)
-3. Fraud detection rules, scoring and review queue
-4. Portal + admin translations and locale formatting
-5. Live chat (portal chat + admin inbox, public widget)
-6. API integrations (webhooks out, keys in)
-7. Backup & recovery exports and runbook
+## Technical notes
+
+- Migrations grouped by module (valuations + distributions, raise rounds + interests + commitments, documents), each with grants and row-level security: investors read only their own holdings, interests, commitments and entitled documents; published products and open rounds are readable by authenticated investors; all admin-wide reads/writes go through permission-checked server functions using the privileged client.
+- New server-function modules: `investments.functions.ts` / `.server.ts`, `raise.functions.ts` / `.server.ts`, `investor-documents.functions.ts`, `investor-reports.functions.ts`, and admin counterparts — every admin mutation wrapped by the existing audit helper.
+- Money movement (subscription, commitment hold, distribution credit) reuses the existing balance-hold and FX helpers so wallet and ledger stay consistent; the fraud guard runs on every debit path.
+- Emails: new templates for subscription confirmation, raise invitation, commitment accepted/released and distribution paid, registered in the template registry so they inherit override/versioning and retry behaviour.
+- Unit tests for performance math (cost basis, gain/loss, weighted yield), capacity/commitment guards, statement CSV builders and entitlement checks. Typecheck plus the existing suite must stay green.
+
+## Order of work
+
+1. Valuations + distributions schema, then real product/holding server layer
+2. Marketplace list, detail and subscribe flow
+3. Investor dashboard and position-level portfolio
+4. Raise rounds: interest stage, then commitment stage, with admin queues
+5. Document library, storage bucket and entitlement-scoped downloads
+6. Financial reports (admin datasets + investor statements)
+7. Admin console rebuild for investments, valuations, distributions, rounds, documents; navigation cleanup
