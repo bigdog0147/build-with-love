@@ -233,7 +233,7 @@ export function comparisonDelta(points: ComparisonPoint[]) {
   return { absolute, percent: compare > 0 ? (absolute / compare) * 100 : 0, reference: compare };
 }
 
-
+export type AllocationDimension = "sector" | "category" | "project";
 
 export type AllocationHolding = {
   holdingId: string;
