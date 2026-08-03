@@ -9,6 +9,16 @@ import { getMarketplaceProduct, subscribeToProduct } from "@/lib/investments.fun
 import { getDocumentDownloadUrl } from "@/lib/documents.functions";
 import { remainingCapacity, toPosition } from "@/lib/investments";
 
+/** Marketplace search params are required by the router; link with the defaults. */
+const MARKETPLACE_DEFAULT_SEARCH = {
+  q: "",
+  category: "all",
+  sector: "all",
+  stage: "all",
+  maxMinimum: 0,
+  sort: "recommended" as const,
+};
+
 export const Route = createFileRoute("/_authenticated/marketplace/$slug")({
   component: ProductPage,
   head: () => ({
@@ -22,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/marketplace/$slug")({
       <div role="alert" className="glass rounded-2xl border border-border p-8">
         <div className="font-display text-xl">Opportunity unavailable</div>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-        <Link to="/marketplace" className="mt-4 inline-block text-sm text-[var(--gold)]">
+        <Link to="/marketplace" search={MARKETPLACE_DEFAULT_SEARCH} className="mt-4 inline-block text-sm text-[var(--gold)]">
           Back to marketplace
         </Link>
       </div>
@@ -98,7 +108,7 @@ function ProductPage() {
 
   return (
     <DashShell>
-      <Link to="/marketplace" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <Link to="/marketplace" search={MARKETPLACE_DEFAULT_SEARCH} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Marketplace
       </Link>
       <PageHeading
