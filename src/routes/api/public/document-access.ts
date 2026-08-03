@@ -13,6 +13,7 @@
  * redirect to it. The file itself is never public and never travels by email.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { isEntitledToDocument } from "@/lib/document-entitlement";
 import {
   VERIFY_MESSAGES,
   verifyDocumentToken,
@@ -33,30 +34,15 @@ type DocRow = {
   is_published: boolean;
 };
 
-/** Mirrors the library's RLS entitlement rules for one investor. */
+/** Loads the investor's active positions, then applies the shared entitlement rules. */
 async function isEntitled(db: any, doc: DocRow, userId: string): Promise<boolean> {
-  if (!doc.is_published) return false;
-  if (doc.visibility === "single_investor") return doc.user_id === userId;
-
-  if (doc.visibility === "product_subscribers") {
-    if (!doc.product_id) return false;
-    const { data } = await db
-      .from("investment_holdings")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("product_id", doc.product_id)
-      .eq("status", "active")
-      .limit(1);
-    return (data ?? []).length > 0;
-  }
-
   const { data } = await db
     .from("investment_holdings")
-    .select("id")
+    .select("product_id")
     .eq("user_id", userId)
-    .eq("status", "active")
-    .limit(1);
-  return (data ?? []).length > 0;
+    .eq("status", "active");
+  const activeProductIds = ((data ?? []) as { product_id: string }[]).map((r) => r.product_id);
+  return isEntitledToDocument(doc, { userId, activeProductIds });
 }
 
 function notice(message: string, status: number) {
