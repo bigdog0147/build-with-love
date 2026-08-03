@@ -3,10 +3,14 @@ import {
   activeFilterCount,
   checkSizeBounds,
   deriveStage,
+  facetCounts,
   facetValues,
   filledPercent,
   filterProducts,
   sortProducts,
+  STAGES,
+  withCount,
+
   type ShelfProduct,
 } from "./marketplace-filters";
 
@@ -113,5 +117,36 @@ describe("activeFilterCount", () => {
     expect(activeFilterCount({ sort: "yield" })).toBe(0);
     expect(activeFilterCount({ q: "  " })).toBe(0);
     expect(activeFilterCount({ q: "cell", stage: "full", maxMinimum: 1000 })).toBe(3);
+  });
+});
+
+describe("facetCounts", () => {
+  it("totals every option and includes an all bucket", () => {
+    const counts = facetCounts(products, subscribed, {}, "category");
+    expect(counts.all).toBe(products.length);
+    const sum = Object.entries(counts)
+      .filter(([k]) => k !== "all")
+      .reduce((acc, [, v]) => acc + v, 0);
+    expect(sum).toBe(products.length);
+  });
+
+  it("ignores the facet's own selection but honours other filters", () => {
+    const all = facetCounts(products, subscribed, { category: "nope" }, "category");
+    expect(all.all).toBe(products.length);
+
+    const narrowed = facetCounts(products, subscribed, { q: "cell" }, "category");
+    expect(narrowed.all).toBe(filterProducts(products, subscribed, { q: "cell" }).length);
+  });
+
+  it("always lists every funding stage, including zero matches", () => {
+    const counts = facetCounts(products, subscribed, {}, "stage");
+    for (const s of STAGES) expect(typeof counts[s.key]).toBe("number");
+  });
+});
+
+describe("withCount", () => {
+  it("renders the count and defaults to zero", () => {
+    expect(withCount("Robotics", 3)).toBe("Robotics (3)");
+    expect(withCount("Robotics", undefined)).toBe("Robotics (0)");
   });
 });

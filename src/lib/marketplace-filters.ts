@@ -147,3 +147,35 @@ export function activeFilterCount(filters: Partial<MarketplaceFilters>): number 
   if (f.maxMinimum > 0) count += 1;
   return count;
 }
+
+export type FacetKey = "category" | "sector" | "stage";
+
+/**
+ * How many listings match each option of one facet, with every *other* active
+ * filter applied. This is the standard faceted-search behaviour: changing the
+ * category doesn't hide its own alternatives, but sector/stage/search/check-size
+ * narrowing is reflected in the counts.
+ *
+ * The returned record always contains an `all` key with the total for the facet.
+ */
+export function facetCounts(
+  products: ShelfProduct[],
+  subscribedById: Record<string, number>,
+  filters: Partial<MarketplaceFilters>,
+  key: FacetKey,
+): Record<string, number> {
+  const base = filterProducts(products, subscribedById, { ...filters, [key]: "all" });
+  const counts: Record<string, number> = { all: base.length };
+  for (const p of base) {
+    const value = key === "stage" ? deriveStage(p, subscribedById[p.id] ?? 0) : (p[key] ?? "").trim();
+    if (!value) continue;
+    counts[value] = (counts[value] ?? 0) + 1;
+  }
+  if (key === "stage") for (const s of STAGES) counts[s.key] = counts[s.key] ?? 0;
+  return counts;
+}
+
+/** Appends a facet count to an option label, e.g. "Robotics (3)". */
+export function withCount(label: string, count: number | undefined): string {
+  return `${label} (${count ?? 0})`;
+}
