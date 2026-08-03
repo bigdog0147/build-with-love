@@ -20,6 +20,8 @@ interface Props {
   productName?: string
   name?: string
   libraryUrl?: string
+  documentUrl?: string
+  linkDays?: number
   isStatement?: boolean
 }
 
@@ -39,6 +41,8 @@ const Email = ({
   productName,
   name,
   libraryUrl = 'https://www.gf3x.space/library',
+  documentUrl,
+  linkDays = 7,
   isStatement,
 }: Props) => {
   const label = LABELS[category] ?? 'Document'
@@ -64,13 +68,22 @@ const Email = ({
             </Text>
             {description ? <Text style={panelText}>{description}</Text> : null}
           </Section>
-          <Button href={libraryUrl} style={button}>
-            Open document library
+          <Button href={documentUrl ?? libraryUrl} style={button}>
+            {documentUrl ? 'Download document' : 'Open document library'}
           </Button>
-          <Text style={small}>
-            Downloads are issued as short-lived private links after you sign in, so this email never
-            carries the file itself.
-          </Text>
+          {documentUrl ? (
+            <Text style={small}>
+              This link was issued to you personally and stops working after {linkDays} days. It is
+              checked against your entitlements each time it is opened, so it cannot be shared or
+              reused by anyone else. The file itself never travels by email — you can always
+              download it from your <a href={libraryUrl} style={link}>document library</a>.
+            </Text>
+          ) : (
+            <Text style={small}>
+              Downloads are issued as short-lived private links after you sign in, so this email
+              never carries the file itself.
+            </Text>
+          )}
           <Hr style={hr} />
           <Text style={footer}>
             Gigafactory 3X — Investor Relations. You are receiving this because report and statement
@@ -106,6 +119,7 @@ const button = {
   display: 'inline-block',
 }
 const small = { fontSize: '12px', lineHeight: '20px', color: '#666666', margin: '16px 0 0' }
+const link = { color: '#8a7a52' }
 const hr = { borderColor: '#e6e3dc', margin: '24px 0' }
 const footer = { fontSize: '11px', lineHeight: '18px', color: '#8a8a8a' }
 
@@ -121,5 +135,7 @@ export const template: TemplateEntry = {
     productName: 'Battery Systems Fund I',
     name: 'Alex',
     libraryUrl: 'https://www.gf3x.space/library',
+    documentUrl: 'https://www.gf3x.space/api/public/document-access?t=example.token',
+    linkDays: 7,
   },
 }

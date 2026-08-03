@@ -6,6 +6,7 @@
  * under "Reports & statements" in their notification preferences.
  */
 import { serviceClient } from "./admin-guard.server";
+import { DOCUMENT_TOKEN_TTL_SECONDS, signDocumentToken } from "./document-link-token";
 
 const SITE_URL = "https://www.gf3x.space";
 
@@ -151,6 +152,7 @@ function buildPayload(row: DocRow, productName?: string) {
       productName,
       libraryUrl: `${SITE_URL}/library`,
       isStatement: row.category === "statement",
+      linkDays: Math.round(DOCUMENT_TOKEN_TTL_SECONDS / 86_400),
     },
   };
 }
@@ -165,6 +167,24 @@ export function nextAttemptAt(attempts: number, from: Date = new Date()): string
   if (attempts >= MAX_DELIVERY_ATTEMPTS) return null;
   const minutes = RETRY_SCHEDULE_MINUTES[attempts - 1] ?? RETRY_SCHEDULE_MINUTES.at(-1)!;
   return new Date(from.getTime() + minutes * 60_000).toISOString();
+}
+
+/**
+ * Per-recipient signed download link. The token is minted fresh on every
+ * attempt, so a retry days later still hands the investor a link with a full
+ * window rather than one that is already stale. Without the secret configured
+ * the email falls back to the library, which requires signing in.
+ */
+async function buildDocumentLink(documentId: string, userId: string): Promise<string> {
+  const secret = process.env["DOCUMENT_LINK_SECRET"] ?? "";
+  if (!secret) return `${SITE_URL}/library`;
+  try {
+    const token = await signDocumentToken({ documentId, userId, secret });
+    return `${SITE_URL}/api/public/document-access?t=${encodeURIComponent(token)}`;
+  } catch (error) {
+    console.error("[documents] could not sign document link", error);
+    return `${SITE_URL}/library`;
+  }
 }
 
 type AttemptOutcome = {
@@ -190,6 +210,7 @@ async function attemptDelivery(
   },
 ): Promise<AttemptOutcome> {
   const { dispatchNotification } = await import("./notification-dispatcher.server");
+  const documentUrl = await buildDocumentLink(args.documentId, args.userId);
   const attempts = args.previousAttempts + 1;
   const now = new Date();
   const stamp = now.toISOString();
@@ -205,6 +226,7 @@ async function attemptDelivery(
   try {
     const res = await dispatchNotification({
       ...args.payload,
+      templateData: { ...args.payload.templateData, documentUrl },
       userId: args.userId,
       idempotencyKey: `document-published-${args.documentId}-${args.userId}`,
     });

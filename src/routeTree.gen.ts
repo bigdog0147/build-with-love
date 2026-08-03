@@ -58,6 +58,7 @@ import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
 import { Route as ApiPublicDocumentNotificationRetryRouteImport } from './routes/api/public/document-notification-retry'
+import { Route as ApiPublicDocumentAccessRouteImport } from './routes/api/public/document-access'
 import { Route as AuthenticatedMarketplaceSlugRouteImport } from './routes/_authenticated/marketplace.$slug'
 import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin/withdrawals'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
@@ -339,6 +340,11 @@ const ApiPublicDocumentNotificationRetryRoute =
     path: '/api/public/document-notification-retry',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDocumentAccessRoute = ApiPublicDocumentAccessRouteImport.update({
+  id: '/api/public/document-access',
+  path: '/api/public/document-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedMarketplaceSlugRoute =
   AuthenticatedMarketplaceSlugRouteImport.update({
     id: '/marketplace/$slug',
@@ -557,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
+  '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -633,6 +640,7 @@ export interface FileRoutesByTo {
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
+  '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -711,6 +719,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
   '/_authenticated/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
   '/_authenticated/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
+  '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -789,6 +798,7 @@ export interface FileRouteTypes {
     | '/admin/social'
     | '/admin/withdrawals'
     | '/marketplace/$slug'
+    | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/admin/'
@@ -865,6 +875,7 @@ export interface FileRouteTypes {
     | '/admin/social'
     | '/admin/withdrawals'
     | '/marketplace/$slug'
+    | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/admin'
@@ -942,6 +953,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/social'
     | '/_authenticated/admin/withdrawals'
     | '/_authenticated/marketplace/$slug'
+    | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/_authenticated/admin/'
@@ -978,6 +990,7 @@ export interface RootRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
   ResourcesSmartFactoryGuideRoute: typeof ResourcesSmartFactoryGuideRoute
   NewsIndexRoute: typeof NewsIndexRoute
+  ApiPublicDocumentAccessRoute: typeof ApiPublicDocumentAccessRoute
   ApiPublicDocumentNotificationRetryRoute: typeof ApiPublicDocumentNotificationRetryRoute
   ApiPublicFxRefreshRoute: typeof ApiPublicFxRefreshRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1330,6 +1343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDocumentNotificationRetryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/document-access': {
+      id: '/api/public/document-access'
+      path: '/api/public/document-access'
+      fullPath: '/api/public/document-access'
+      preLoaderRoute: typeof ApiPublicDocumentAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/marketplace/$slug': {
       id: '/_authenticated/marketplace/$slug'
       path: '/marketplace/$slug'
@@ -1640,6 +1660,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsSlugRoute: NewsSlugRoute,
   ResourcesSmartFactoryGuideRoute: ResourcesSmartFactoryGuideRoute,
   NewsIndexRoute: NewsIndexRoute,
+  ApiPublicDocumentAccessRoute: ApiPublicDocumentAccessRoute,
   ApiPublicDocumentNotificationRetryRoute:
     ApiPublicDocumentNotificationRetryRoute,
   ApiPublicFxRefreshRoute: ApiPublicFxRefreshRoute,
