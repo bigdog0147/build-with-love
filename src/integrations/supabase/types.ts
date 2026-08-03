@@ -617,8 +617,12 @@ export type Database = {
           id: string
           idempotency_key: string | null
           inapp_sent: boolean
+          last_attempt_at: string | null
+          last_error: string | null
+          next_attempt_at: string | null
           queued_at: string
           reason: string | null
+          retryable: boolean
           sent_at: string | null
           status: string
           updated_at: string
@@ -634,8 +638,12 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           inapp_sent?: boolean
+          last_attempt_at?: string | null
+          last_error?: string | null
+          next_attempt_at?: string | null
           queued_at?: string
           reason?: string | null
+          retryable?: boolean
           sent_at?: string | null
           status?: string
           updated_at?: string
@@ -651,8 +659,12 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           inapp_sent?: boolean
+          last_attempt_at?: string | null
+          last_error?: string | null
+          next_attempt_at?: string | null
           queued_at?: string
           reason?: string | null
+          retryable?: boolean
           sent_at?: string | null
           status?: string
           updated_at?: string
