@@ -177,3 +177,23 @@ export function raiseTimeline(input: {
     nextStep: "Your capital is deployed. Track performance in Portfolio and export a statement any time.",
   };
 }
+
+/**
+ * Notice-friendly view of a timeline transition: the stage the investor is now on
+ * and the highlighted next step, so alerts say exactly what the portal shows.
+ */
+export function raiseAdvanceNotice(input: Parameters<typeof raiseTimeline>[0]): {
+  stageLabel: string;
+  nextStep: string;
+  ended?: RaiseTimeline["ended"];
+} {
+  const timeline = raiseTimeline(input);
+  const stage =
+    timeline.stages.find((s) => s.state === "current") ??
+    [...timeline.stages].reverse().find((s) => s.state === "done");
+  return {
+    stageLabel: stage?.label ?? "Capital raise",
+    nextStep: timeline.nextStep,
+    ...(timeline.ended ? { ended: timeline.ended } : {}),
+  };
+}
