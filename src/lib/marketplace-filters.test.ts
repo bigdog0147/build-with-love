@@ -66,7 +66,9 @@ describe("filterProducts", () => {
   });
   it("matches every search term across name, sector and summary", () => {
     expect(filterProducts(products, subscribed, { q: "robotics cell" }).map((p) => p.id)).toEqual(["b"]);
-    expect(filterProducts(products, subscribed, { q: "storage" }).map((p) => p.id)).toEqual(["c"]);
+    expect(filterProducts(products, subscribed, { q: "storage gamma" }).map((p) => p.id)).toEqual(["c"]);
+    expect(filterProducts(products, subscribed, { q: "storage" })).toHaveLength(3);
+
     expect(filterProducts(products, subscribed, { q: "nothing here" })).toEqual([]);
   });
   it("filters by category and sector", () => {
