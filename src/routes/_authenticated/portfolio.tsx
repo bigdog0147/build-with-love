@@ -3,8 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo } from "react";
 import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
+import { PortfolioCharts } from "@/components/portfolio-charts";
 import { getInvestorOverview } from "@/lib/investments.functions";
-import { exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
+import { COUNTED_STATUSES, exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
+
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
@@ -34,6 +36,11 @@ function PortfolioPage() {
   );
   const summary = useMemo(() => summarisePortfolio(positions, data?.products ?? []), [positions, data?.products]);
   const sectors = useMemo(() => exposureBy(positions, data?.products ?? [], "sector"), [positions, data?.products]);
+  const chartHoldings = useMemo(
+    () => (data?.holdings ?? []).filter((h) => (COUNTED_STATUSES as readonly string[]).includes(h.status)),
+    [data?.holdings],
+  );
+
   const productName = useMemo(() => {
     const map: Record<string, { name: string; slug: string; currency: string }> = {};
     for (const p of data?.products ?? []) map[p.id] = { name: p.name, slug: p.slug, currency: p.currency };
@@ -64,6 +71,15 @@ function PortfolioPage() {
           tone={summary.totalReturn >= 0 ? "up" : "down"}
         />
       </div>
+
+      <PortfolioCharts
+        holdings={chartHoldings}
+        valuations={data?.valuations ?? []}
+        distributions={data?.distributions ?? []}
+        products={data?.products ?? []}
+      />
+
+
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="glass rounded-2xl border border-border p-2">
