@@ -35,6 +35,87 @@ export const Route = createFileRoute("/_authenticated/admin/investments")({
   }),
 });
 
+type ProductRow = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  sector: string;
+  summary: string;
+  description: string;
+  currency: string;
+  minimum: number;
+  target_yield: number;
+  term_months: number;
+  capacity: number | null;
+  status: string;
+};
+type HoldingRow = {
+  id: string;
+  user_id: string;
+  product_id: string;
+  units: number;
+  invested: number;
+  currency: string;
+  status: string;
+  created_at: string;
+};
+type ValuationRow = {
+  id: string;
+  holding_id: string;
+  product_id: string;
+  user_id: string;
+  as_of: string;
+  unit_price: number;
+  value: number;
+};
+type DistributionRow = {
+  id: string;
+  holding_id: string;
+  product_id: string;
+  user_id: string;
+  kind: string;
+  amount: number;
+  currency: string;
+  paid_at: string;
+};
+type RoundRow = {
+  id: string;
+  name: string;
+  product_id: string | null;
+  narrative: string;
+  highlights: string[];
+  target_amount: number;
+  minimum_ticket: number;
+  currency: string;
+  closes_at: string | null;
+  status: string;
+};
+type InterestRow = {
+  id: string;
+  round_id: string;
+  user_id: string;
+  indicative_amount: number;
+  currency: string;
+  status: string;
+  note: string | null;
+};
+type CommitmentRow = {
+  id: string;
+  round_id: string;
+  user_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+};
+type RaiseData = {
+  rounds: RoundRow[];
+  interests: InterestRow[];
+  commitments: CommitmentRow[];
+  products: ProductRow[];
+  investorNames: Record<string, string>;
+};
+
 const TABS = [
   { key: "products", label: "Products" },
   { key: "subscriptions", label: "Subscriptions" },
@@ -55,7 +136,10 @@ function InvestmentsPage() {
   const queryClient = useQueryClient();
 
   const fetchBook = useServerFn(adminGetInvestmentBook);
-  const { data: book } = useQuery({ queryKey: ["admin-investment-book"], queryFn: () => fetchBook({} as never) });
+  const { data: book } = useQuery({
+    queryKey: ["admin-investment-book"],
+    queryFn: async () => (await fetchBook({} as never)) as BookData,
+  });
 
   const positions = useMemo(
     () => (book?.holdings ?? []).map((h) => toPosition(h, book?.distributions ?? [])),
@@ -99,7 +183,14 @@ function InvestmentsPage() {
   );
 }
 
-type Book = Awaited<ReturnType<typeof adminGetInvestmentBook>> | undefined;
+type BookData = {
+  products: ProductRow[];
+  holdings: HoldingRow[];
+  valuations: ValuationRow[];
+  distributions: DistributionRow[];
+  investorNames: Record<string, string>;
+};
+type Book = BookData | undefined;
 
 function ProductsTab({ book, onDone, onFail }: { book: Book; onDone: () => void; onFail: (e: unknown) => void }) {
   const save = useServerFn(adminSaveProduct);
@@ -458,10 +549,10 @@ function PerformanceTab({
     onError: onFail,
   });
 
-  const holdingLabel = (h: { id: string; product_id: string; user_id?: string; units: number | string }) =>
-    `${book?.investorNames[(h as { user_id?: string }).user_id ?? ""] ?? "Investor"} — ${
-      names.get(h.product_id) ?? "Project"
-    } (${Number(h.units).toLocaleString()} units)`;
+  const holdingLabel = (h: HoldingRow) =>
+    `${book?.investorNames[h.user_id] ?? "Investor"} — ${names.get(h.product_id) ?? "Project"} (${Number(
+      h.units,
+    ).toLocaleString()} units)`;
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -605,7 +696,10 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
   const reviewInterest = useServerFn(adminReviewInterest);
   const reviewCommitment = useServerFn(adminReviewCommitment);
 
-  const { data } = useQuery({ queryKey: ["admin-raise"], queryFn: () => fetchRaise({} as never) });
+  const { data } = useQuery({
+    queryKey: ["admin-raise"],
+    queryFn: async () => (await fetchRaise({} as never)) as RaiseData,
+  });
   const [form, setForm] = useState({
     id: "",
     name: "",
