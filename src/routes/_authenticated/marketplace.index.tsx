@@ -79,12 +79,25 @@ function MarketplacePage() {
 
   const categories = useMemo(() => facetValues(products, "category"), [products]);
   const sectors = useMemo(() => facetValues(products, "sector"), [products]);
+  const categoryCounts = useMemo(
+    () => facetCounts(products, subscribedById, search, "category"),
+    [products, subscribedById, search],
+  );
+  const sectorCounts = useMemo(
+    () => facetCounts(products, subscribedById, search, "sector"),
+    [products, subscribedById, search],
+  );
+  const stageCounts = useMemo(
+    () => facetCounts(products, subscribedById, search, "stage"),
+    [products, subscribedById, search],
+  );
   const bounds = useMemo(() => checkSizeBounds(products), [products]);
   const visible = useMemo(
     () => sortProducts(filterProducts(products, subscribedById, search), search.sort),
     [products, subscribedById, search],
   );
   const activeCount = activeFilterCount(search);
+
 
   return (
     <DashShell>
