@@ -27,6 +27,10 @@ export type DispatchResult = {
   inapp: boolean;
   email: boolean;
   emailSkippedReason?: string;
+  /** How many send attempts the email took (retries included). */
+  emailAttempts?: number;
+  /** True when the failure was transient and another attempt could succeed. */
+  emailRetryable?: boolean;
 };
 
 type Prefs = Record<string, boolean>;
@@ -84,7 +88,11 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
     idempotencyKey: input.idempotencyKey,
   });
   result.email = sent.sent;
-  if (!sent.sent) result.emailSkippedReason = sent.reason;
+  result.emailAttempts = sent.attempts;
+  if (!sent.sent) {
+    result.emailSkippedReason = sent.reason;
+    result.emailRetryable = sent.retryable;
+  }
   return result;
 }
 
