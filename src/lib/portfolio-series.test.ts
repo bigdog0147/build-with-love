@@ -165,3 +165,54 @@ describe("allocationSlices drilldown", () => {
     expect(slices[0]!.holdings[0]!.gain).toBe(-10);
   });
 });
+
+describe("comparison modes", () => {
+  const pts = [
+    { date: "2026-03-01", value: 100, invested: 90, income: 0, total: 100 },
+    { date: "2026-04-01", value: 120, invested: 90, income: 5, total: 125 },
+  ];
+  const history = [
+    { date: "2026-01-01", value: 70, invested: 90, income: 0, total: 70 },
+    { date: "2026-02-01", value: 80, invested: 90, income: 0, total: 80 },
+    ...pts,
+  ];
+
+  it("returns null comparisons when off", () => {
+    expect(comparisonPoints({ points: pts, mode: "none" }).map((p) => p.compare)).toEqual([null, null]);
+  });
+
+  it("compares against invested capital", () => {
+    expect(comparisonPoints({ points: pts, mode: "invested" }).map((p) => p.compare)).toEqual([90, 90]);
+  });
+
+  it("compounds the benchmark from the window opening value", () => {
+    const out = comparisonPoints({ points: pts, mode: "benchmark", benchmarkAnnualRate: 0.12 });
+    expect(out[0]!.compare).toBeCloseTo(100, 6);
+    expect(out[1]!.compare).toBeCloseTo(100 * Math.pow(1.12, 31 / 365), 6);
+  });
+
+  it("shifts the previous period back by one window length", () => {
+    const out = comparisonPoints({ points: pts, allPoints: history, mode: "previous" });
+    // window = 31 days; 2026-03-01 - 31d = 2026-01-29 -> latest known total is 70
+    expect(out[0]!.compare).toBe(70);
+    // 2026-04-01 - 31d = 2026-03-01 -> 100
+    expect(out[1]!.compare).toBe(100);
+  });
+
+  it("returns null before history begins", () => {
+    const out = comparisonPoints({ points: pts, allPoints: pts, mode: "previous" });
+    expect(out[0]!.compare).toBeNull();
+  });
+
+  it("summarises the delta against the reference", () => {
+    const out = comparisonPoints({ points: pts, mode: "invested" });
+    const d = comparisonDelta(out)!;
+    expect(d.reference).toBe(90);
+    expect(d.absolute).toBeCloseTo(35, 6);
+    expect(d.percent).toBeCloseTo((35 / 90) * 100, 6);
+  });
+
+  it("has no delta when nothing is comparable", () => {
+    expect(comparisonDelta(comparisonPoints({ points: pts, mode: "none" }))).toBeNull();
+  });
+});
