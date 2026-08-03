@@ -361,7 +361,7 @@ export const adminReviewInterest = createServerFn({ method: "POST" })
 
     const { data: round } = await db
       .from("raise_rounds")
-      .select("id, name, currency, minimum_ticket")
+      .select("id, name, currency, minimum_ticket, status")
       .eq("id", interest.round_id)
       .maybeSingle();
 
@@ -450,7 +450,7 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
 
     const { data: round } = await db
       .from("raise_rounds")
-      .select("id, name, product_id, currency")
+      .select("id, name, product_id, currency, status")
       .eq("id", commitment.round_id)
       .maybeSingle();
 
