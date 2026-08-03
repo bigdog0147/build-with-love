@@ -556,3 +556,113 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
 
     return { message: `Commitment accepted${holdingId ? " and holding created" : ""}.` };
   });
+
+/**
+ * Update a round's lifecycle status and automatically send the matching
+ * decision email + in-app notice to every investor participating in it.
+ */
+export const adminUpdateRoundStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: { id: string; status: "draft" | "open" | "closed" | "funded"; note?: string; notify?: boolean }) => ({
+      id: String(input.id ?? ""),
+      status: input.status,
+      note: (input.note ?? "").slice(0, 500),
+      notify: input.notify !== false,
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const identity = await requireAdminPermission(context as never, "investments");
+    const db = await serviceClient();
+
+    const allowed = ["draft", "open", "closed", "funded"];
+    if (!allowed.includes(data.status)) throw new Error("Unknown round status.");
+
+    const { data: round } = await db
+      .from("raise_rounds")
+      .select("id, name, currency, target_amount, minimum_ticket, closes_at, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!round) throw new Error("Round not found.");
+    if (round.status === data.status) throw new Error(`This round is already ${data.status}.`);
+
+    const { error } = await db
+      .from("raise_rounds")
+      .update({ status: data.status })
+      .eq("id", round.id);
+    if (error) throw new Error(error.message);
+
+    let notified = 0;
+    if (data.notify) {
+      const [interests, commitments] = await Promise.all([
+        db
+          .from("raise_interests")
+          .select("user_id, status")
+          .eq("round_id", round.id)
+          .in("status", ["submitted", "invited"]),
+        db
+          .from("raise_commitments")
+          .select("user_id, status")
+          .eq("round_id", round.id)
+          .in("status", ["awaiting_funding", "funded", "accepted"]),
+      ]);
+
+      const recipients = new Set<string>();
+      for (const row of interests.data ?? []) recipients.add(row.user_id);
+      for (const row of commitments.data ?? []) recipients.add(row.user_id);
+
+      const titles: Record<string, string> = {
+        open: "Round now open",
+        closed: "Round closed",
+        funded: "Round fully funded",
+        draft: "Round paused",
+      };
+      const details: Record<string, string> = {
+        open: `${round.name} is now open for participation. Register or confirm your indication in the capital raising portal.`,
+        closed: `${round.name} is now closed. Accepted commitments remain deployed; anything still held is returned to your wallet.`,
+        funded: `${round.name} has reached its target and is fully funded. Accepted commitments are tracked in your portfolio.`,
+        draft: `${round.name} has been paused while the desk revises its terms. Your indication is retained.`,
+      };
+      const tones: Record<string, "info" | "success" | "warning"> = {
+        open: "success",
+        closed: "warning",
+        funded: "success",
+        draft: "warning",
+      };
+
+      for (const userId of recipients) {
+        await notifyInvestor({
+          userId,
+          title: titles[data.status]!,
+          detail: `${details[data.status]!}${data.note ? ` ${data.note}` : ""}`,
+          tone: tones[data.status] ?? "info",
+          template: "raise-round-update",
+          templateData: {
+            outcome: data.status,
+            roundName: round.name,
+            currency: round.currency,
+            targetAmount: Number(round.target_amount ?? 0),
+            minimumTicket: Number(round.minimum_ticket ?? 0),
+            closesAt: round.closes_at ? String(round.closes_at).slice(0, 10) : "",
+            note: data.note || "",
+          },
+          idempotencyKey: `raise-round-${round.id}-${data.status}-${userId}`,
+        });
+        notified += 1;
+      }
+    }
+
+    await logAdminAction(identity, {
+      action: "raise.round.status",
+      targetType: "raise_round",
+      targetId: round.id,
+      targetLabel: round.name,
+      before: { status: round.status },
+      after: { status: data.status, notified, note: data.note || null },
+    });
+
+    return {
+      message: `${round.name} marked ${data.status}${data.notify ? ` · ${notified} investor${notified === 1 ? "" : "s"} notified` : " · no emails sent"}.`,
+      notified,
+    };
+  });
