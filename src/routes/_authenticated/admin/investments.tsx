@@ -12,7 +12,13 @@ import {
   adminReviewHolding,
   adminSaveProduct,
 } from "@/lib/investments.admin.functions";
-import { adminGetRaise, adminReviewCommitment, adminReviewInterest, adminSaveRound } from "@/lib/raise.functions";
+import {
+  adminGetRaise,
+  adminReviewCommitment,
+  adminReviewInterest,
+  adminSaveRound,
+  adminUpdateRoundStatus,
+} from "@/lib/raise.functions";
 import { AdminDocumentLibrary } from "@/components/admin/document-library";
 import { exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
 
@@ -696,6 +702,7 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
   const saveRound = useServerFn(adminSaveRound);
   const reviewInterest = useServerFn(adminReviewInterest);
   const reviewCommitment = useServerFn(adminReviewCommitment);
+  const updateRoundStatus = useServerFn(adminUpdateRoundStatus);
 
   const { data } = useQuery({
     queryKey: ["admin-raise"],
@@ -714,6 +721,7 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
     status: "draft",
   });
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [notify, setNotify] = useState<Record<string, boolean>>({});
 
   const refresh = (message: string) => {
     toast.success(message);
@@ -743,6 +751,17 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
       refresh(r.message);
       setForm({ ...form, id: "" });
     },
+    onError: onFail,
+  });
+
+  const roundStatus = useMutation({
+    mutationFn: (vars: {
+      id: string;
+      status: "draft" | "open" | "closed" | "funded";
+      note?: string;
+      notify?: boolean;
+    }) => updateRoundStatus({ data: vars }),
+    onSuccess: (r) => refresh(r.message),
     onError: onFail,
   });
 
