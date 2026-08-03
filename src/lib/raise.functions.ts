@@ -14,7 +14,7 @@ export const getRaisePortal = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [rounds, interests, commitments, wallets, kyc] = await Promise.all([
+    const [rounds, interests, commitments, wallets, kyc, profile] = await Promise.all([
       supabase.from("raise_rounds").select(ROUND_SELECT).neq("status", "draft").order("sort_order"),
       supabase
         .from("raise_interests")
@@ -26,6 +26,7 @@ export const getRaisePortal = createServerFn({ method: "GET" })
         .eq("user_id", userId),
       supabase.from("wallets").select("id, code, label, balance").eq("user_id", userId).order("sort_order"),
       supabase.from("kyc_profiles").select("id_status").eq("user_id", userId).maybeSingle(),
+      supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle(),
     ]);
     if (rounds.error) throw new Error(rounds.error.message);
 
@@ -46,6 +47,8 @@ export const getRaisePortal = createServerFn({ method: "GET" })
       wallets: wallets.data ?? [],
       committed,
       idStatus: (kyc.data?.id_status as string | undefined) ?? "not_started",
+      // Named on downloaded decision confirmations.
+      investor: { name: profile.data?.display_name ?? "Investor" },
     };
   });
 

@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { History, ChevronDown } from "lucide-react";
+import { History, ChevronDown, Download } from "lucide-react";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
+import {
+  buildRaiseConfirmation,
+  downloadRaiseConfirmation,
+  raiseConfirmationTitle,
+} from "@/lib/raise-confirmation";
 
 const TONE: Record<RaiseHistoryTone, string> = {
   neutral: "hsl(var(--border))",
@@ -25,9 +30,13 @@ function stamp(at: string | null) {
 export function RaiseHistoryTimeline({
   events,
   roundName,
+  currency = "USD",
+  investorName = "Investor",
 }: {
   events: RaiseHistoryEvent[];
   roundName?: string;
+  currency?: string;
+  investorName?: string;
 }) {
   const [open, setOpen] = useState(false);
   if (events.length === 0) return null;
@@ -91,6 +100,32 @@ export function RaiseHistoryTimeline({
                     {stamp(event.at)}
                   </time>
                   <p className="mt-1 text-sm text-muted-foreground">{event.detail}</p>
+                  {event.downloadable && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadRaiseConfirmation(
+                          buildRaiseConfirmation({
+                            kind: event.key,
+                            reference: event.reference ?? event.key,
+                            roundName: roundName ?? "Capital raise",
+                            currency,
+                            investorName,
+                            amount: event.amount ?? null,
+                            decidedAt: event.at,
+                            actor: event.actor,
+                            headline: event.label,
+                            detail: event.detail,
+                            note: event.note ?? null,
+                          }),
+                        )
+                      }
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+                    >
+                      <Download className="h-3.5 w-3.5" aria-hidden />
+                      Download {raiseConfirmationTitle(event.key).toLowerCase()}
+                    </button>
+                  )}
                 </div>
               </li>
             );

@@ -175,7 +175,12 @@ function CapitalRaisingPage() {
               </div>
 
               <div className="mt-4">
-                <RaiseHistoryTimeline events={history} roundName={round.name} />
+                <RaiseHistoryTimeline
+                  events={history}
+                  roundName={round.name}
+                  currency={round.currency}
+                  investorName={data?.investor?.name ?? "Investor"}
+                />
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
