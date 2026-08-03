@@ -33,6 +33,14 @@ import {
   readStoredRange,
   writeStoredRange,
 } from "@/lib/portfolio-preferences";
+import {
+  buildPortfolioCsv,
+  buildPortfolioReportHtml,
+  downloadTextFile,
+  portfolioCsvFileName,
+  printPortfolioReport,
+} from "@/lib/portfolio-export";
+
 
 const SLICE_COLORS = [
   "var(--gold)",
