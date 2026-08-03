@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   allocationSlices,
+  comparisonDelta,
+  comparisonPoints,
   performanceSeries,
   rangeStart,
   seriesDelta,
