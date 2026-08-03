@@ -74,7 +74,8 @@ function MarketplacePage() {
   const subscribedById = data?.subscribed ?? {};
 
   const setFilter = (patch: Partial<Search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
+
 
   const categories = useMemo(() => facetValues(products, "category"), [products]);
   const sectors = useMemo(() => facetValues(products, "sector"), [products]);
