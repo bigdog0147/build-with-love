@@ -13,11 +13,16 @@ import {
 } from "recharts";
 import { money } from "@/components/dashboard-chrome";
 import {
+  BENCHMARKS,
+  COMPARISONS,
   RANGES,
   allocationSlices,
+  comparisonDelta,
+  comparisonPoints,
   performanceSeries,
   seriesDelta,
   type AllocationDimension,
+  type ComparisonMode,
   type RangeKey,
   type SeriesDistribution,
   type SeriesHolding,
@@ -93,6 +98,8 @@ export function PortfolioCharts({
   const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
   const [selected, setSelected] = useState<string | null>(null);
+  const [comparison, setComparison] = useState<ComparisonMode>("invested");
+  const [benchmark, setBenchmark] = useState<string>(BENCHMARKS[2]!.key);
 
   // Restore after mount so SSR markup and hydration stay identical.
   useEffect(() => {
@@ -108,6 +115,35 @@ export function PortfolioCharts({
   const points = useMemo(
     () => performanceSeries({ holdings, valuations, distributions, range }),
     [holdings, valuations, distributions, range],
+  );
+  const allPoints = useMemo(
+    () => performanceSeries({ holdings, valuations, distributions, range: "ALL" }),
+    [holdings, valuations, distributions],
+  );
+  const benchmarkRate = useMemo(
+    () => BENCHMARKS.find((b) => b.key === benchmark)?.annualRate ?? 0,
+    [benchmark],
+  );
+  const chartPoints = useMemo(
+    () =>
+      comparisonPoints({
+        points,
+        allPoints,
+        mode: comparison,
+        benchmarkAnnualRate: benchmarkRate,
+      }),
+    [points, allPoints, comparison, benchmarkRate],
+  );
+  const compareLabel = useMemo(() => {
+    if (comparison === "invested") return "Invested";
+    if (comparison === "previous") return "Previous period";
+    if (comparison === "benchmark")
+      return BENCHMARKS.find((b) => b.key === benchmark)?.label ?? "Benchmark";
+    return "";
+  }, [comparison, benchmark]);
+  const compareDelta = useMemo(
+    () => (comparison === "none" ? null : comparisonDelta(chartPoints)),
+    [chartPoints, comparison],
   );
   const delta = useMemo(() => seriesDelta(points), [points]);
   const slices = useMemo(() => allocationSlices({ holdings, products, dimension }), [holdings, products, dimension]);
@@ -128,21 +164,51 @@ export function PortfolioCharts({
           <Toggle options={RANGES} value={range} onChange={changeRange} label="Performance time range" />
         </div>
 
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Compare</span>
+          <Toggle options={COMPARISONS} value={comparison} onChange={setComparison} label="Performance comparison mode" />
+          {comparison === "benchmark" ? (
+            <select
+              aria-label="Benchmark"
+              value={benchmark}
+              onChange={(e) => setBenchmark(e.target.value)}
+              className="rounded-full border border-border bg-transparent px-3 py-1.5 text-xs text-foreground"
+            >
+              {BENCHMARKS.map((b) => (
+                <option key={b.key} value={b.key} className="bg-[var(--surface-elevated)]">
+                  {b.label}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+
+
         <div aria-live="polite" className="mt-3 text-sm">
           {points.length >= 2 ? (
-            <span className={delta.absolute >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
-              {delta.absolute >= 0 ? "+" : ""}
-              {fmt(delta.absolute)} · {delta.percent.toFixed(2)}% over {range === "ALL" ? "all time" : range}
-            </span>
+            <>
+              <span className={delta.absolute >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
+                {delta.absolute >= 0 ? "+" : ""}
+                {fmt(delta.absolute)} · {delta.percent.toFixed(2)}% over {range === "ALL" ? "all time" : range}
+              </span>
+              {compareDelta ? (
+                <span className="ml-2 text-muted-foreground">
+                  vs {compareLabel}: {compareDelta.absolute >= 0 ? "+" : ""}
+                  {fmt(compareDelta.absolute)} ({compareDelta.percent >= 0 ? "+" : ""}
+                  {compareDelta.percent.toFixed(2)}%)
+                </span>
+              ) : null}
+            </>
           ) : (
             <span className="text-muted-foreground">Not enough history yet for this range.</span>
           )}
         </div>
 
+
         <div className="mt-4 h-64 w-full">
           {points.length >= 2 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={points} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <AreaChart data={chartPoints} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gf3xTotal" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.45} />
@@ -181,7 +247,19 @@ export function PortfolioCharts({
                   strokeWidth={2}
                   fill="url(#gf3xTotal)"
                 />
-                <Line type="monotone" dataKey="invested" name="Invested" stroke="#8fa6c4" strokeWidth={1.5} dot={false} />
+                {comparison !== "none" ? (
+                  <Line
+                    type="monotone"
+                    dataKey="compare"
+                    name={compareLabel}
+                    stroke={comparison === "benchmark" ? "#4da3ff" : "#8fa6c4"}
+                    strokeWidth={1.5}
+                    strokeDasharray={comparison === "invested" ? undefined : "5 4"}
+                    dot={false}
+                    connectNulls
+                  />
+                ) : null}
+
               </AreaChart>
             </ResponsiveContainer>
           ) : (

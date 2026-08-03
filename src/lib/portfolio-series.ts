@@ -141,6 +141,98 @@ export function performanceSeries(input: {
   return points.slice(-2);
 }
 
+/* ---------------------------------------------------------------------------
+ * Performance comparison
+ * ------------------------------------------------------------------------- */
+
+export type ComparisonMode = "none" | "invested" | "previous" | "benchmark";
+
+export const COMPARISONS: { key: ComparisonMode; label: string }[] = [
+  { key: "none", label: "Off" },
+  { key: "invested", label: "Invested" },
+  { key: "previous", label: "Prev. period" },
+  { key: "benchmark", label: "Benchmark" },
+];
+
+export type Benchmark = { key: string; label: string; annualRate: number };
+
+/** Reference growth curves, expressed as simple annualised rates. */
+export const BENCHMARKS: Benchmark[] = [
+  { key: "cash", label: "Cash · 4%", annualRate: 0.04 },
+  { key: "bonds", label: "Bonds · 6%", annualRate: 0.06 },
+  { key: "equities", label: "Global equities · 8%", annualRate: 0.08 },
+  { key: "industrials", label: "Industrial tech · 12%", annualRate: 0.12 },
+];
+
+export type ComparisonPoint = SeriesPoint & { compare: number | null };
+
+const DAY_MS = 86_400_000;
+
+const toUtc = (date: string) => Date.parse(`${day(date)}T00:00:00Z`);
+
+export function daysBetween(from: string, to: string): number {
+  return Math.round((toUtc(to) - toUtc(from)) / DAY_MS);
+}
+
+/** Shift a date string by a whole number of days, staying on UTC days. */
+export function shiftDays(date: string, days: number): string {
+  return new Date(toUtc(date) + days * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** Latest known total at or before `date`, or null when history starts later. */
+function totalAt(points: SeriesPoint[], date: string): number | null {
+  let latest: number | null = null;
+  for (const p of points) {
+    if (day(p.date) <= date) latest = p.total;
+    else break;
+  }
+  return latest;
+}
+
+/**
+ * Attach a comparison value to each visible point. `previous` re-reads the
+ * full history shifted back by exactly one window length so the two curves
+ * line up day-for-day; `benchmark` compounds the window's opening value.
+ */
+export function comparisonPoints(input: {
+  points: SeriesPoint[];
+  allPoints?: SeriesPoint[];
+  mode: ComparisonMode;
+  benchmarkAnnualRate?: number;
+}): ComparisonPoint[] {
+  const { points, mode } = input;
+  const allPoints = input.allPoints ?? points;
+  if (points.length === 0) return [];
+  if (mode === "none") return points.map((p) => ({ ...p, compare: null }));
+  if (mode === "invested") return points.map((p) => ({ ...p, compare: p.invested }));
+
+  const first = points[0]!;
+
+  if (mode === "benchmark") {
+    const rate = input.benchmarkAnnualRate ?? 0;
+    const base = first.total;
+    return points.map((p) => ({
+      ...p,
+      compare: base * Math.pow(1 + rate, daysBetween(first.date, p.date) / 365),
+    }));
+  }
+
+  // previous period
+  const window = Math.max(1, daysBetween(first.date, points[points.length - 1]!.date));
+  const sorted = [...allPoints].sort((a, b) => day(a.date).localeCompare(day(b.date)));
+  return points.map((p) => ({ ...p, compare: totalAt(sorted, shiftDays(p.date, -window)) }));
+}
+
+/** Headline summary of the comparison for the aria-live status line. */
+export function comparisonDelta(points: ComparisonPoint[]) {
+  const withCompare = points.filter((p) => p.compare !== null);
+  if (withCompare.length === 0) return null;
+  const last = withCompare[withCompare.length - 1]!;
+  const compare = last.compare!;
+  const absolute = last.total - compare;
+  return { absolute, percent: compare > 0 ? (absolute / compare) * 100 : 0, reference: compare };
+}
+
 export type AllocationDimension = "sector" | "category" | "project";
 
 export type AllocationHolding = {
