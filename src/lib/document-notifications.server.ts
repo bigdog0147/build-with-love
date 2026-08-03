@@ -6,7 +6,6 @@
  * under "Reports & statements" in their notification preferences.
  */
 import { serviceClient } from "./admin-guard.server";
-import { dispatchBroadcast } from "./notification-dispatcher.server";
 
 const SITE_URL = "https://www.gf3x.space";
 
@@ -63,6 +62,7 @@ function unique(ids: string[]) {
 export async function notifyDocumentPublished(documentId: string): Promise<{
   notified: number;
   emails: number;
+  failed?: number;
   skipped?: string;
 }> {
   const db = await serviceClient();
