@@ -41,18 +41,23 @@ import { Route as AuthenticatedVerificationStatusRouteImport } from './routes/_a
 import { Route as AuthenticatedTransfersRouteImport } from './routes/_authenticated/transfers'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
+import { Route as AuthenticatedStatementsRouteImport } from './routes/_authenticated/statements'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
 import { Route as AuthenticatedPrivateMarketsRouteImport } from './routes/_authenticated/private-markets'
 import { Route as AuthenticatedPortfolioRouteImport } from './routes/_authenticated/portfolio'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDepositsRouteImport } from './routes/_authenticated/deposits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/cards'
+import { Route as AuthenticatedCapitalRaisingRouteImport } from './routes/_authenticated/capital-raising'
+import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_authenticated/marketplace.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
+import { Route as AuthenticatedMarketplaceSlugRouteImport } from './routes/_authenticated/marketplace.$slug'
 import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin/withdrawals'
 import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenticated/admin/social'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
@@ -242,6 +247,11 @@ const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStatementsRoute = AuthenticatedStatementsRouteImport.update({
+  id: '/statements',
+  path: '/statements',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -269,6 +279,11 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
@@ -295,6 +310,18 @@ const AuthenticatedCardsRoute = AuthenticatedCardsRouteImport.update({
   path: '/cards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCapitalRaisingRoute =
+  AuthenticatedCapitalRaisingRouteImport.update({
+    id: '/capital-raising',
+    path: '/capital-raising',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMarketplaceIndexRoute =
+  AuthenticatedMarketplaceIndexRouteImport.update({
+    id: '/marketplace/',
+    path: '/marketplace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -305,6 +332,12 @@ const ApiPublicFxRefreshRoute = ApiPublicFxRefreshRouteImport.update({
   path: '/api/public/fx-refresh',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedMarketplaceSlugRoute =
+  AuthenticatedMarketplaceSlugRouteImport.update({
+    id: '/marketplace/$slug',
+    path: '/marketplace/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminWithdrawalsRoute =
   AuthenticatedAdminWithdrawalsRouteImport.update({
     id: '/admin/withdrawals',
@@ -469,16 +502,19 @@ export interface FileRoutesByFullPath {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposits': typeof AuthenticatedDepositsRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/statements': typeof AuthenticatedStatementsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
@@ -513,8 +549,10 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -539,16 +577,19 @@ export interface FileRoutesByTo {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/cards': typeof AuthenticatedCardsRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposits': typeof AuthenticatedDepositsRoute
   '/documents': typeof AuthenticatedDocumentsRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/portfolio': typeof AuthenticatedPortfolioRoute
   '/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/statements': typeof AuthenticatedStatementsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/transfers': typeof AuthenticatedTransfersRoute
@@ -583,8 +624,10 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/social': typeof AuthenticatedAdminSocialRoute
   '/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/marketplace': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -611,16 +654,19 @@ export interface FileRoutesById {
   '/sustainability': typeof SustainabilityRoute
   '/technologies': typeof TechnologiesRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/_authenticated/capital-raising': typeof AuthenticatedCapitalRaisingRoute
   '/_authenticated/cards': typeof AuthenticatedCardsRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deposits': typeof AuthenticatedDepositsRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/portfolio': typeof AuthenticatedPortfolioRoute
   '/_authenticated/private-markets': typeof AuthenticatedPrivateMarketsRoute
   '/_authenticated/security': typeof AuthenticatedSecurityRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/statements': typeof AuthenticatedStatementsRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/_authenticated/transfers': typeof AuthenticatedTransfersRoute
@@ -655,8 +701,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/social': typeof AuthenticatedAdminSocialRoute
   '/_authenticated/admin/withdrawals': typeof AuthenticatedAdminWithdrawalsRoute
+  '/_authenticated/marketplace/$slug': typeof AuthenticatedMarketplaceSlugRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -683,16 +731,19 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/capital-raising'
     | '/cards'
     | '/change-password'
     | '/dashboard'
     | '/deposits'
     | '/documents'
+    | '/library'
     | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
     | '/settings'
+    | '/statements'
     | '/support'
     | '/transactions'
     | '/transfers'
@@ -727,8 +778,10 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/social'
     | '/admin/withdrawals'
+    | '/marketplace/$slug'
     | '/api/public/fx-refresh'
     | '/admin/'
+    | '/marketplace/'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -753,16 +806,19 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/capital-raising'
     | '/cards'
     | '/change-password'
     | '/dashboard'
     | '/deposits'
     | '/documents'
+    | '/library'
     | '/notifications'
     | '/portfolio'
     | '/private-markets'
     | '/security'
     | '/settings'
+    | '/statements'
     | '/support'
     | '/transactions'
     | '/transfers'
@@ -797,8 +853,10 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/social'
     | '/admin/withdrawals'
+    | '/marketplace/$slug'
     | '/api/public/fx-refresh'
     | '/admin'
+    | '/marketplace'
     | '/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -824,16 +882,19 @@ export interface FileRouteTypes {
     | '/sustainability'
     | '/technologies'
     | '/verify-email'
+    | '/_authenticated/capital-raising'
     | '/_authenticated/cards'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
     | '/_authenticated/deposits'
     | '/_authenticated/documents'
+    | '/_authenticated/library'
     | '/_authenticated/notifications'
     | '/_authenticated/portfolio'
     | '/_authenticated/private-markets'
     | '/_authenticated/security'
     | '/_authenticated/settings'
+    | '/_authenticated/statements'
     | '/_authenticated/support'
     | '/_authenticated/transactions'
     | '/_authenticated/transfers'
@@ -868,8 +929,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/social'
     | '/_authenticated/admin/withdrawals'
+    | '/_authenticated/marketplace/$slug'
     | '/api/public/fx-refresh'
     | '/_authenticated/admin/'
+    | '/_authenticated/marketplace/'
     | '/_authenticated/admin/customer/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1134,6 +1197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupportRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/statements': {
+      id: '/_authenticated/statements'
+      path: '/statements'
+      fullPath: '/statements'
+      preLoaderRoute: typeof AuthenticatedStatementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -1167,6 +1237,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/documents': {
@@ -1204,6 +1281,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCardsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/capital-raising': {
+      id: '/_authenticated/capital-raising'
+      path: '/capital-raising'
+      fullPath: '/capital-raising'
+      preLoaderRoute: typeof AuthenticatedCapitalRaisingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/marketplace/': {
+      id: '/_authenticated/marketplace/'
+      path: '/marketplace'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof AuthenticatedMarketplaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
@@ -1217,6 +1308,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/fx-refresh'
       preLoaderRoute: typeof ApiPublicFxRefreshRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/marketplace/$slug': {
+      id: '/_authenticated/marketplace/$slug'
+      path: '/marketplace/$slug'
+      fullPath: '/marketplace/$slug'
+      preLoaderRoute: typeof AuthenticatedMarketplaceSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/withdrawals': {
       id: '/_authenticated/admin/withdrawals'
@@ -1397,16 +1495,19 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCapitalRaisingRoute: typeof AuthenticatedCapitalRaisingRoute
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepositsRoute: typeof AuthenticatedDepositsRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPortfolioRoute: typeof AuthenticatedPortfolioRoute
   AuthenticatedPrivateMarketsRoute: typeof AuthenticatedPrivateMarketsRoute
   AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStatementsRoute: typeof AuthenticatedStatementsRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedTransfersRoute: typeof AuthenticatedTransfersRoute
@@ -1435,21 +1536,26 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminSocialRoute: typeof AuthenticatedAdminSocialRoute
   AuthenticatedAdminWithdrawalsRoute: typeof AuthenticatedAdminWithdrawalsRoute
+  AuthenticatedMarketplaceSlugRoute: typeof AuthenticatedMarketplaceSlugRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedMarketplaceIndexRoute: typeof AuthenticatedMarketplaceIndexRoute
   AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCapitalRaisingRoute: AuthenticatedCapitalRaisingRoute,
   AuthenticatedCardsRoute: AuthenticatedCardsRoute,
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepositsRoute: AuthenticatedDepositsRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPortfolioRoute: AuthenticatedPortfolioRoute,
   AuthenticatedPrivateMarketsRoute: AuthenticatedPrivateMarketsRoute,
   AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStatementsRoute: AuthenticatedStatementsRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedTransfersRoute: AuthenticatedTransfersRoute,
@@ -1478,7 +1584,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminSocialRoute: AuthenticatedAdminSocialRoute,
   AuthenticatedAdminWithdrawalsRoute: AuthenticatedAdminWithdrawalsRoute,
+  AuthenticatedMarketplaceSlugRoute: AuthenticatedMarketplaceSlugRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedMarketplaceIndexRoute: AuthenticatedMarketplaceIndexRoute,
   AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
 }
 

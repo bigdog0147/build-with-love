@@ -529,6 +529,148 @@ export type Database = {
           },
         ]
       }
+      distributions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          holding_id: string
+          id: string
+          kind: Database["public"]["Enums"]["distribution_kind"]
+          note: string | null
+          paid_at: string
+          product_id: string
+          transaction_id: string | null
+          user_id: string
+          wallet_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          holding_id: string
+          id?: string
+          kind?: Database["public"]["Enums"]["distribution_kind"]
+          note?: string | null
+          paid_at?: string
+          product_id: string
+          transaction_id?: string | null
+          user_id: string
+          wallet_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          holding_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["distribution_kind"]
+          note?: string | null
+          paid_at?: string
+          product_id?: string
+          transaction_id?: string | null
+          user_id?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributions_holding_id_fkey"
+            columns: ["holding_id"]
+            isOneToOne: false
+            referencedRelation: "investment_holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "investment_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          category: Database["public"]["Enums"]["document_category"]
+          content_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          is_published: boolean
+          product_id: string | null
+          published_at: string
+          title: string
+          updated_at: string
+          user_id: string | null
+          visibility: Database["public"]["Enums"]["document_visibility"]
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["document_category"]
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number
+          id?: string
+          is_published?: boolean
+          product_id?: string | null
+          published_at?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+          visibility?: Database["public"]["Enums"]["document_visibility"]
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["document_category"]
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          is_published?: boolean
+          product_id?: string | null
+          published_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+          visibility?: Database["public"]["Enums"]["document_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "investment_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_template_versions: {
         Row: {
           created_at: string
@@ -624,6 +766,60 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      holding_valuations: {
+        Row: {
+          as_of: string
+          created_at: string
+          created_by: string | null
+          holding_id: string
+          id: string
+          note: string | null
+          product_id: string
+          unit_price: number
+          user_id: string
+          value: number
+        }
+        Insert: {
+          as_of?: string
+          created_at?: string
+          created_by?: string | null
+          holding_id: string
+          id?: string
+          note?: string | null
+          product_id: string
+          unit_price?: number
+          user_id: string
+          value?: number
+        }
+        Update: {
+          as_of?: string
+          created_at?: string
+          created_by?: string | null
+          holding_id?: string
+          id?: string
+          note?: string | null
+          product_id?: string
+          unit_price?: number
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holding_valuations_holding_id_fkey"
+            columns: ["holding_id"]
+            isOneToOne: false
+            referencedRelation: "investment_holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holding_valuations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "investment_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       investment_holdings: {
         Row: {
@@ -1105,6 +1301,214 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      raise_commitments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          holding_id: string | null
+          id: string
+          interest_id: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          round_id: string
+          status: Database["public"]["Enums"]["raise_commitment_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+          wallet_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          holding_id?: string | null
+          id?: string
+          interest_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          round_id: string
+          status?: Database["public"]["Enums"]["raise_commitment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          holding_id?: string | null
+          id?: string
+          interest_id?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          round_id?: string
+          status?: Database["public"]["Enums"]["raise_commitment_status"]
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raise_commitments_holding_id_fkey"
+            columns: ["holding_id"]
+            isOneToOne: false
+            referencedRelation: "investment_holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raise_commitments_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "raise_interests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raise_commitments_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "raise_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raise_commitments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "raise_commitments_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raise_interests: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          indicative_amount: number
+          note: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          round_id: string
+          status: Database["public"]["Enums"]["raise_interest_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          indicative_amount: number
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          round_id: string
+          status?: Database["public"]["Enums"]["raise_interest_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          indicative_amount?: number
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          round_id?: string
+          status?: Database["public"]["Enums"]["raise_interest_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raise_interests_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "raise_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      raise_rounds: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          highlights: string[]
+          id: string
+          minimum_ticket: number
+          name: string
+          narrative: string
+          opens_at: string | null
+          product_id: string | null
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["raise_round_status"]
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          highlights?: string[]
+          id?: string
+          minimum_ticket?: number
+          name: string
+          narrative?: string
+          opens_at?: string | null
+          product_id?: string | null
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["raise_round_status"]
+          target_amount: number
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          highlights?: string[]
+          id?: string
+          minimum_ticket?: number
+          name?: string
+          narrative?: string
+          opens_at?: string | null
+          product_id?: string | null
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["raise_round_status"]
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raise_rounds_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "investment_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       report_runs: {
         Row: {
@@ -1653,6 +2057,18 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       deposit_method: "bank_transfer" | "card" | "crypto" | "wire"
       deposit_status: "pending" | "approved" | "rejected" | "cancelled"
+      distribution_kind: "income" | "capital_return"
+      document_category:
+        | "prospectus"
+        | "factsheet"
+        | "term_sheet"
+        | "report"
+        | "statement"
+        | "agreement"
+      document_visibility:
+        | "all_investors"
+        | "single_investor"
+        | "product_subscribers"
       holding_status: "pending" | "active" | "closed" | "rejected"
       kyc_doc_type:
         | "passport"
@@ -1666,6 +2082,14 @@ export type Database = {
         | "verified"
         | "rejected"
       product_status: "draft" | "published" | "retired"
+      raise_commitment_status:
+        | "awaiting_funding"
+        | "funded"
+        | "accepted"
+        | "released"
+        | "cancelled"
+      raise_interest_status: "submitted" | "invited" | "declined" | "withdrawn"
+      raise_round_status: "draft" | "open" | "closed" | "funded"
       withdrawal_destination: "bank_account" | "external_wallet"
       withdrawal_status: "pending" | "approved" | "rejected" | "cancelled"
     }
@@ -1798,6 +2222,20 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       deposit_method: ["bank_transfer", "card", "crypto", "wire"],
       deposit_status: ["pending", "approved", "rejected", "cancelled"],
+      distribution_kind: ["income", "capital_return"],
+      document_category: [
+        "prospectus",
+        "factsheet",
+        "term_sheet",
+        "report",
+        "statement",
+        "agreement",
+      ],
+      document_visibility: [
+        "all_investors",
+        "single_investor",
+        "product_subscribers",
+      ],
       holding_status: ["pending", "active", "closed", "rejected"],
       kyc_doc_type: [
         "passport",
@@ -1813,6 +2251,15 @@ export const Constants = {
         "rejected",
       ],
       product_status: ["draft", "published", "retired"],
+      raise_commitment_status: [
+        "awaiting_funding",
+        "funded",
+        "accepted",
+        "released",
+        "cancelled",
+      ],
+      raise_interest_status: ["submitted", "invited", "declined", "withdrawn"],
+      raise_round_status: ["draft", "open", "closed", "funded"],
       withdrawal_destination: ["bank_account", "external_wallet"],
       withdrawal_status: ["pending", "approved", "rejected", "cancelled"],
     },
