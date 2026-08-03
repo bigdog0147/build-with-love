@@ -65,6 +65,15 @@ function PortfolioPage() {
         />
       </div>
 
+      <PortfolioCharts
+        holdings={chartHoldings}
+        valuations={data?.valuations ?? []}
+        distributions={data?.distributions ?? []}
+        products={data?.products ?? []}
+      />
+
+
+
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="glass rounded-2xl border border-border p-2">
           <div className="px-4 pt-4 font-display text-xl">Holdings</div>
