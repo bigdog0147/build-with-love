@@ -247,7 +247,19 @@ export function PortfolioCharts({
                   strokeWidth={2}
                   fill="url(#gf3xTotal)"
                 />
-                <Line type="monotone" dataKey="invested" name="Invested" stroke="#8fa6c4" strokeWidth={1.5} dot={false} />
+                {comparison !== "none" ? (
+                  <Line
+                    type="monotone"
+                    dataKey="compare"
+                    name={compareLabel}
+                    stroke={comparison === "benchmark" ? "#4da3ff" : "#8fa6c4"}
+                    strokeWidth={1.5}
+                    strokeDasharray={comparison === "invested" ? undefined : "5 4"}
+                    dot={false}
+                    connectNulls
+                  />
+                ) : null}
+
               </AreaChart>
             </ResponsiveContainer>
           ) : (
