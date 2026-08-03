@@ -13,11 +13,16 @@ import {
 } from "recharts";
 import { money } from "@/components/dashboard-chrome";
 import {
+  BENCHMARKS,
+  COMPARISONS,
   RANGES,
   allocationSlices,
+  comparisonDelta,
+  comparisonPoints,
   performanceSeries,
   seriesDelta,
   type AllocationDimension,
+  type ComparisonMode,
   type RangeKey,
   type SeriesDistribution,
   type SeriesHolding,
