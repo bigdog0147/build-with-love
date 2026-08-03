@@ -138,6 +138,10 @@ export type DocumentDeliveryRow = {
   reason: string | null;
   error: string | null;
   attempts: number;
+  retryable: boolean;
+  last_error: string | null;
+  last_attempt_at: string | null;
+  next_attempt_at: string | null;
   queued_at: string;
   sent_at: string | null;
   failed_at: string | null;
@@ -159,7 +163,7 @@ export const adminListDocumentDeliveries = createServerFn({ method: "GET" })
     let query = db
       .from("document_notification_deliveries")
       .select(
-        "id, document_id, user_id, status, inapp_sent, email_sent, reason, error, attempts, queued_at, sent_at, failed_at",
+        "id, document_id, user_id, status, inapp_sent, email_sent, reason, error, attempts, retryable, last_error, last_attempt_at, next_attempt_at, queued_at, sent_at, failed_at",
       )
       .order("queued_at", { ascending: false })
       .limit(500);
@@ -328,4 +332,31 @@ export const adminCreateDocumentUploadUrl = createServerFn({ method: "POST" })
     const { data: signed, error } = await db.storage.from(DOC_BUCKET).createSignedUploadUrl(path);
     if (error || !signed) throw new Error(error?.message ?? "Could not prepare the upload.");
     return { path, token: signed.token, signedUrl: signed.signedUrl };
+  });
+
+/** Re-attempts document notification deliveries that are parked or failed. */
+export const adminRetryDocumentDeliveries = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input?: { deliveryIds?: string[]; documentId?: string | null }) => ({
+    deliveryIds: Array.isArray(input?.deliveryIds) ? input!.deliveryIds.map(String).slice(0, 200) : [],
+    documentId: input?.documentId ? String(input.documentId) : null,
+  }))
+  .handler(async ({ data, context }) => {
+    const identity = await requireAdminPermission(context as never, "investments");
+    const { retryDocumentDeliveries } = await import("@/lib/document-notifications.server");
+    const result = await retryDocumentDeliveries({
+      deliveryIds: data.deliveryIds.length ? data.deliveryIds : null,
+      documentId: data.documentId,
+      force: true,
+    });
+    await logAdminAction(identity, {
+      action: "documents.deliveries_retried",
+      targetType: "document_delivery",
+      targetId: data.deliveryIds[0] ?? data.documentId ?? "all",
+      after: result,
+    });
+    const message = result.attempted
+      ? `Retried ${result.attempted} deliver${result.attempted === 1 ? "y" : "ies"} — ${result.sent} sent, ${result.retrying} awaiting another attempt, ${result.failed} failed.`
+      : "Nothing to retry.";
+    return { message, ...result };
   });

@@ -63,6 +63,7 @@ export async function notifyDocumentPublished(documentId: string): Promise<{
   notified: number;
   emails: number;
   failed?: number;
+  retrying?: number;
   skipped?: string;
 }> {
   const db = await serviceClient();
