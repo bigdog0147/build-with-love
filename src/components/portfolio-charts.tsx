@@ -23,6 +23,11 @@ import {
   type SeriesHolding,
   type ValuationLike,
 } from "@/lib/portfolio-series";
+import {
+  DEFAULT_PORTFOLIO_RANGE,
+  readStoredRange,
+  writeStoredRange,
+} from "@/lib/portfolio-preferences";
 
 const SLICE_COLORS = [
   "var(--gold)",
