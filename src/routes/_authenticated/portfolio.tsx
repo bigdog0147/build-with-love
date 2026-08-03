@@ -36,6 +36,11 @@ function PortfolioPage() {
   );
   const summary = useMemo(() => summarisePortfolio(positions, data?.products ?? []), [positions, data?.products]);
   const sectors = useMemo(() => exposureBy(positions, data?.products ?? [], "sector"), [positions, data?.products]);
+  const chartHoldings = useMemo(
+    () => (data?.holdings ?? []).filter((h) => (COUNTED_STATUSES as readonly string[]).includes(h.status)),
+    [data?.holdings],
+  );
+
   const productName = useMemo(() => {
     const map: Record<string, { name: string; slug: string; currency: string }> = {};
     for (const p of data?.products ?? []) map[p.id] = { name: p.name, slug: p.slug, currency: p.currency };
