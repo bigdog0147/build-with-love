@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { AdminDocumentDeliveryLog } from "@/components/admin/document-delivery-log";
 import { Panel, PanelHead } from "@/components/admin/kit";
 import {
   adminCreateDocument,
@@ -248,6 +249,9 @@ export function AdminDocumentLibrary() {
           </button>
         </form>
       </Panel>
+      <AdminDocumentDeliveryLog
+        documents={(data?.documents ?? []).map((d) => ({ id: d.id, title: d.title }))}
+      />
     </div>
   );
 }
