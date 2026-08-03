@@ -186,14 +186,24 @@ export function PortfolioCharts({
 
         <div aria-live="polite" className="mt-3 text-sm">
           {points.length >= 2 ? (
-            <span className={delta.absolute >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
-              {delta.absolute >= 0 ? "+" : ""}
-              {fmt(delta.absolute)} · {delta.percent.toFixed(2)}% over {range === "ALL" ? "all time" : range}
-            </span>
+            <>
+              <span className={delta.absolute >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
+                {delta.absolute >= 0 ? "+" : ""}
+                {fmt(delta.absolute)} · {delta.percent.toFixed(2)}% over {range === "ALL" ? "all time" : range}
+              </span>
+              {compareDelta ? (
+                <span className="ml-2 text-muted-foreground">
+                  vs {compareLabel}: {compareDelta.absolute >= 0 ? "+" : ""}
+                  {fmt(compareDelta.absolute)} ({compareDelta.percent >= 0 ? "+" : ""}
+                  {compareDelta.percent.toFixed(2)}%)
+                </span>
+              ) : null}
+            </>
           ) : (
             <span className="text-muted-foreground">Not enough history yet for this range.</span>
           )}
         </div>
+
 
         <div className="mt-4 h-64 w-full">
           {points.length >= 2 ? (
