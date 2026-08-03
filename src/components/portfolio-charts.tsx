@@ -181,7 +181,24 @@ export function PortfolioCharts({
               ))}
             </select>
           ) : null}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="rounded-full border border-border px-3 py-1.5 text-xs uppercase tracking-widest text-muted-foreground transition hover:border-[var(--gold)] hover:text-[var(--gold)]"
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={exportPdf}
+              className="rounded-full border border-[var(--gold)]/40 px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--gold)] transition hover:bg-[var(--gold)]/10"
+            >
+              Export PDF
+            </button>
+          </div>
         </div>
+
 
 
         <div aria-live="polite" className="mt-3 text-sm">
