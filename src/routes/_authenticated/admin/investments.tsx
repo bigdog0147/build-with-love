@@ -765,36 +765,76 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Panel>
-          <PanelHead title="Rounds" sub="Open rounds appear in the investor capital raising portal." />
+          <PanelHead
+            title="Rounds"
+            sub="Change a round's status to notify every participating investor by email automatically."
+          />
           <ul className="divide-y divide-white/10">
             {(data?.rounds ?? []).map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm">{r.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Target {Number(r.target_amount).toLocaleString()} {r.currency} · min ticket{" "}
-                    {Number(r.minimum_ticket).toLocaleString()} · <span className="capitalize">{r.status}</span>
+              <li key={r.id} className="space-y-3 px-5 py-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm">{r.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Target {Number(r.target_amount).toLocaleString()} {r.currency} · min ticket{" "}
+                      {Number(r.minimum_ticket).toLocaleString()} ·{" "}
+                      <span className="capitalize">{r.status}</span>
+                    </div>
                   </div>
+                  <button
+                    className={btn}
+                    onClick={() =>
+                      setForm({
+                        id: r.id,
+                        name: r.name,
+                        productId: r.product_id ?? "",
+                        narrative: r.narrative,
+                        highlights: r.highlights.join("\n"),
+                        targetAmount: String(Number(r.target_amount)),
+                        minimumTicket: String(Number(r.minimum_ticket)),
+                        currency: r.currency,
+                        closesAt: r.closes_at ? String(r.closes_at).slice(0, 10) : "",
+                        status: r.status,
+                      })
+                    }
+                  >
+                    Edit
+                  </button>
                 </div>
-                <button
-                  className={btn}
-                  onClick={() =>
-                    setForm({
-                      id: r.id,
-                      name: r.name,
-                      productId: r.product_id ?? "",
-                      narrative: r.narrative,
-                      highlights: r.highlights.join("\n"),
-                      targetAmount: String(Number(r.target_amount)),
-                      minimumTicket: String(Number(r.minimum_ticket)),
-                      currency: r.currency,
-                      closesAt: r.closes_at ? String(r.closes_at).slice(0, 10) : "",
-                      status: r.status,
-                    })
-                  }
-                >
-                  Edit
-                </button>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {(["draft", "open", "closed", "funded"] as const).map((s) => (
+                    <button
+                      key={s}
+                      disabled={s === r.status || roundStatus.isPending}
+                      className={`${btn} capitalize disabled:opacity-40`}
+                      onClick={() =>
+                        roundStatus.mutate({
+                          id: r.id,
+                          status: s,
+                          note: notes[`round-${r.id}`] || undefined,
+                          notify: notify[r.id] !== false,
+                        })
+                      }
+                    >
+                      Mark {s}
+                    </button>
+                  ))}
+                  <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={notify[r.id] !== false}
+                      onChange={(e) => setNotify({ ...notify, [r.id]: e.target.checked })}
+                    />
+                    Send decision emails
+                  </label>
+                </div>
+                <input
+                  className={input}
+                  placeholder="Desk note included in the decision email (optional)"
+                  value={notes[`round-${r.id}`] ?? ""}
+                  onChange={(e) => setNotes({ ...notes, [`round-${r.id}`]: e.target.value })}
+                />
               </li>
             ))}
             {(data?.rounds ?? []).length === 0 && (
@@ -802,6 +842,7 @@ function RaiseTab({ onFail }: { onFail: (e: unknown) => void }) {
             )}
           </ul>
         </Panel>
+
 
         <Panel>
           <PanelHead
