@@ -3,8 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo } from "react";
 import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
+import { PortfolioCharts } from "@/components/portfolio-charts";
 import { getInvestorOverview } from "@/lib/investments.functions";
-import { exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
+import { COUNTED_STATUSES, exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
+
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
