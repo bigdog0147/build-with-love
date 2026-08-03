@@ -128,6 +128,74 @@ export const adminListDocuments = createServerFn({ method: "GET" })
     };
   });
 
+export type DocumentDeliveryRow = {
+  id: string;
+  document_id: string;
+  user_id: string;
+  status: string;
+  inapp_sent: boolean;
+  email_sent: boolean;
+  reason: string | null;
+  error: string | null;
+  attempts: number;
+  queued_at: string;
+  sent_at: string | null;
+  failed_at: string | null;
+};
+
+/**
+ * Delivery log for document-published notifications: one row per investor with
+ * the moment it was queued, sent (and on which channels) or failed.
+ */
+export const adminListDocumentDeliveries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input?: { documentId?: string | null; status?: string | null }) => ({
+    documentId: input?.documentId ? String(input.documentId) : null,
+    status: input?.status ? String(input.status) : null,
+  }))
+  .handler(async ({ data, context }) => {
+    await requireAdminPermission(context as never, "investments");
+    const db = await serviceClient();
+    let query = db
+      .from("document_notification_deliveries")
+      .select(
+        "id, document_id, user_id, status, inapp_sent, email_sent, reason, error, attempts, queued_at, sent_at, failed_at",
+      )
+      .order("queued_at", { ascending: false })
+      .limit(500);
+    if (data.documentId) query = query.eq("document_id", data.documentId);
+    if (data.status) query = query.eq("status", data.status);
+
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    const deliveries = (rows ?? []) as DocumentDeliveryRow[];
+
+    const docIds = Array.from(new Set(deliveries.map((r) => r.document_id)));
+    const userIds = Array.from(new Set(deliveries.map((r) => r.user_id)));
+    const [docs, profiles] = await Promise.all([
+      docIds.length
+        ? db.from("documents").select("id, title, category").in("id", docIds)
+        : Promise.resolve({ data: [] }),
+      userIds.length
+        ? db.from("profiles").select("id, display_name").in("id", userIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    return {
+      deliveries,
+      documentTitles: Object.fromEntries(
+        ((docs.data ?? []) as { id: string; title: string }[]).map((d) => [d.id, d.title]),
+      ),
+      investorNames: Object.fromEntries(
+        ((profiles.data ?? []) as { id: string; display_name: string }[]).map((p) => [
+          p.id,
+          p.display_name,
+        ]),
+      ),
+    };
+  });
+
+
 /** Registers a document already uploaded to the private bucket. */
 export const adminCreateDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
