@@ -8,12 +8,17 @@ import {
   type NotificationPreferences,
 } from "@/lib/notification-preferences.functions";
 
-const CATEGORIES: { key: "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports"; label: string; sub: string }[] = [
+const CATEGORIES: { key: "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports" | "raise"; label: string; sub: string }[] = [
   { key: "kyc", label: "Identity verification", sub: "Submission receipts, review progress and decisions." },
   { key: "deposits", label: "Deposits", sub: "Declared funding, approvals and declines." },
   { key: "withdrawals", label: "Withdrawals", sub: "Payout requests, approvals and rejections." },
   { key: "security", label: "Security", sub: "Sign-in alerts, password and device changes." },
   { key: "announcements", label: "Announcements", sub: "Platform updates from the GF3X desk." },
+  {
+    key: "raise",
+    label: "Capital raising",
+    sub: "Alerts each time your raise timeline advances to a new highlighted next step.",
+  },
   {
     key: "reports",
     label: "Reports & statements",

@@ -14,6 +14,8 @@ export type NotificationPreferences = {
   announcements_inapp: boolean;
   reports_email: boolean;
   reports_inapp: boolean;
+  raise_email: boolean;
+  raise_inapp: boolean;
   locale: string | null;
 };
 
@@ -30,6 +32,8 @@ const DEFAULTS: NotificationPreferences = {
   announcements_inapp: true,
   reports_email: true,
   reports_inapp: true,
+  raise_email: true,
+  raise_inapp: true,
   locale: null,
 };
 
@@ -40,7 +44,7 @@ export const getNotificationPreferences = createServerFn({ method: "GET" })
     const { data } = await context.supabase
       .from("notification_preferences")
       .select(
-        "kyc_email, kyc_inapp, deposits_email, deposits_inapp, withdrawals_email, withdrawals_inapp, security_email, security_inapp, announcements_email, announcements_inapp, reports_email, reports_inapp, locale",
+        "kyc_email, kyc_inapp, deposits_email, deposits_inapp, withdrawals_email, withdrawals_inapp, security_email, security_inapp, announcements_email, announcements_inapp, reports_email, reports_inapp, raise_email, raise_inapp, locale",
       )
       .eq("user_id", context.userId)
       .maybeSingle();

@@ -236,10 +236,12 @@ export async function notifyInvestor(input: {
   templateData?: Record<string, unknown>;
   idempotencyKey?: string;
   awaitDelivery?: boolean;
+  /** Preference category the notice is filtered against. Defaults to announcements. */
+  category?: "announcements" | "reports" | "raise";
 }) {
   const payload = {
     userId: input.userId,
-    category: "announcements" as const,
+    category: input.category ?? ("announcements" as const),
     title: input.title,
     detail: input.detail,
     tone: input.tone ?? "info",
