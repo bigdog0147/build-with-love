@@ -220,7 +220,13 @@ export async function payDistribution(
   return { walletId, transactionId: tx.id as string };
 }
 
-/** Investor-facing notice for any investment lifecycle event. */
+/**
+ * Investor-facing notice for any investment lifecycle event.
+ *
+ * Dispatch happens in the background by default so a slow or rate-limited email
+ * provider can never fail or delay a status change. Pass `awaitDelivery` when the
+ * caller genuinely needs the outcome before responding.
+ */
 export async function notifyInvestor(input: {
   userId: string;
   title: string;
@@ -229,19 +235,28 @@ export async function notifyInvestor(input: {
   template?: string;
   templateData?: Record<string, unknown>;
   idempotencyKey?: string;
+  awaitDelivery?: boolean;
 }) {
+  const payload = {
+    userId: input.userId,
+    category: "announcements" as const,
+    title: input.title,
+    detail: input.detail,
+    tone: input.tone ?? "info",
+    template: input.template,
+    templateData: input.templateData,
+    idempotencyKey: input.idempotencyKey,
+  };
+
+  if (!input.awaitDelivery) {
+    const { dispatchInBackground } = await import("./email-dispatch.server");
+    dispatchInBackground({ ...payload, label: input.idempotencyKey ?? input.title });
+    return;
+  }
+
   const { dispatchNotification } = await import("./notification-dispatcher.server");
   try {
-    await dispatchNotification({
-      userId: input.userId,
-      category: "announcements",
-      title: input.title,
-      detail: input.detail,
-      tone: input.tone ?? "info",
-      template: input.template,
-      templateData: input.templateData,
-      idempotencyKey: input.idempotencyKey,
-    });
+    await dispatchNotification(payload);
   } catch (error) {
     console.error("[investments] notification failed", error);
   }
