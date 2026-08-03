@@ -1,19 +1,61 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowUpRight, Layers } from "lucide-react";
+import { useMemo } from "react";
+import { ArrowUpRight, Layers, Search, SlidersHorizontal } from "lucide-react";
 import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
 import { listMarketplace } from "@/lib/investments.functions";
 import { remainingCapacity } from "@/lib/investments";
+import {
+  DEFAULT_FILTERS,
+  SORTS,
+  STAGES,
+  activeFilterCount,
+  checkSizeBounds,
+  deriveStage,
+  facetValues,
+  filledPercent,
+  filterProducts,
+  sortProducts,
+  type SortKey,
+} from "@/lib/marketplace-filters";
+
+type Search = {
+  q: string;
+  category: string;
+  sector: string;
+  stage: string;
+  maxMinimum: number;
+  sort: SortKey;
+};
 
 export const Route = createFileRoute("/_authenticated/marketplace/")({
+  validateSearch: (search: Record<string, unknown>): Search => {
+    const str = (v: unknown, fallback: string) =>
+      typeof v === "string" && v.trim() ? v : fallback;
+    const max = Number(search["maxMinimum"] ?? 0);
+    const sort = str(search["sort"], DEFAULT_FILTERS.sort);
+    return {
+      q: str(search["q"], "").slice(0, 120),
+      category: str(search["category"], "all"),
+      sector: str(search["sector"], "all"),
+      stage: str(search["stage"], "all"),
+      maxMinimum: Number.isFinite(max) && max > 0 ? Math.round(max) : 0,
+      sort: (SORTS.some((s) => s.key === sort) ? sort : DEFAULT_FILTERS.sort) as SortKey,
+    };
+  },
   component: MarketplacePage,
   head: () => ({
     meta: [
       { title: "Project marketplace — Gigafactory 3X" },
       {
         name: "description",
-        content: "Subscribe to live industrial infrastructure, robotics and energy projects.",
+        content: "Search and filter live industrial infrastructure, robotics and energy projects.",
+      },
+      { property: "og:title", content: "Project marketplace — Gigafactory 3X" },
+      {
+        property: "og:description",
+        content: "Filter live opportunities by category, funding stage and minimum check size.",
       },
     ],
   }),
@@ -21,12 +63,27 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
 
 function MarketplacePage() {
   const fetchShelf = useServerFn(listMarketplace);
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = useQuery({
     queryKey: ["marketplace"],
     queryFn: () => fetchShelf({} as never),
   });
 
   const products = data?.products ?? [];
+  const subscribedById = data?.subscribed ?? {};
+
+  const setFilter = (patch: Partial<Search>) =>
+    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+
+  const categories = useMemo(() => facetValues(products, "category"), [products]);
+  const sectors = useMemo(() => facetValues(products, "sector"), [products]);
+  const bounds = useMemo(() => checkSizeBounds(products), [products]);
+  const visible = useMemo(
+    () => sortProducts(filterProducts(products, subscribedById, search), search.sort),
+    [products, subscribedById, search],
+  );
+  const activeCount = activeFilterCount(search);
 
   return (
     <DashShell>
@@ -36,7 +93,100 @@ function MarketplacePage() {
         sub="Industrial projects open for subscription, with live capacity and terms."
       />
 
+      <div className="glass rounded-2xl border border-border p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-[var(--gold)]" />
+            Refine
+            {activeCount > 0 && <span className="text-[var(--gold)]">· {activeCount} active</span>}
+          </div>
+          {activeCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setFilter({ ...DEFAULT_FILTERS, sort: search.sort })}
+              className="text-xs uppercase tracking-widest text-muted-foreground hover:text-[var(--gold)]"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-4">
+          <label className="lg:col-span-2">
+            <span className="text-xs text-muted-foreground">Search</span>
+            <div className="mt-1 flex items-center gap-2 rounded-xl border border-border bg-[var(--surface-elevated)] px-3">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                type="search"
+                value={search.q}
+                onChange={(e) => setFilter({ q: e.target.value })}
+                placeholder="Project name, sector or keyword"
+                className="w-full bg-transparent py-2.5 text-sm outline-none"
+              />
+            </div>
+          </label>
+
+          <Select
+            label="Category"
+            value={search.category}
+            onChange={(v) => setFilter({ category: v })}
+            options={[{ value: "all", label: "All categories" }, ...categories.map((c) => ({ value: c, label: c }))]}
+          />
+          <Select
+            label="Sector"
+            value={search.sector}
+            onChange={(v) => setFilter({ sector: v })}
+            options={[{ value: "all", label: "All sectors" }, ...sectors.map((s) => ({ value: s, label: s }))]}
+          />
+          <Select
+            label="Funding stage"
+            value={search.stage}
+            onChange={(v) => setFilter({ stage: v })}
+            options={[
+              { value: "all", label: "Any stage" },
+              ...STAGES.map((s) => ({ value: s.key, label: `${s.label} — ${s.hint}` })),
+            ]}
+          />
+          <Select
+            label="Sort by"
+            value={search.sort}
+            onChange={(v) => setFilter({ sort: v as SortKey })}
+            options={SORTS.map((s) => ({ value: s.key, label: s.label }))}
+          />
+
+          <label className="lg:col-span-2">
+            <span className="text-xs text-muted-foreground">
+              Maximum check size{" "}
+              <span className="text-foreground">
+                {search.maxMinimum > 0 ? money(search.maxMinimum, undefined, 0) : "No limit"}
+              </span>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={bounds.max || 0}
+              step={Math.max(1000, Math.round((bounds.max || 0) / 50) || 1000)}
+              value={Math.min(search.maxMinimum, bounds.max || 0)}
+              disabled={!bounds.max}
+              onChange={(e) => setFilter({ maxMinimum: Number(e.target.value) })}
+              aria-label="Maximum minimum check size"
+              className="mt-3 w-full accent-[var(--gold)]"
+            />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Hides projects whose minimum subscription exceeds this amount.
+            </span>
+          </label>
+        </div>
+      </div>
+
       {isLoading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
+
+      {!isLoading && (
+        <p aria-live="polite" className="text-sm text-muted-foreground">
+          Showing {visible.length} of {products.length} opportunities
+        </p>
+      )}
+
       {!isLoading && products.length === 0 && (
         <div className="glass rounded-2xl border border-border p-8 text-sm text-muted-foreground">
           No opportunities are open for subscription right now. New projects are added as they clear
@@ -44,12 +194,26 @@ function MarketplacePage() {
         </div>
       )}
 
+      {!isLoading && products.length > 0 && visible.length === 0 && (
+        <div className="glass rounded-2xl border border-border p-8 text-sm text-muted-foreground">
+          No opportunities match these filters.{" "}
+          <button
+            type="button"
+            onClick={() => setFilter({ ...DEFAULT_FILTERS, sort: search.sort })}
+            className="text-[var(--gold)]"
+          >
+            Clear filters
+          </button>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
-        {products.map((p) => {
-          const subscribed = data?.subscribed[p.id] ?? 0;
+        {visible.map((p) => {
+          const subscribed = subscribedById[p.id] ?? 0;
           const remaining = remainingCapacity(p, subscribed);
-          const capacity = p.capacity == null ? null : Number(p.capacity);
-          const filled = capacity && capacity > 0 ? Math.min(100, (subscribed / capacity) * 100) : null;
+          const filled = filledPercent(p, subscribed);
+          const stage = deriveStage(p, subscribed);
+          const stageLabel = STAGES.find((s) => s.key === stage)?.label ?? "Open";
           const mine = data?.mine[p.id] ?? 0;
           return (
             <Link
@@ -58,9 +222,14 @@ function MarketplacePage() {
               params={{ slug: p.slug }}
               className="glass group rounded-2xl border border-border p-5 transition-colors hover:border-[var(--gold)]/60"
             >
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
-                <Layers className="h-3.5 w-3.5 text-[var(--gold)]" />
-                {p.category} · {p.sector}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+                  <Layers className="h-3.5 w-3.5 text-[var(--gold)]" />
+                  {p.category} · {p.sector}
+                </div>
+                <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {stageLabel}
+                </span>
               </div>
               <div className="mt-2 flex items-start justify-between gap-3">
                 <div className="font-display text-xl">{p.name}</div>
@@ -109,5 +278,34 @@ function MarketplacePage() {
         })}
       </div>
     </DashShell>
+  );
+}
+
+function Select({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label>
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 w-full rounded-xl border border-border bg-[var(--surface-elevated)] px-3 py-2.5 text-sm outline-none"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
