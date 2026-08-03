@@ -8,12 +8,17 @@ import {
   type NotificationPreferences,
 } from "@/lib/notification-preferences.functions";
 
-const CATEGORIES: { key: "kyc" | "deposits" | "withdrawals" | "security" | "announcements"; label: string; sub: string }[] = [
+const CATEGORIES: { key: "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports"; label: string; sub: string }[] = [
   { key: "kyc", label: "Identity verification", sub: "Submission receipts, review progress and decisions." },
   { key: "deposits", label: "Deposits", sub: "Declared funding, approvals and declines." },
   { key: "withdrawals", label: "Withdrawals", sub: "Payout requests, approvals and rejections." },
   { key: "security", label: "Security", sub: "Sign-in alerts, password and device changes." },
   { key: "announcements", label: "Announcements", sub: "Platform updates from the GF3X desk." },
+  {
+    key: "reports",
+    label: "Reports & statements",
+    sub: "New financial reports, factsheets and downloadable statements in your library.",
+  },
 ];
 
 /** Per-category email and in-app notification switches for the signed-in customer. */

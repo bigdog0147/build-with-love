@@ -8,7 +8,7 @@
 import { serviceClient } from "./admin-guard.server";
 import { sendTemplateEmailWithRetry } from "./email-retry.server";
 
-export type NotificationCategory = "kyc" | "deposits" | "withdrawals" | "security" | "announcements";
+export type NotificationCategory = "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports";
 
 export type DispatchInput = {
   userId: string;
