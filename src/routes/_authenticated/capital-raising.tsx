@@ -15,6 +15,8 @@ import {
 import { raiseProgress } from "@/lib/investments";
 import { raiseTimeline } from "@/lib/raise-timeline";
 import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
+import { RaiseHistoryTimeline } from "@/components/raise-history";
+import { raiseHistory } from "@/lib/raise-history";
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
@@ -117,6 +119,7 @@ function CapitalRaisingPage() {
             interest,
             commitment,
           });
+          const history = raiseHistory({ round, interest, commitment });
 
           return (
             <section key={round.id} className="glass rounded-2xl border border-border p-6">
@@ -169,6 +172,10 @@ function CapitalRaisingPage() {
 
               <div className="mt-6">
                 <RaiseStatusTimeline timeline={timeline} />
+              </div>
+
+              <div className="mt-4">
+                <RaiseHistoryTimeline events={history} roundName={round.name} />
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-2">

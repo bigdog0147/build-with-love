@@ -17,11 +17,11 @@ export const getRaisePortal = createServerFn({ method: "GET" })
       supabase.from("raise_rounds").select(ROUND_SELECT).neq("status", "draft").order("sort_order"),
       supabase
         .from("raise_interests")
-        .select("id, round_id, indicative_amount, currency, note, status, review_note, created_at")
+        .select("id, round_id, indicative_amount, currency, note, status, review_note, created_at, reviewed_at, updated_at")
         .eq("user_id", userId),
       supabase
         .from("raise_commitments")
-        .select("id, round_id, interest_id, amount, currency, wallet_id, status, review_note, created_at")
+        .select("id, round_id, interest_id, amount, currency, wallet_id, status, review_note, created_at, reviewed_at, updated_at")
         .eq("user_id", userId),
       supabase.from("wallets").select("id, code, label, balance").eq("user_id", userId).order("sort_order"),
       supabase.from("kyc_profiles").select("id_status").eq("user_id", userId).maybeSingle(),
