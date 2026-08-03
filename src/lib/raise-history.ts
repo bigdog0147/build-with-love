@@ -16,9 +16,18 @@ export interface RaiseHistoryEvent {
   detail: string;
   actor: "Investor" | "Capital markets desk" | "System";
   tone: RaiseHistoryTone;
+  /** Amount the event concerns, when money was involved. */
+  amount?: number | null;
+  /** Desk note recorded with the decision, kept separate from the detail copy. */
+  note?: string | null;
+  /** Source row reference so a downloaded confirmation can be traced back. */
+  reference?: string | null;
+  /** Decision events can be downloaded as a confirmation document. */
+  downloadable?: boolean;
 }
 
 interface RoundLike {
+  id?: string | null;
   name?: string | null;
   status: string;
   currency: string;
@@ -29,6 +38,7 @@ interface RoundLike {
 }
 
 interface RowLike {
+  id?: string | null;
   status: string;
   created_at?: string | null;
   reviewed_at?: string | null;
@@ -169,6 +179,10 @@ export function raiseHistory(input: {
         detail: interest.review_note ? `${decision.detail} Desk note: ${interest.review_note}` : decision.detail,
         actor: interest.status === "withdrawn" ? "Investor" : "Capital markets desk",
         tone: decision.tone,
+        amount: Number(interest.indicative_amount ?? interest.amount ?? 0) || null,
+        note: interest.review_note ?? null,
+        reference: interest.id ?? null,
+        downloadable: true,
       });
     }
   }
@@ -197,6 +211,10 @@ export function raiseHistory(input: {
           : decision.detail,
         actor: decision.actor,
         tone: decision.tone,
+        amount: Number(commitment.amount ?? 0) || null,
+        note: commitment.review_note ?? null,
+        reference: commitment.id ?? null,
+        downloadable: true,
       });
     }
   }
@@ -211,6 +229,8 @@ export function raiseHistory(input: {
       detail: roundClose.detail,
       actor: "Capital markets desk",
       tone: roundClose.tone,
+      reference: round.id ?? null,
+      downloadable: true,
     });
   }
 
