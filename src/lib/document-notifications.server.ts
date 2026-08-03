@@ -7,20 +7,13 @@
  */
 import { serviceClient } from "./admin-guard.server";
 import { DOCUMENT_TOKEN_TTL_SECONDS, signDocumentToken } from "./document-link-token";
+import {
+  DOCUMENT_LABELS,
+  isDocumentNotifiable,
+  isEntitledToDocument,
+} from "./document-entitlement";
 
 const SITE_URL = "https://www.gf3x.space";
-
-/** Categories investors care about as reports/statements; others stay silent. */
-const NOTIFIABLE = new Set(["report", "statement", "factsheet", "prospectus", "term_sheet"]);
-
-const LABELS: Record<string, string> = {
-  prospectus: "Prospectus",
-  factsheet: "Factsheet",
-  term_sheet: "Term sheet",
-  report: "Financial report",
-  statement: "Statement",
-  agreement: "Agreement",
-};
 
 type DocRow = {
   id: string;
@@ -35,7 +28,9 @@ type DocRow = {
 
 /** Investors entitled to a document, mirroring the library's RLS rules. */
 async function resolveAudience(db: any, doc: DocRow): Promise<string[]> {
-  if (doc.visibility === "single_investor") return doc.user_id ? [doc.user_id] : [];
+  if (doc.visibility === "single_investor") {
+    return doc.user_id && isEntitledToDocument(doc, { userId: doc.user_id }) ? [doc.user_id] : [];
+  }
 
   if (doc.visibility === "product_subscribers") {
     if (!doc.product_id) return [];
@@ -77,7 +72,7 @@ export async function notifyDocumentPublished(documentId: string): Promise<{
   if (!doc) return { notified: 0, emails: 0, skipped: "document_not_found" };
   const row = doc as DocRow;
   if (!row.is_published) return { notified: 0, emails: 0, skipped: "not_published" };
-  if (!NOTIFIABLE.has(row.category)) return { notified: 0, emails: 0, skipped: "category_not_notifiable" };
+  if (!isDocumentNotifiable(row.category)) return { notified: 0, emails: 0, skipped: "category_not_notifiable" };
 
   const audience = await resolveAudience(db, row);
   if (audience.length === 0) return { notified: 0, emails: 0, skipped: "no_audience" };
@@ -136,7 +131,7 @@ export async function notifyDocumentPublished(documentId: string): Promise<{
 
 /** Notification content for one document — identical on the first try and on retries. */
 function buildPayload(row: DocRow, productName?: string) {
-  const label = LABELS[row.category] ?? "Document";
+  const label = DOCUMENT_LABELS[row.category] ?? "Document";
   return {
     category: "reports" as const,
     title: `${label} available: ${row.title}`,
