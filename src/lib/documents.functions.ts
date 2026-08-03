@@ -181,7 +181,15 @@ export const adminCreateDocument = createServerFn({ method: "POST" })
       targetLabel: title,
       after: { category: data.category, visibility: data.visibility, published: row.is_published },
     });
-    return { message: `${title} added to the document library.` };
+
+    let notice = "";
+    if (row.is_published) {
+      const { notifyDocumentPublished } = await import("@/lib/document-notifications.server");
+      const fanout = await notifyDocumentPublished(created.id);
+      if (fanout.notified || fanout.emails)
+        notice = ` ${fanout.notified} investor${fanout.notified === 1 ? "" : "s"} notified (${fanout.emails} email${fanout.emails === 1 ? "" : "s"}).`;
+    }
+    return { message: `${title} added to the document library.${notice}` };
   });
 
 export const adminSetDocumentPublished = createServerFn({ method: "POST" })
@@ -204,7 +212,16 @@ export const adminSetDocumentPublished = createServerFn({ method: "POST" })
       targetId: data.id,
       after: { is_published: data.isPublished },
     });
-    return { message: data.isPublished ? "Document published." : "Document hidden from investors." };
+
+    if (!data.isPublished) return { message: "Document hidden from investors." };
+
+    const { notifyDocumentPublished } = await import("@/lib/document-notifications.server");
+    const fanout = await notifyDocumentPublished(data.id);
+    const notice =
+      fanout.notified || fanout.emails
+        ? ` ${fanout.notified} investor${fanout.notified === 1 ? "" : "s"} notified (${fanout.emails} email${fanout.emails === 1 ? "" : "s"}).`
+        : "";
+    return { message: `Document published.${notice}` };
   });
 
 export const adminDeleteDocument = createServerFn({ method: "POST" })
