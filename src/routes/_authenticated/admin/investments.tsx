@@ -56,6 +56,7 @@ type HoldingRow = {
   product_id: string;
   units: number;
   invested: number;
+  current_value: number;
   currency: string;
   status: string;
   created_at: string;
