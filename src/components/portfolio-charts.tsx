@@ -96,12 +96,14 @@ export function PortfolioCharts({
   distributions,
   products,
   currency,
+  investorName,
 }: {
   holdings: SeriesHolding[];
   valuations: ValuationLike[];
   distributions: SeriesDistribution[];
   products: { id: string; name: string; sector: string; category: string }[];
   currency?: string;
+  investorName?: string;
 }) {
   const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
