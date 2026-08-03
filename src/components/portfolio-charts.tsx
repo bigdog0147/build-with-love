@@ -98,6 +98,8 @@ export function PortfolioCharts({
   const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
   const [selected, setSelected] = useState<string | null>(null);
+  const [comparison, setComparison] = useState<ComparisonMode>("invested");
+  const [benchmark, setBenchmark] = useState<string>(BENCHMARKS[2]!.key);
 
   // Restore after mount so SSR markup and hydration stay identical.
   useEffect(() => {
@@ -113,6 +115,35 @@ export function PortfolioCharts({
   const points = useMemo(
     () => performanceSeries({ holdings, valuations, distributions, range }),
     [holdings, valuations, distributions, range],
+  );
+  const allPoints = useMemo(
+    () => performanceSeries({ holdings, valuations, distributions, range: "ALL" }),
+    [holdings, valuations, distributions],
+  );
+  const benchmarkRate = useMemo(
+    () => BENCHMARKS.find((b) => b.key === benchmark)?.annualRate ?? 0,
+    [benchmark],
+  );
+  const chartPoints = useMemo(
+    () =>
+      comparisonPoints({
+        points,
+        allPoints,
+        mode: comparison,
+        benchmarkAnnualRate: benchmarkRate,
+      }),
+    [points, allPoints, comparison, benchmarkRate],
+  );
+  const compareLabel = useMemo(() => {
+    if (comparison === "invested") return "Invested";
+    if (comparison === "previous") return "Previous period";
+    if (comparison === "benchmark")
+      return BENCHMARKS.find((b) => b.key === benchmark)?.label ?? "Benchmark";
+    return "";
+  }, [comparison, benchmark]);
+  const compareDelta = useMemo(
+    () => (comparison === "none" ? null : comparisonDelta(chartPoints)),
+    [chartPoints, comparison],
   );
   const delta = useMemo(() => seriesDelta(points), [points]);
   const slices = useMemo(() => allocationSlices({ holdings, products, dimension }), [holdings, products, dimension]);
@@ -132,6 +163,26 @@ export function PortfolioCharts({
           </div>
           <Toggle options={RANGES} value={range} onChange={changeRange} label="Performance time range" />
         </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Compare</span>
+          <Toggle options={COMPARISONS} value={comparison} onChange={setComparison} label="Performance comparison mode" />
+          {comparison === "benchmark" ? (
+            <select
+              aria-label="Benchmark"
+              value={benchmark}
+              onChange={(e) => setBenchmark(e.target.value)}
+              className="rounded-full border border-border bg-transparent px-3 py-1.5 text-xs text-foreground"
+            >
+              {BENCHMARKS.map((b) => (
+                <option key={b.key} value={b.key} className="bg-[var(--surface-elevated)]">
+                  {b.label}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+
 
         <div aria-live="polite" className="mt-3 text-sm">
           {points.length >= 2 ? (
