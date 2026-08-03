@@ -179,13 +179,34 @@ export function PortfolioCharts({
           <Toggle options={DIMENSIONS} value={dimension} onChange={setDimension} label="Allocation breakdown" />
         </div>
 
+        <p className="mt-1 text-xs text-muted-foreground">
+          Select a slice to drill into the underlying holdings and amounts.
+        </p>
+
         <div className="mt-2 h-48 w-full">
           {slices.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={slices} dataKey="value" nameKey="label" innerRadius="58%" outerRadius="88%" stroke="none">
+                <Pie
+                  data={slices}
+                  dataKey="value"
+                  nameKey="label"
+                  innerRadius="58%"
+                  outerRadius="88%"
+                  stroke="none"
+                  onClick={(entry: unknown) => {
+                    const key = (entry as { key?: string; payload?: { key?: string } })?.key
+                      ?? (entry as { payload?: { key?: string } })?.payload?.key;
+                    if (key) setSelected((prev) => (prev === key ? null : key));
+                  }}
+                  className="cursor-pointer outline-none"
+                >
                   {slices.map((s, i) => (
-                    <Cell key={s.key} fill={SLICE_COLORS[i % SLICE_COLORS.length]} />
+                    <Cell
+                      key={s.key}
+                      fill={SLICE_COLORS[i % SLICE_COLORS.length]}
+                      opacity={selected && selected !== s.key ? 0.35 : 1}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
@@ -206,24 +227,90 @@ export function PortfolioCharts({
           )}
         </div>
 
-        <ul className="mt-4 space-y-2 text-sm">
+        <ul className="mt-4 space-y-1 text-sm">
           {slices.map((s, i) => (
-            <li key={s.key} className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: SLICE_COLORS[i % SLICE_COLORS.length] }}
-                />
-                <span className="capitalize">{s.label}</span>
-              </span>
-              <span className="tabular-nums text-muted-foreground">
-                {s.percent.toFixed(1)}% · {fmt(s.value)}
-              </span>
+            <li key={s.key}>
+              <button
+                type="button"
+                aria-pressed={selected === s.key}
+                aria-label={`Drill into ${s.label}`}
+                onClick={() => setSelected((prev) => (prev === s.key ? null : s.key))}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left transition hover:bg-[var(--surface-elevated)] ${
+                  selected === s.key ? "bg-[var(--surface-elevated)]" : ""
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: SLICE_COLORS[i % SLICE_COLORS.length] }}
+                  />
+                  <span className="capitalize">{s.label}</span>
+                </span>
+                <span className="tabular-nums text-muted-foreground">
+                  {s.percent.toFixed(1)}% · {fmt(s.value)}
+                </span>
+              </button>
             </li>
           ))}
         </ul>
+
+        <div aria-live="polite">
+          {active && (
+            <div className="mt-4 rounded-xl border border-border bg-[var(--surface-elevated)]/60 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {DIMENSIONS.find((d) => d.key === dimension)?.label} drilldown
+                  </div>
+                  <div className="font-display text-lg capitalize">{active.label}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {fmt(active.value)} current · {fmt(active.invested)} invested ·{" "}
+                    <span className={active.gain >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
+                      {active.gain >= 0 ? "+" : ""}
+                      {fmt(active.gain)} ({active.gainPct.toFixed(2)}%)
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  className="rounded-full border border-border px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                >
+                  Close
+                </button>
+              </div>
+
+              <ul className="mt-3 space-y-2">
+                {active.holdings.map((h) => (
+                  <li key={h.holdingId} className="rounded-lg border border-border/60 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm">{h.project}</div>
+                        <div className="text-[11px] capitalize text-muted-foreground">
+                          {h.sector} · {h.category}
+                        </div>
+                      </div>
+                      <div className="text-right text-xs tabular-nums">
+                        <div>{fmt(h.value)}</div>
+                        <div className="text-muted-foreground">{h.shareOfSlice.toFixed(1)}% of slice</div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] tabular-nums text-muted-foreground">
+                      <span>Invested {fmt(h.invested)}</span>
+                      <span className={h.gain >= 0 ? "text-[var(--success)]" : "text-[var(--danger,#e05a5a)]"}>
+                        {h.gain >= 0 ? "+" : ""}
+                        {fmt(h.gain)} · {h.gainPct.toFixed(2)}%
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
