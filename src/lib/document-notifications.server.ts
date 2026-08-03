@@ -6,7 +6,6 @@
  * under "Reports & statements" in their notification preferences.
  */
 import { serviceClient } from "./admin-guard.server";
-import { dispatchBroadcast } from "./notification-dispatcher.server";
 
 const SITE_URL = "https://www.gf3x.space";
 
@@ -63,6 +62,7 @@ function unique(ids: string[]) {
 export async function notifyDocumentPublished(documentId: string): Promise<{
   notified: number;
   emails: number;
+  failed?: number;
   skipped?: string;
 }> {
   const db = await serviceClient();
@@ -91,13 +91,13 @@ export async function notifyDocumentPublished(documentId: string): Promise<{
   }
 
   const label = LABELS[row.category] ?? "Document";
-  const result = await dispatchBroadcast(audience, {
-    category: "reports",
+  const payload = {
+    category: "reports" as const,
     title: `${label} available: ${row.title}`,
     detail:
       row.description?.trim() ||
       `${row.title} has been published to your document library and is ready to download.`,
-    tone: "info",
+    tone: "info" as const,
     template: "document-published",
     templateData: {
       title: row.title,
@@ -107,8 +107,72 @@ export async function notifyDocumentPublished(documentId: string): Promise<{
       libraryUrl: `${SITE_URL}/library`,
       isStatement: row.category === "statement",
     },
-    idempotencyKey: `document-published-${row.id}`,
-  });
+  };
 
-  return { notified: result.inapp, emails: result.email };
+  // Queue one delivery row per investor first, so the admin log shows the
+  // intended audience even if the process dies mid fan-out.
+  const queuedAt = new Date().toISOString();
+  const rows = audience.map((userId) => ({
+    document_id: row.id,
+    user_id: userId,
+    status: "queued",
+    idempotency_key: `document-published-${row.id}-${userId}`,
+    queued_at: queuedAt,
+  }));
+  const { data: inserted } = await db
+    .from("document_notification_deliveries")
+    .insert(rows)
+    .select("id, user_id");
+  const deliveryId = new Map<string, string>(
+    ((inserted ?? []) as { id: string; user_id: string }[]).map((r) => [r.user_id, r.id]),
+  );
+
+  const { dispatchNotification } = await import("./notification-dispatcher.server");
+  let inapp = 0;
+  let email = 0;
+  let failed = 0;
+
+  for (const userId of audience) {
+    const id = deliveryId.get(userId);
+    try {
+      const res = await dispatchNotification({
+        ...payload,
+        userId,
+        idempotencyKey: `document-published-${row.id}-${userId}`,
+      });
+      if (res.inapp) inapp += 1;
+      if (res.email) email += 1;
+      if (id)
+        await db
+          .from("document_notification_deliveries")
+          .update({
+            status: res.inapp || res.email ? "sent" : "skipped",
+            inapp_sent: Boolean(res.inapp),
+            email_sent: Boolean(res.email),
+            reason: res.emailSkippedReason ?? null,
+            attempts: 1,
+            sent_at: new Date().toISOString(),
+            failed_at: null,
+            error: null,
+          })
+          .eq("id", id);
+    } catch (error) {
+      failed += 1;
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[documents] notification failed for ${userId}`, message);
+      if (id)
+        await db
+          .from("document_notification_deliveries")
+          .update({
+            status: "failed",
+            error: message.slice(0, 500),
+            attempts: 1,
+            failed_at: new Date().toISOString(),
+          })
+          .eq("id", id);
+    }
+  }
+
+  return { notified: inapp, emails: email, failed };
 }
+
