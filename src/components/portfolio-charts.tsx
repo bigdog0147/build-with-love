@@ -125,7 +125,7 @@ export function PortfolioCharts({
               Portfolio value plus distributions received across the selected window.
             </p>
           </div>
-          <Toggle options={RANGES} value={range} onChange={setRange} label="Performance time range" />
+          <Toggle options={RANGES} value={range} onChange={changeRange} label="Performance time range" />
         </div>
 
         <div aria-live="polite" className="mt-3 text-sm">
