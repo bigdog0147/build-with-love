@@ -1171,6 +1171,8 @@ export type Database = {
           kyc_email: boolean
           kyc_inapp: boolean
           locale: string | null
+          reports_email: boolean
+          reports_inapp: boolean
           security_email: boolean
           security_inapp: boolean
           updated_at: string
@@ -1187,6 +1189,8 @@ export type Database = {
           kyc_email?: boolean
           kyc_inapp?: boolean
           locale?: string | null
+          reports_email?: boolean
+          reports_inapp?: boolean
           security_email?: boolean
           security_inapp?: boolean
           updated_at?: string
@@ -1203,6 +1207,8 @@ export type Database = {
           kyc_email?: boolean
           kyc_inapp?: boolean
           locale?: string | null
+          reports_email?: boolean
+          reports_inapp?: boolean
           security_email?: boolean
           security_inapp?: boolean
           updated_at?: string
