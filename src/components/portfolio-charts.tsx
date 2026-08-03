@@ -33,6 +33,14 @@ import {
   readStoredRange,
   writeStoredRange,
 } from "@/lib/portfolio-preferences";
+import {
+  buildPortfolioCsv,
+  buildPortfolioReportHtml,
+  downloadTextFile,
+  portfolioCsvFileName,
+  printPortfolioReport,
+} from "@/lib/portfolio-export";
+
 
 const SLICE_COLORS = [
   "var(--gold)",
@@ -88,12 +96,14 @@ export function PortfolioCharts({
   distributions,
   products,
   currency,
+  investorName,
 }: {
   holdings: SeriesHolding[];
   valuations: ValuationLike[];
   distributions: SeriesDistribution[];
   products: { id: string; name: string; sector: string; category: string }[];
   currency?: string;
+  investorName?: string;
 }) {
   const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
@@ -150,6 +160,28 @@ export function PortfolioCharts({
   const active = useMemo(() => slices.find((s) => s.key === selected) ?? null, [slices, selected]);
   const fmt = (n: number) => money(n, currency);
 
+  const exportInput = () => ({
+    points: chartPoints,
+    slices,
+    dimension,
+    range: range === "ALL" ? "All time" : range,
+    comparisonLabel: comparison === "none" ? undefined : compareLabel,
+    currency,
+    investorName,
+    generatedAt: new Date().toISOString(),
+  });
+
+  const exportCsv = () => {
+    const input = exportInput();
+    downloadTextFile(portfolioCsvFileName(input), buildPortfolioCsv(input), "text/csv");
+  };
+
+  const exportPdf = () => {
+    printPortfolioReport(buildPortfolioReportHtml(exportInput()));
+  };
+
+
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
@@ -181,7 +213,24 @@ export function PortfolioCharts({
               ))}
             </select>
           ) : null}
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="rounded-full border border-border px-3 py-1.5 text-xs uppercase tracking-widest text-muted-foreground transition hover:border-[var(--gold)] hover:text-[var(--gold)]"
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={exportPdf}
+              className="rounded-full border border-[var(--gold)]/40 px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--gold)] transition hover:bg-[var(--gold)]/10"
+            >
+              Export PDF
+            </button>
+          </div>
         </div>
+
 
 
         <div aria-live="polite" className="mt-3 text-sm">
