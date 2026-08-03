@@ -3,10 +3,14 @@ import {
   activeFilterCount,
   checkSizeBounds,
   deriveStage,
+  facetCounts,
   facetValues,
   filledPercent,
   filterProducts,
   sortProducts,
+  STAGES,
+  withCount,
+
   type ShelfProduct,
 } from "./marketplace-filters";
 
