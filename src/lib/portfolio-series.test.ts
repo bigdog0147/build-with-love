@@ -133,3 +133,35 @@ describe("seriesDelta", () => {
     expect(d.percent).toBeCloseTo(15);
   });
 });
+
+describe("allocationSlices drilldown", () => {
+  it("exposes underlying holdings with amounts and slice shares", () => {
+    const slices = allocationSlices({
+      holdings: [
+        ...holdings,
+        { id: "h3", product_id: "p1", invested: 20000, current_value: 22000, created_at: "2026-05-01T00:00:00Z" },
+      ],
+      products,
+      dimension: "sector",
+    });
+    const energy = slices.find((s) => s.label === "Energy")!;
+    expect(energy.value).toBe(140000);
+    expect(energy.invested).toBe(120000);
+    expect(energy.gain).toBe(20000);
+    expect(energy.holdings.map((h) => h.holdingId)).toEqual(["h1", "h3"]);
+    expect(energy.holdings.reduce((a, h) => a + h.shareOfSlice, 0)).toBeCloseTo(100, 6);
+    expect(energy.holdings[0]!.project).toBe("Cell Line A");
+    expect(energy.holdings[0]!.category).toBe("Battery");
+    expect(energy.holdings[0]!.gainPct).toBeCloseTo(18, 6);
+  });
+
+  it("labels unknown products in the drilldown rows", () => {
+    const slices = allocationSlices({
+      holdings: [{ id: "x", product_id: "missing", invested: 100, current_value: 90 }],
+      products,
+      dimension: "category",
+    });
+    expect(slices[0]!.holdings[0]!.project).toBe("Unlisted project");
+    expect(slices[0]!.holdings[0]!.gain).toBe(-10);
+  });
+});
