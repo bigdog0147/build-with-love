@@ -147,23 +147,33 @@ function MarketplacePage() {
             label="Category"
             value={search.category}
             onChange={(v) => setFilter({ category: v })}
-            options={[{ value: "all", label: "All categories" }, ...categories.map((c) => ({ value: c, label: c }))]}
+            options={[
+              { value: "all", label: withCount("All categories", categoryCounts.all) },
+              ...categories.map((c) => ({ value: c, label: withCount(c, categoryCounts[c]) })),
+            ]}
           />
           <Select
             label="Sector"
             value={search.sector}
             onChange={(v) => setFilter({ sector: v })}
-            options={[{ value: "all", label: "All sectors" }, ...sectors.map((s) => ({ value: s, label: s }))]}
+            options={[
+              { value: "all", label: withCount("All sectors", sectorCounts.all) },
+              ...sectors.map((s) => ({ value: s, label: withCount(s, sectorCounts[s]) })),
+            ]}
           />
           <Select
             label="Funding stage"
             value={search.stage}
             onChange={(v) => setFilter({ stage: v })}
             options={[
-              { value: "all", label: "Any stage" },
-              ...STAGES.map((s) => ({ value: s.key, label: `${s.label} — ${s.hint}` })),
+              { value: "all", label: withCount("Any stage", stageCounts.all) },
+              ...STAGES.map((s) => ({
+                value: s.key,
+                label: `${withCount(s.label, stageCounts[s.key])} — ${s.hint}`,
+              })),
             ]}
           />
+
           <Select
             label="Sort by"
             value={search.sort}
