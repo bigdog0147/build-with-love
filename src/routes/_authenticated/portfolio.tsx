@@ -7,6 +7,16 @@ import { PortfolioCharts } from "@/components/portfolio-charts";
 import { getInvestorOverview } from "@/lib/investments.functions";
 import { COUNTED_STATUSES, exposureBy, summarisePortfolio, toPosition } from "@/lib/investments";
 
+/** Marketplace search params are required by the router; link with the defaults. */
+const MARKETPLACE_DEFAULT_SEARCH = {
+  q: "",
+  category: "all",
+  sector: "all",
+  stage: "all",
+  maxMinimum: 0,
+  sort: "recommended" as const,
+};
+
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
@@ -130,7 +140,7 @@ function PortfolioPage() {
                   <tr>
                     <td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">
                       No holdings yet.{" "}
-                      <Link to="/marketplace" className="text-[var(--gold)]">
+                      <Link to="/marketplace" search={MARKETPLACE_DEFAULT_SEARCH} className="text-[var(--gold)]">
                         Browse the marketplace
                       </Link>
                     </td>

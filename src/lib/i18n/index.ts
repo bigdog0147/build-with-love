@@ -53,10 +53,11 @@ export function useSetLocale() {
       }
       void navigate({
         to: ".",
-        search: (prev: Record<string, unknown>) => ({
+        // Locale is a cross-route param, so the reducer is intentionally untyped here.
+        search: ((prev: Record<string, unknown>) => ({
           ...prev,
           lang: next === DEFAULT_LOCALE ? undefined : next,
-        }),
+        })) as never,
         replace: true,
       });
     },
