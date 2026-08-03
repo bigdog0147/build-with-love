@@ -606,6 +606,68 @@ export type Database = {
           },
         ]
       }
+      document_notification_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          document_id: string
+          email_sent: boolean
+          error: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string | null
+          inapp_sent: boolean
+          queued_at: string
+          reason: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          document_id: string
+          email_sent?: boolean
+          error?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          inapp_sent?: boolean
+          queued_at?: string
+          reason?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          document_id?: string
+          email_sent?: boolean
+          error?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          inapp_sent?: boolean
+          queued_at?: string
+          reason?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_notification_deliveries_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]
