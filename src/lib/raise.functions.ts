@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validateCommitment } from "@/lib/investments";
 import { notifyInvestor } from "@/lib/investments.server";
+import { raiseAdvanceNotice } from "@/lib/raise-timeline";
 import { moveWalletBalance } from "@/lib/withdrawals.server";
 import { logAdminAction, requireAdminPermission, serviceClient } from "@/lib/admin-guard.server";
 
@@ -187,10 +188,18 @@ export const fundRaiseCommitment = createServerFn({ method: "POST" })
       .eq("id", commitment.id);
     if (error) throw new Error(error.message);
 
+    const fundedStep = raiseAdvanceNotice({
+      roundStatus: String(round.status),
+      currency: round.currency,
+      idStatus: "verified",
+      interest: { status: "invited" },
+      commitment: { status: "funded" },
+    });
     await notifyInvestor({
       userId,
-      title: "Commitment funded",
-      detail: `${amount.toLocaleString()} ${round.currency} is held against your commitment to ${round.name}, pending final acceptance.`,
+      category: "raise",
+      title: `Capital raise: ${fundedStep.stageLabel}`,
+      detail: `${amount.toLocaleString()} ${round.currency} is held against your commitment to ${round.name}, pending final acceptance. Next step: ${fundedStep.nextStep}`,
       tone: "info",
       template: "commitment-status",
       templateData: { roundName: round.name, amount, currency: round.currency, outcome: "funded" },
@@ -380,11 +389,19 @@ export const adminReviewInterest = createServerFn({ method: "POST" })
       if (cErr) throw new Error(cErr.message);
     }
 
+    const interestStep = raiseAdvanceNotice({
+      roundStatus: String(round?.status ?? "open"),
+      currency: interest.currency,
+      idStatus: "verified",
+      interest: { status: invited ? "invited" : "declined" },
+      commitment: invited ? { status: "awaiting_funding" } : null,
+    });
     await notifyInvestor({
       userId: interest.user_id,
-      title: invited ? "Invitation to commit" : "Interest not progressed",
+      category: "raise",
+      title: invited ? `Capital raise: ${interestStep.stageLabel}` : "Interest not progressed",
       detail: invited
-        ? `You are invited to commit capital to ${round?.name ?? "the round"}. Confirm and fund your commitment in the capital raising portal.`
+        ? `You are invited to commit capital to ${round?.name ?? "the round"}. Next step: ${interestStep.nextStep}`
         : `Your interest in ${round?.name ?? "the round"} was not progressed at this time.${data.note ? ` ${data.note}` : ""}`,
       tone: invited ? "success" : "warning",
       template: "raise-invitation",
@@ -455,6 +472,7 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
 
       await notifyInvestor({
         userId: commitment.user_id,
+        category: "raise",
         title: "Commitment released",
         detail: `${amount.toLocaleString()} ${commitment.currency} held for ${round?.name ?? "the round"} has been returned to your wallet.${data.note ? ` ${data.note}` : ""}`,
         tone: "warning",
@@ -531,10 +549,18 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
       .eq("id", commitment.id);
     if (error) throw new Error(error.message);
 
+    const acceptedStep = raiseAdvanceNotice({
+      roundStatus: String(round?.status ?? "open"),
+      currency: commitment.currency,
+      idStatus: "verified",
+      interest: { status: "invited" },
+      commitment: { status: "accepted" },
+    });
     await notifyInvestor({
       userId: commitment.user_id,
-      title: "Commitment accepted",
-      detail: `Your ${amount.toLocaleString()} ${commitment.currency} commitment to ${round?.name ?? "the round"} has been accepted and deployed.`,
+      category: "raise",
+      title: `Capital raise: ${acceptedStep.stageLabel}`,
+      detail: `Your ${amount.toLocaleString()} ${commitment.currency} commitment to ${round?.name ?? "the round"} has been accepted and deployed. Next step: ${acceptedStep.nextStep}`,
       tone: "success",
       template: "commitment-status",
       templateData: {
@@ -633,6 +659,7 @@ export const adminUpdateRoundStatus = createServerFn({ method: "POST" })
       for (const userId of recipients) {
         await notifyInvestor({
           userId,
+          category: "raise",
           title: titles[data.status]!,
           detail: `${details[data.status]!}${data.note ? ` ${data.note}` : ""}`,
           tone: tones[data.status] ?? "info",
