@@ -158,6 +158,28 @@ export function PortfolioCharts({
   const active = useMemo(() => slices.find((s) => s.key === selected) ?? null, [slices, selected]);
   const fmt = (n: number) => money(n, currency);
 
+  const exportInput = () => ({
+    points: chartPoints,
+    slices,
+    dimension,
+    range: range === "ALL" ? "All time" : range,
+    comparisonLabel: comparison === "none" ? undefined : compareLabel,
+    currency,
+    investorName,
+    generatedAt: new Date().toISOString(),
+  });
+
+  const exportCsv = () => {
+    const input = exportInput();
+    downloadTextFile(portfolioCsvFileName(input), buildPortfolioCsv(input), "text/csv");
+  };
+
+  const exportPdf = () => {
+    printPortfolioReport(buildPortfolioReportHtml(exportInput()));
+  };
+
+
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
