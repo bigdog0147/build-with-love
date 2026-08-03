@@ -87,6 +87,7 @@ export function PortfolioCharts({
 }) {
   const [range, setRange] = useState<RangeKey>("6M");
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
+  const [selected, setSelected] = useState<string | null>(null);
 
   const points = useMemo(
     () => performanceSeries({ holdings, valuations, distributions, range }),
@@ -94,7 +95,9 @@ export function PortfolioCharts({
   );
   const delta = useMemo(() => seriesDelta(points), [points]);
   const slices = useMemo(() => allocationSlices({ holdings, products, dimension }), [holdings, products, dimension]);
+  const active = useMemo(() => slices.find((s) => s.key === selected) ?? null, [slices, selected]);
   const fmt = (n: number) => money(n, currency);
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
