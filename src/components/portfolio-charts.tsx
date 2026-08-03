@@ -90,9 +90,20 @@ export function PortfolioCharts({
   products: { id: string; name: string; sector: string; category: string }[];
   currency?: string;
 }) {
-  const [range, setRange] = useState<RangeKey>("6M");
+  const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Restore after mount so SSR markup and hydration stay identical.
+  useEffect(() => {
+    setRange(readStoredRange());
+  }, []);
+
+  const changeRange = (next: RangeKey) => {
+    setRange(next);
+    writeStoredRange(next);
+  };
+
 
   const points = useMemo(
     () => performanceSeries({ holdings, valuations, distributions, range }),
