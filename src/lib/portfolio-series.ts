@@ -143,11 +143,30 @@ export function performanceSeries(input: {
 
 export type AllocationDimension = "sector" | "category" | "project";
 
+export type AllocationHolding = {
+  holdingId: string;
+  productId: string;
+  project: string;
+  sector: string;
+  category: string;
+  invested: number;
+  value: number;
+  gain: number;
+  gainPct: number;
+  /** Share of this slice's current value, 0-100. */
+  shareOfSlice: number;
+};
+
 export type AllocationSlice = {
   key: string;
   label: string;
   value: number;
   percent: number;
+  invested: number;
+  gain: number;
+  gainPct: number;
+  /** Underlying positions rolled into this slice, richest first. */
+  holdings: AllocationHolding[];
 };
 
 /** Point-in-time allocation split of current value by sector, category or project. */
@@ -158,24 +177,53 @@ export function allocationSlices(input: {
 }): AllocationSlice[] {
   const { holdings, products, dimension } = input;
   const meta = new Map(products.map((p) => [p.id, p]));
-  const buckets = new Map<string, number>();
+  const buckets = new Map<string, AllocationHolding[]>();
   for (const h of holdings) {
     const p = meta.get(h.product_id);
     const label =
       dimension === "project" ? (p?.name ?? "Project") : ((p?.[dimension] as string | undefined) ?? "Unclassified");
-    buckets.set(label, (buckets.get(label) ?? 0) + num(h.current_value));
+    const value = num(h.current_value);
+    const invested = num(h.invested);
+    const list = buckets.get(label) ?? [];
+    list.push({
+      holdingId: h.id,
+      productId: h.product_id,
+      project: p?.name ?? "Unlisted project",
+      sector: p?.sector ?? "Unclassified",
+      category: p?.category ?? "Unclassified",
+      invested,
+      value,
+      gain: value - invested,
+      gainPct: invested > 0 ? ((value - invested) / invested) * 100 : 0,
+      shareOfSlice: 0,
+    });
+    buckets.set(label, list);
   }
-  const total = [...buckets.values()].reduce((a, b) => a + b, 0);
-  return [...buckets.entries()]
-    .filter(([, value]) => value > 0)
-    .map(([label, value]) => ({
+
+  const slices = [...buckets.entries()].map(([label, list]) => {
+    const value = list.reduce((a, h) => a + h.value, 0);
+    const invested = list.reduce((a, h) => a + h.invested, 0);
+    return {
       key: label,
       label,
       value,
-      percent: total > 0 ? (value / total) * 100 : 0,
-    }))
+      percent: 0,
+      invested,
+      gain: value - invested,
+      gainPct: invested > 0 ? ((value - invested) / invested) * 100 : 0,
+      holdings: list
+        .map((h) => ({ ...h, shareOfSlice: value > 0 ? (h.value / value) * 100 : 0 }))
+        .sort((a, b) => b.value - a.value),
+    };
+  });
+
+  const total = slices.reduce((a, s) => a + s.value, 0);
+  return slices
+    .filter((s) => s.value > 0)
+    .map((s) => ({ ...s, percent: total > 0 ? (s.value / total) * 100 : 0 }))
     .sort((a, b) => b.value - a.value);
 }
+
 
 /** Value change across the visible window, used for the range delta badge. */
 export function seriesDelta(points: SeriesPoint[]) {
