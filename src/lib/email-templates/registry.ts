@@ -7,6 +7,7 @@ import { template as announcementTemplate } from './announcement'
 import { template as adminInviteTemplate } from './admin-invite'
 import { template as raiseInvitationTemplate } from './raise-invitation'
 import { template as commitmentStatusTemplate } from './commitment-status'
+import { template as raiseRoundUpdateTemplate } from './raise-round-update'
 import { template as subscriptionStatusTemplate } from './subscription-status'
 import { template as documentPublishedTemplate } from './document-published'
 
@@ -40,6 +41,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'admin-invite': adminInviteTemplate,
   'raise-invitation': raiseInvitationTemplate,
   'commitment-status': commitmentStatusTemplate,
+  'raise-round-update': raiseRoundUpdateTemplate,
   'subscription-status': subscriptionStatusTemplate,
   'document-published': documentPublishedTemplate,
 }
