@@ -13,6 +13,8 @@ import {
   withdrawRaiseInterest,
 } from "@/lib/raise.functions";
 import { raiseProgress } from "@/lib/investments";
+import { raiseTimeline } from "@/lib/raise-timeline";
+import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
@@ -107,6 +109,14 @@ function CapitalRaisingPage() {
             (c) => c.round_id === round.id && !["released", "cancelled"].includes(c.status),
           );
           const walletList = (data?.wallets ?? []).filter((w) => w.code === round.currency);
+          const timeline = raiseTimeline({
+            roundStatus: round.status,
+            roundName: round.name,
+            currency: round.currency,
+            idStatus: data?.idStatus ?? "not_started",
+            interest,
+            commitment,
+          });
 
           return (
             <section key={round.id} className="glass rounded-2xl border border-border p-6">
@@ -157,7 +167,11 @@ function CapitalRaisingPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <div className="mt-6">
+                <RaiseStatusTimeline timeline={timeline} />
+              </div>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-xl border border-border/70 p-4">
                   <div className="font-display text-lg">Indication of interest</div>
                   {interest ? (
