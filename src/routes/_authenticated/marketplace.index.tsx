@@ -13,7 +13,10 @@ import {
   activeFilterCount,
   checkSizeBounds,
   deriveStage,
+  facetCounts,
   facetValues,
+  withCount,
+
   filledPercent,
   filterProducts,
   sortProducts,
