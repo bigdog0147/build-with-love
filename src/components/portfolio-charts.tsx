@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -23,6 +23,11 @@ import {
   type SeriesHolding,
   type ValuationLike,
 } from "@/lib/portfolio-series";
+import {
+  DEFAULT_PORTFOLIO_RANGE,
+  readStoredRange,
+  writeStoredRange,
+} from "@/lib/portfolio-preferences";
 
 const SLICE_COLORS = [
   "var(--gold)",
@@ -85,9 +90,20 @@ export function PortfolioCharts({
   products: { id: string; name: string; sector: string; category: string }[];
   currency?: string;
 }) {
-  const [range, setRange] = useState<RangeKey>("6M");
+  const [range, setRange] = useState<RangeKey>(DEFAULT_PORTFOLIO_RANGE);
   const [dimension, setDimension] = useState<AllocationDimension>("sector");
   const [selected, setSelected] = useState<string | null>(null);
+
+  // Restore after mount so SSR markup and hydration stay identical.
+  useEffect(() => {
+    setRange(readStoredRange());
+  }, []);
+
+  const changeRange = (next: RangeKey) => {
+    setRange(next);
+    writeStoredRange(next);
+  };
+
 
   const points = useMemo(
     () => performanceSeries({ holdings, valuations, distributions, range }),
@@ -109,7 +125,7 @@ export function PortfolioCharts({
               Portfolio value plus distributions received across the selected window.
             </p>
           </div>
-          <Toggle options={RANGES} value={range} onChange={setRange} label="Performance time range" />
+          <Toggle options={RANGES} value={range} onChange={changeRange} label="Performance time range" />
         </div>
 
         <div aria-live="polite" className="mt-3 text-sm">
