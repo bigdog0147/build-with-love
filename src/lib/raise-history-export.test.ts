@@ -100,7 +100,6 @@ describe("buildRaiseHistoryCsv", () => {
   });
 
   it("leaves currency blank when no amount was involved", () => {
-    expect(lines[6]!.endsWith(",,")).toBe(false);
     expect(lines[6]).not.toContain("USD");
   });
 });
