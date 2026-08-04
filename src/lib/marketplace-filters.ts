@@ -179,3 +179,52 @@ export function facetCounts(
 export function withCount(label: string, count: number | undefined): string {
   return `${label} (${count ?? 0})`;
 }
+
+/** Page sizes offered in the marketplace pagination control. */
+export const PAGE_SIZES = [6, 12, 24, 48] as const;
+export const DEFAULT_PAGE_SIZE = 12;
+
+export type Pagination = {
+  page: number;
+  perPage: number;
+  pageCount: number;
+  total: number;
+  from: number;
+  to: number;
+};
+
+/** Clamped page/offset maths for a filtered result list. */
+export function paginationInfo(total: number, page: number, perPage: number): Pagination {
+  const size = Number.isFinite(perPage) && perPage >= 1 ? Math.floor(perPage) : DEFAULT_PAGE_SIZE;
+  const pageCount = Math.max(1, Math.ceil(Math.max(0, total) / size));
+  const current = Math.min(Math.max(1, Math.floor(page) || 1), pageCount);
+  const from = total === 0 ? 0 : (current - 1) * size + 1;
+  const to = Math.min(total, current * size);
+  return { page: current, perPage: size, pageCount, total, from, to };
+}
+
+/** Slice of the list for the (clamped) current page. */
+export function paginate<T>(items: T[], page: number, perPage: number): T[] {
+  const info = paginationInfo(items.length, page, perPage);
+  return items.slice((info.page - 1) * info.perPage, info.page * info.perPage);
+}
+
+/**
+ * Page numbers to render, with `null` marking an ellipsis gap. Always includes
+ * the first and last page plus a window around the current page.
+ */
+export function pageWindow(page: number, pageCount: number, span = 1): (number | null)[] {
+  const pages = new Set<number>([1, pageCount]);
+  for (let p = page - span; p <= page + span; p += 1) {
+    if (p >= 1 && p <= pageCount) pages.add(p);
+  }
+  const sorted = [...pages].sort((a, b) => a - b);
+  const out: (number | null)[] = [];
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) out.push(null);
+    out.push(p);
+    prev = p;
+  }
+  return out;
+}

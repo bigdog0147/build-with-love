@@ -2,12 +2,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo } from "react";
-import { ArrowUpRight, Layers, Search, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
 import { listMarketplace } from "@/lib/investments.functions";
 import { remainingCapacity } from "@/lib/investments";
 import {
   DEFAULT_FILTERS,
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZES,
   SORTS,
   STAGES,
   activeFilterCount,
@@ -15,6 +24,9 @@ import {
   deriveStage,
   facetCounts,
   facetValues,
+  pageWindow,
+  paginate,
+  paginationInfo,
   withCount,
 
   filledPercent,
@@ -30,6 +42,8 @@ type Search = {
   stage: string;
   maxMinimum: number;
   sort: SortKey;
+  page: number;
+  perPage: number;
 };
 
 export const Route = createFileRoute("/_authenticated/marketplace/")({
@@ -38,6 +52,8 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
       typeof v === "string" && v.trim() ? v : fallback;
     const max = Number(search["maxMinimum"] ?? 0);
     const sort = str(search["sort"], DEFAULT_FILTERS.sort);
+    const page = Number(search["page"] ?? 1);
+    const perPage = Number(search["perPage"] ?? DEFAULT_PAGE_SIZE);
     return {
       q: str(search["q"], "").slice(0, 120),
       category: str(search["category"], "all"),
@@ -45,6 +61,10 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
       stage: str(search["stage"], "all"),
       maxMinimum: Number.isFinite(max) && max > 0 ? Math.round(max) : 0,
       sort: (SORTS.some((s) => s.key === sort) ? sort : DEFAULT_FILTERS.sort) as SortKey,
+      page: Number.isFinite(page) && page > 1 ? Math.floor(page) : 1,
+      perPage: PAGE_SIZES.includes(perPage as (typeof PAGE_SIZES)[number])
+        ? perPage
+        : DEFAULT_PAGE_SIZE,
     };
   },
   component: MarketplacePage,
@@ -76,9 +96,11 @@ function MarketplacePage() {
   const products = data?.products ?? [];
   const subscribedById = data?.subscribed ?? {};
 
+  // Any filter/sort change resets to page 1; explicit page moves keep filters.
   const setFilter = (patch: Partial<Search>) =>
-    navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
-
+    navigate({ search: (prev: Search) => ({ ...prev, page: 1, ...patch }) });
+  const goToPage = (page: number) =>
+    navigate({ search: (prev: Search) => ({ ...prev, page }) });
 
   const categories = useMemo(() => facetValues(products, "category"), [products]);
   const sectors = useMemo(() => facetValues(products, "sector"), [products]);
@@ -95,9 +117,14 @@ function MarketplacePage() {
     [products, subscribedById, search],
   );
   const bounds = useMemo(() => checkSizeBounds(products), [products]);
-  const visible = useMemo(
+  const matches = useMemo(
     () => sortProducts(filterProducts(products, subscribedById, search), search.sort),
     [products, subscribedById, search],
+  );
+  const pageInfo = paginationInfo(matches.length, search.page, search.perPage);
+  const visible = useMemo(
+    () => paginate(matches, search.page, search.perPage),
+    [matches, search.page, search.perPage],
   );
   const activeCount = activeFilterCount(search);
 
@@ -209,9 +236,27 @@ function MarketplacePage() {
       {isLoading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
 
       {!isLoading && (
-        <p aria-live="polite" className="text-sm text-muted-foreground">
-          Showing {visible.length} of {products.length} opportunities
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {matches.length === 0
+              ? `Showing 0 of ${products.length} opportunities`
+              : `Showing ${pageInfo.from}–${pageInfo.to} of ${matches.length} matching opportunities · page ${pageInfo.page} of ${pageInfo.pageCount}`}
+          </p>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            Per page
+            <select
+              value={search.perPage}
+              onChange={(e) => setFilter({ perPage: Number(e.target.value) })}
+              className="rounded-lg border border-border bg-[var(--surface-elevated)] px-2 py-1.5 text-xs outline-none"
+            >
+              {PAGE_SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       )}
 
       {!isLoading && products.length === 0 && (
@@ -221,7 +266,7 @@ function MarketplacePage() {
         </div>
       )}
 
-      {!isLoading && products.length > 0 && visible.length === 0 && (
+      {!isLoading && products.length > 0 && matches.length === 0 && (
         <div className="glass rounded-2xl border border-border p-8 text-sm text-muted-foreground">
           No opportunities match these filters.{" "}
           <button
@@ -304,6 +349,50 @@ function MarketplacePage() {
           );
         })}
       </div>
+
+      {!isLoading && pageInfo.pageCount > 1 && (
+        <nav aria-label="Marketplace pagination" className="flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => goToPage(pageInfo.page - 1)}
+            disabled={pageInfo.page <= 1}
+            className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-[var(--gold)] disabled:opacity-40 disabled:hover:text-muted-foreground"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Prev
+          </button>
+          {pageWindow(pageInfo.page, pageInfo.pageCount).map((p, i) =>
+            p == null ? (
+              <span key={`gap-${i}`} className="px-1 text-xs text-muted-foreground">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => goToPage(p)}
+                aria-current={p === pageInfo.page ? "page" : undefined}
+                className={`min-w-9 rounded-xl border px-3 py-2 text-xs tabular-nums transition-colors ${
+                  p === pageInfo.page
+                    ? "border-[var(--gold)]/60 text-[var(--gold)]"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
+          <button
+            type="button"
+            onClick={() => goToPage(pageInfo.page + 1)}
+            disabled={pageInfo.page >= pageInfo.pageCount}
+            className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-[var(--gold)] disabled:opacity-40 disabled:hover:text-muted-foreground"
+          >
+            Next
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </nav>
+      )}
     </DashShell>
   );
 }

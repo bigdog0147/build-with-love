@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_PAGE_SIZE,
   activeFilterCount,
   checkSizeBounds,
   deriveStage,
@@ -7,6 +8,9 @@ import {
   facetValues,
   filledPercent,
   filterProducts,
+  pageWindow,
+  paginate,
+  paginationInfo,
   sortProducts,
   STAGES,
   withCount,
@@ -148,5 +152,43 @@ describe("withCount", () => {
   it("renders the count and defaults to zero", () => {
     expect(withCount("Robotics", 3)).toBe("Robotics (3)");
     expect(withCount("Robotics", undefined)).toBe("Robotics (0)");
+  });
+});
+
+describe("paginationInfo", () => {
+  it("computes clamped pages and ranges", () => {
+    const info = paginationInfo(25, 2, 12);
+    expect(info).toMatchObject({ page: 2, perPage: 12, pageCount: 3, from: 13, to: 24 });
+  });
+
+  it("clamps out-of-range pages and invalid page sizes", () => {
+    expect(paginationInfo(25, 99, 12).page).toBe(3);
+    expect(paginationInfo(25, 0, 12).page).toBe(1);
+    expect(paginationInfo(25, 1, 0).perPage).toBe(DEFAULT_PAGE_SIZE);
+  });
+
+  it("handles an empty result set", () => {
+    expect(paginationInfo(0, 1, 12)).toMatchObject({ pageCount: 1, from: 0, to: 0 });
+  });
+});
+
+describe("paginate", () => {
+  const items = Array.from({ length: 7 }, (_, i) => i + 1);
+
+  it("slices the requested page", () => {
+    expect(paginate(items, 2, 3)).toEqual([4, 5, 6]);
+    expect(paginate(items, 3, 3)).toEqual([7]);
+  });
+
+  it("falls back to the last page when the page overflows", () => {
+    expect(paginate(items, 99, 3)).toEqual([7]);
+  });
+});
+
+describe("pageWindow", () => {
+  it("includes first, last and a window with ellipsis gaps", () => {
+    expect(pageWindow(5, 10)).toEqual([1, null, 4, 5, 6, null, 10]);
+    expect(pageWindow(1, 3)).toEqual([1, 2, 3]);
+    expect(pageWindow(1, 1)).toEqual([1]);
   });
 });
