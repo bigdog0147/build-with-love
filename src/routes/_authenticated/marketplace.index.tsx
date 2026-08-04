@@ -236,9 +236,27 @@ function MarketplacePage() {
       {isLoading && <p className="text-sm text-muted-foreground">Loading opportunities…</p>}
 
       {!isLoading && (
-        <p aria-live="polite" className="text-sm text-muted-foreground">
-          Showing {visible.length} of {products.length} opportunities
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {matches.length === 0
+              ? `Showing 0 of ${products.length} opportunities`
+              : `Showing ${pageInfo.from}–${pageInfo.to} of ${matches.length} matching opportunities · page ${pageInfo.page} of ${pageInfo.pageCount}`}
+          </p>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            Per page
+            <select
+              value={search.perPage}
+              onChange={(e) => setFilter({ perPage: Number(e.target.value) })}
+              className="rounded-lg border border-border bg-[var(--surface-elevated)] px-2 py-1.5 text-xs outline-none"
+            >
+              {PAGE_SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       )}
 
       {!isLoading && products.length === 0 && (
@@ -248,7 +266,7 @@ function MarketplacePage() {
         </div>
       )}
 
-      {!isLoading && products.length > 0 && visible.length === 0 && (
+      {!isLoading && products.length > 0 && matches.length === 0 && (
         <div className="glass rounded-2xl border border-border p-8 text-sm text-muted-foreground">
           No opportunities match these filters.{" "}
           <button
