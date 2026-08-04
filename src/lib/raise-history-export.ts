@@ -1,0 +1,266 @@
+/**
+ * Pure builders for exporting the investor-facing capital raising status
+ * history as a CSV file or a printable (PDF-ready) statement.
+ *
+ * Both exports carry every recorded stage with its full timestamp (ISO plus a
+ * human-readable UTC stamp), the actor label that recorded it, amounts and any
+ * desk note, so the download is an auditable copy of the on-screen timeline.
+ */
+
+import type { RaiseHistoryEvent } from "./raise-history";
+
+export interface RaiseHistoryExportInput {
+  events: RaiseHistoryEvent[];
+  roundName: string;
+  currency: string;
+  investorName: string;
+  generatedAt?: string;
+}
+
+export interface RaiseHistoryExportDocument {
+  fileName: string;
+  title: string;
+  html: string;
+}
+
+const escape = (value: unknown) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const slug = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "round";
+
+/** CSV-safe cell: quotes when the value contains a separator, quote or newline. */
+export function csvCell(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  if (/[",\r\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+function formatMoney(amount: number | null | undefined, currency: string) {
+  if (amount === null || amount === undefined) return "";
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${amount.toLocaleString()} ${currency}`;
+  }
+}
+
+/** Human-readable UTC timestamp, or a stable placeholder when missing. */
+export function formatHistoryStamp(at: string | null | undefined) {
+  if (!at) return "Not recorded";
+  const d = new Date(at);
+  if (Number.isNaN(d.getTime())) return "Not recorded";
+  return d.toLocaleString("en-GB", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  });
+}
+
+const HEADERS = [
+  "Stage",
+  "Timestamp (ISO 8601)",
+  "Timestamp (UTC)",
+  "Actor",
+  "Status tone",
+  "Amount",
+  "Currency",
+  "Detail",
+  "Desk note",
+  "Reference",
+] as const;
+
+/** Full status history as CSV, oldest event first. */
+export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
+  const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const lines: string[] = [];
+
+  lines.push(["Round", input.roundName].map(csvCell).join(","));
+  lines.push(["Investor", input.investorName].map(csvCell).join(","));
+  lines.push(["Generated", generatedAt].map(csvCell).join(","));
+  lines.push(["Events", input.events.length].map(csvCell).join(","));
+  lines.push("");
+  lines.push(HEADERS.map(csvCell).join(","));
+
+  for (const event of input.events) {
+    lines.push(
+      [
+        event.label,
+        event.at ?? "",
+        formatHistoryStamp(event.at),
+        event.actor,
+        event.tone,
+        event.amount ?? "",
+        event.amount === null || event.amount === undefined ? "" : input.currency,
+        event.detail,
+        event.note ?? "",
+        event.reference ?? "",
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+  }
+
+  return lines.join("\r\n");
+}
+
+/** CSV file name for a round's status history. */
+export function raiseHistoryCsvFileName(input: { roundName: string; generatedAt?: string }) {
+  const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
+  return `gf3x-${slug(input.roundName)}-status-history-${stamp}.csv`;
+}
+
+/** Printable statement of the full status history, ready to save as PDF. */
+export function buildRaiseHistoryReportHtml(
+  input: RaiseHistoryExportInput,
+): RaiseHistoryExportDocument {
+  const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const title = "Capital Raising — Status History";
+
+  const rows = input.events
+    .map(
+      (event) => `<tr>
+          <td>
+            <strong>${escape(event.label)}</strong>
+            <div class="detail">${escape(event.detail)}</div>
+            ${event.note ? `<div class="note">Desk note: ${escape(event.note)}</div>` : ""}
+            ${event.reference ? `<div class="ref">Reference ${escape(event.reference)}</div>` : ""}
+          </td>
+          <td>
+            ${escape(formatHistoryStamp(event.at))}
+            ${event.at ? `<div class="ref">${escape(event.at)}</div>` : ""}
+          </td>
+          <td>${escape(event.actor)}</td>
+          <td class="num">${escape(formatMoney(event.amount ?? null, input.currency))}</td>
+        </tr>`,
+    )
+    .join("\n        ");
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escape(title)} — ${escape(input.roundName)}</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 48px 32px; background: #0b0b0c; color: #f5f4f1;
+         font-family: "Helvetica Neue", Arial, sans-serif; font-size: 13px; line-height: 1.6; }
+  .sheet { max-width: 900px; margin: 0 auto; background: #131315; border: 1px solid #2a2a2d;
+           border-radius: 16px; padding: 40px; }
+  .brand { display: flex; align-items: baseline; justify-content: space-between;
+           border-bottom: 1px solid #2a2a2d; padding-bottom: 18px; gap: 16px; flex-wrap: wrap; }
+  .brand strong { font-size: 18px; letter-spacing: 0.14em; text-transform: uppercase; color: #d4af62; }
+  .brand span { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8a8a90; }
+  h1 { font-size: 22px; margin: 28px 0 4px; }
+  .lede { color: #b6b5b1; margin: 0 0 26px; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 26px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #232326; vertical-align: top; }
+  th { font-weight: 400; color: #8a8a90; font-size: 11px;
+       text-transform: uppercase; letter-spacing: 0.12em; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .detail { color: #b6b5b1; margin-top: 3px; }
+  .note { border-left: 2px solid #d4af62; padding-left: 10px; margin-top: 6px; color: #d8d7d3; }
+  .ref { color: #7e7e84; font-size: 11px; margin-top: 4px; }
+  footer { border-top: 1px solid #2a2a2d; padding-top: 18px; color: #7e7e84; font-size: 11px; }
+  @media print {
+    body { background: #ffffff; color: #111111; padding: 0; }
+    .sheet { border: none; background: #ffffff; }
+    .brand strong { color: #8a6d24; }
+    th, td, .brand, footer { border-color: #dddddd; }
+    .lede, th, footer, .detail, .ref { color: #555555; }
+    .note { color: #222222; border-color: #8a6d24; }
+  }
+</style>
+</head>
+<body>
+  <main class="sheet">
+    <div class="brand">
+      <strong>Gigafactory 3X</strong>
+      <span>Capital Markets Desk</span>
+    </div>
+    <h1>${escape(title)}</h1>
+    <p class="lede">
+      ${escape(input.roundName)} — prepared for ${escape(input.investorName)}.
+      ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
+      All timestamps are shown in UTC.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Timestamp</th>
+          <th>Recorded by</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows || `<tr><td colspan="4">No status events recorded yet.</td></tr>`}
+      </tbody>
+    </table>
+    <footer>
+      Generated ${escape(formatHistoryStamp(generatedAt))} from your capital raising portal. This
+      statement restates decisions already recorded in your account; it is a history record, not an
+      offer or a solicitation to invest.
+    </footer>
+  </main>
+</body>
+</html>`;
+
+  return {
+    fileName: `gf3x-${slug(input.roundName)}-status-history-${generatedAt.slice(0, 10)}.html`,
+    title,
+    html,
+  };
+}
+
+/** Triggers a browser download for text content; no-ops on the server. */
+export function downloadTextFile(fileName: string, content: string, mimeType: string) {
+  if (typeof document === "undefined") return;
+  const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Opens the printable statement so the browser's print dialog can save it as
+ * PDF. Falls back to a file download when popups are blocked.
+ */
+export function printRaiseHistoryReport(doc: RaiseHistoryExportDocument) {
+  if (typeof window === "undefined") return;
+  const win = window.open("", "_blank", "noopener,noreferrer,width=980,height=1200");
+  if (!win) {
+    downloadTextFile(doc.fileName, doc.html, "text/html");
+    return;
+  }
+  win.document.open();
+  win.document.write(doc.html);
+  win.document.close();
+  win.focus();
+  win.setTimeout(() => win.print(), 350);
+}
