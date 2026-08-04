@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { History, ChevronDown, Download } from "lucide-react";
+import { History, ChevronDown, Download, FileText, Table2 } from "lucide-react";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
   buildRaiseConfirmation,
   downloadRaiseConfirmation,
   raiseConfirmationTitle,
 } from "@/lib/raise-confirmation";
+import {
+  buildRaiseHistoryCsv,
+  buildRaiseHistoryReportHtml,
+  downloadTextFile,
+  printRaiseHistoryReport,
+  raiseHistoryCsvFileName,
+} from "@/lib/raise-history-export";
+
 
 const TONE: Record<RaiseHistoryTone, string> = {
   neutral: "hsl(var(--border))",
