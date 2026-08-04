@@ -164,7 +164,7 @@ describe("paginationInfo", () => {
   it("clamps out-of-range pages and invalid page sizes", () => {
     expect(paginationInfo(25, 99, 12).page).toBe(3);
     expect(paginationInfo(25, 0, 12).page).toBe(1);
-    expect(paginationInfo(25, 1, 7).perPage).toBe(DEFAULT_PAGE_SIZE);
+    expect(paginationInfo(25, 1, 0).perPage).toBe(DEFAULT_PAGE_SIZE);
   });
 
   it("handles an empty result set", () => {

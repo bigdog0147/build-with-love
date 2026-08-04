@@ -195,9 +195,7 @@ export type Pagination = {
 
 /** Clamped page/offset maths for a filtered result list. */
 export function paginationInfo(total: number, page: number, perPage: number): Pagination {
-  const size = PAGE_SIZES.includes(perPage as (typeof PAGE_SIZES)[number])
-    ? perPage
-    : DEFAULT_PAGE_SIZE;
+  const size = Number.isFinite(perPage) && perPage >= 1 ? Math.floor(perPage) : DEFAULT_PAGE_SIZE;
   const pageCount = Math.max(1, Math.ceil(Math.max(0, total) / size));
   const current = Math.min(Math.max(1, Math.floor(page) || 1), pageCount);
   const from = total === 0 ? 0 : (current - 1) * size + 1;
