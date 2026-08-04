@@ -96,9 +96,11 @@ function MarketplacePage() {
   const products = data?.products ?? [];
   const subscribedById = data?.subscribed ?? {};
 
+  // Any filter/sort change resets to page 1; explicit page moves keep filters.
   const setFilter = (patch: Partial<Search>) =>
-    navigate({ search: (prev: Search) => ({ ...prev, ...patch }) });
-
+    navigate({ search: (prev: Search) => ({ ...prev, page: 1, ...patch }) });
+  const goToPage = (page: number) =>
+    navigate({ search: (prev: Search) => ({ ...prev, page }) });
 
   const categories = useMemo(() => facetValues(products, "category"), [products]);
   const sectors = useMemo(() => facetValues(products, "sector"), [products]);
@@ -115,9 +117,14 @@ function MarketplacePage() {
     [products, subscribedById, search],
   );
   const bounds = useMemo(() => checkSizeBounds(products), [products]);
-  const visible = useMemo(
+  const matches = useMemo(
     () => sortProducts(filterProducts(products, subscribedById, search), search.sort),
     [products, subscribedById, search],
+  );
+  const pageInfo = paginationInfo(matches.length, search.page, search.perPage);
+  const visible = useMemo(
+    () => paginate(matches, search.page, search.perPage),
+    [matches, search.page, search.perPage],
   );
   const activeCount = activeFilterCount(search);
 
