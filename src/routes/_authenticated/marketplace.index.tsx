@@ -349,6 +349,50 @@ function MarketplacePage() {
           );
         })}
       </div>
+
+      {!isLoading && pageInfo.pageCount > 1 && (
+        <nav aria-label="Marketplace pagination" className="flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => goToPage(pageInfo.page - 1)}
+            disabled={pageInfo.page <= 1}
+            className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-[var(--gold)] disabled:opacity-40 disabled:hover:text-muted-foreground"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Prev
+          </button>
+          {pageWindow(pageInfo.page, pageInfo.pageCount).map((p, i) =>
+            p == null ? (
+              <span key={`gap-${i}`} className="px-1 text-xs text-muted-foreground">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => goToPage(p)}
+                aria-current={p === pageInfo.page ? "page" : undefined}
+                className={`min-w-9 rounded-xl border px-3 py-2 text-xs tabular-nums transition-colors ${
+                  p === pageInfo.page
+                    ? "border-[var(--gold)]/60 text-[var(--gold)]"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
+          <button
+            type="button"
+            onClick={() => goToPage(pageInfo.page + 1)}
+            disabled={pageInfo.page >= pageInfo.pageCount}
+            className="flex items-center gap-1 rounded-xl border border-border px-3 py-2 text-xs uppercase tracking-widest text-muted-foreground transition-colors hover:text-[var(--gold)] disabled:opacity-40 disabled:hover:text-muted-foreground"
+          >
+            Next
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </nav>
+      )}
     </DashShell>
   );
 }
