@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { History, ChevronDown, Download } from "lucide-react";
+import { History, ChevronDown, Download, FileText, Table2 } from "lucide-react";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
   buildRaiseConfirmation,
   downloadRaiseConfirmation,
   raiseConfirmationTitle,
 } from "@/lib/raise-confirmation";
+import {
+  buildRaiseHistoryCsv,
+  buildRaiseHistoryReportHtml,
+  downloadTextFile,
+  printRaiseHistoryReport,
+  raiseHistoryCsvFileName,
+} from "@/lib/raise-history-export";
+
 
 const TONE: Record<RaiseHistoryTone, string> = {
   neutral: "hsl(var(--border))",
@@ -41,6 +49,13 @@ export function RaiseHistoryTimeline({
   const [open, setOpen] = useState(false);
   if (events.length === 0) return null;
 
+  const exportInput = {
+    events,
+    roundName: roundName ?? "Capital raise",
+    currency,
+    investorName,
+  };
+
   return (
     <div className="rounded-xl border border-border/70 p-4">
       <button
@@ -61,6 +76,32 @@ export function RaiseHistoryTimeline({
           aria-hidden
         />
       </button>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            downloadTextFile(
+              raiseHistoryCsvFileName({ roundName: exportInput.roundName }),
+              buildRaiseHistoryCsv(exportInput),
+              "text/csv",
+            )
+          }
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+        >
+          <Table2 className="h-3.5 w-3.5" aria-hidden />
+          Download history CSV
+        </button>
+        <button
+          type="button"
+          onClick={() => printRaiseHistoryReport(buildRaiseHistoryReportHtml(exportInput))}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+        >
+          <FileText className="h-3.5 w-3.5" aria-hidden />
+          Download history PDF
+        </button>
+      </div>
+
 
       {open && (
         <ol

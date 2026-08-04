@@ -15,6 +15,8 @@ const MARKETPLACE_DEFAULT_SEARCH = {
   stage: "all",
   maxMinimum: 0,
   sort: "recommended" as const,
+  page: 1,
+  perPage: 12,
 };
 
 
