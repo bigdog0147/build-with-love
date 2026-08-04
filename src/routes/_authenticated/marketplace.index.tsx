@@ -2,12 +2,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo } from "react";
-import { ArrowUpRight, Layers, Search, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { DashShell, PageHeading, money } from "@/components/dashboard-chrome";
 import { listMarketplace } from "@/lib/investments.functions";
 import { remainingCapacity } from "@/lib/investments";
 import {
   DEFAULT_FILTERS,
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZES,
   SORTS,
   STAGES,
   activeFilterCount,
@@ -15,6 +24,9 @@ import {
   deriveStage,
   facetCounts,
   facetValues,
+  pageWindow,
+  paginate,
+  paginationInfo,
   withCount,
 
   filledPercent,
@@ -30,6 +42,8 @@ type Search = {
   stage: string;
   maxMinimum: number;
   sort: SortKey;
+  page: number;
+  perPage: number;
 };
 
 export const Route = createFileRoute("/_authenticated/marketplace/")({
@@ -38,6 +52,8 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
       typeof v === "string" && v.trim() ? v : fallback;
     const max = Number(search["maxMinimum"] ?? 0);
     const sort = str(search["sort"], DEFAULT_FILTERS.sort);
+    const page = Number(search["page"] ?? 1);
+    const perPage = Number(search["perPage"] ?? DEFAULT_PAGE_SIZE);
     return {
       q: str(search["q"], "").slice(0, 120),
       category: str(search["category"], "all"),
@@ -45,6 +61,10 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
       stage: str(search["stage"], "all"),
       maxMinimum: Number.isFinite(max) && max > 0 ? Math.round(max) : 0,
       sort: (SORTS.some((s) => s.key === sort) ? sort : DEFAULT_FILTERS.sort) as SortKey,
+      page: Number.isFinite(page) && page > 1 ? Math.floor(page) : 1,
+      perPage: PAGE_SIZES.includes(perPage as (typeof PAGE_SIZES)[number])
+        ? perPage
+        : DEFAULT_PAGE_SIZE,
     };
   },
   component: MarketplacePage,
