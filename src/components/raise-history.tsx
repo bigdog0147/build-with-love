@@ -84,8 +84,10 @@ export function RaiseHistoryTimeline({
           <History className="h-4 w-4 text-[var(--gold)]" aria-hidden />
           Status history
           <span className="text-xs font-sans uppercase tracking-widest text-muted-foreground">
-            {events.length} {events.length === 1 ? "event" : "events"}
+            {active.length > 0 ? `${visible.length} of ${events.length}` : events.length}{" "}
+            {events.length === 1 ? "event" : "events"}
           </span>
+
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
