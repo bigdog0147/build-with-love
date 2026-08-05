@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { History, ChevronDown, Download, FileText, Table2 } from "lucide-react";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
@@ -13,6 +13,13 @@ import {
   printRaiseHistoryReport,
   raiseHistoryCsvFileName,
 } from "@/lib/raise-history-export";
+import {
+  RAISE_HISTORY_CATEGORIES,
+  filterRaiseHistory,
+  raiseHistoryCounts,
+  type RaiseHistoryCategory,
+} from "@/lib/raise-history-filters";
+
 
 
 const TONE: Record<RaiseHistoryTone, string> = {
@@ -47,14 +54,23 @@ export function RaiseHistoryTimeline({
   investorName?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+
+  const counts = useMemo(() => raiseHistoryCounts(events), [events]);
+  const visible = useMemo(() => filterRaiseHistory(events, active), [events, active]);
+
   if (events.length === 0) return null;
 
   const exportInput = {
-    events,
+    events: visible,
     roundName: roundName ?? "Capital raise",
     currency,
     investorName,
   };
+
+  const toggle = (key: RaiseHistoryCategory) =>
+    setActive((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
 
   return (
     <div className="rounded-xl border border-border/70 p-4">
@@ -68,8 +84,10 @@ export function RaiseHistoryTimeline({
           <History className="h-4 w-4 text-[var(--gold)]" aria-hidden />
           Status history
           <span className="text-xs font-sans uppercase tracking-widest text-muted-foreground">
-            {events.length} {events.length === 1 ? "event" : "events"}
+            {active.length > 0 ? `${visible.length} of ${events.length}` : events.length}{" "}
+            {events.length === 1 ? "event" : "events"}
           </span>
+
         </span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
@@ -102,14 +120,60 @@ export function RaiseHistoryTimeline({
         </button>
       </div>
 
+      <div
+        className="mt-3 flex flex-wrap items-center gap-2"
+        role="group"
+        aria-label="Filter status history by type"
+      >
+        <button
+          type="button"
+          onClick={() => setActive([])}
+          aria-pressed={active.length === 0}
+          className={`rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-widest transition-colors ${
+            active.length === 0
+              ? "border-[var(--gold)]/60 bg-[var(--gold)]/12 text-[var(--gold)]"
+              : "border-border text-muted-foreground hover:border-[var(--gold)]/40 hover:text-foreground"
+          }`}
+        >
+          All
+        </button>
+        {RAISE_HISTORY_CATEGORIES.map((category) => {
+          const count = counts[category.key];
+          const on = active.includes(category.key);
+          return (
+            <button
+              key={category.key}
+              type="button"
+              onClick={() => toggle(category.key)}
+              disabled={count === 0}
+              aria-pressed={on}
+              className={`rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-widest transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                on
+                  ? "border-[var(--gold)]/60 bg-[var(--gold)]/12 text-[var(--gold)]"
+                  : "border-border text-muted-foreground hover:border-[var(--gold)]/40 hover:text-foreground"
+              }`}
+            >
+              {category.label}
+              <span className="ml-1.5 opacity-70">{count}</span>
+            </button>
+          );
+        })}
+      </div>
 
-      {open && (
+      {open && visible.length === 0 && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          No events match the selected types. Clear the filters to see the full history.
+        </p>
+      )}
+
+      {open && visible.length > 0 && (
         <ol
           className="mt-4 space-y-0"
           aria-label={roundName ? `Status history for ${roundName}` : "Status history"}
         >
-          {events.map((event, i) => {
-            const last = i === events.length - 1;
+          {visible.map((event, i) => {
+            const last = i === visible.length - 1;
+
             const color = TONE[event.tone];
             return (
               <li key={event.key} className="grid grid-cols-[auto_1fr] gap-x-3">
