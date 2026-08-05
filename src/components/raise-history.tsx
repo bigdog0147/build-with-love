@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { History, ChevronDown, Download, FileText, Table2 } from "lucide-react";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
@@ -13,6 +13,13 @@ import {
   printRaiseHistoryReport,
   raiseHistoryCsvFileName,
 } from "@/lib/raise-history-export";
+import {
+  RAISE_HISTORY_CATEGORIES,
+  filterRaiseHistory,
+  raiseHistoryCounts,
+  type RaiseHistoryCategory,
+} from "@/lib/raise-history-filters";
+
 
 
 const TONE: Record<RaiseHistoryTone, string> = {
