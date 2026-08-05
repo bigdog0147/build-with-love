@@ -54,14 +54,23 @@ export function RaiseHistoryTimeline({
   investorName?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+
+  const counts = useMemo(() => raiseHistoryCounts(events), [events]);
+  const visible = useMemo(() => filterRaiseHistory(events, active), [events, active]);
+
   if (events.length === 0) return null;
 
   const exportInput = {
-    events,
+    events: visible,
     roundName: roundName ?? "Capital raise",
     currency,
     investorName,
   };
+
+  const toggle = (key: RaiseHistoryCategory) =>
+    setActive((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
 
   return (
     <div className="rounded-xl border border-border/70 p-4">
