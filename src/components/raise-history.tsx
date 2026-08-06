@@ -42,6 +42,31 @@ function stamp(at: string | null) {
   });
 }
 
+function actorBadge(actor: RaiseHistoryEvent["actor"]) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+      {actor}
+    </span>
+  );
+}
+
+function noteBlock(note: string | null | undefined, downloadable?: boolean) {
+  if (note) {
+    return (
+      <div className="mt-2 border-l-2 border-[var(--gold)]/60 bg-[var(--gold)]/[0.04] pl-3 pr-2 py-1.5">
+        <span className="block text-[10px] uppercase tracking-wider text-[var(--gold)]">Desk note</span>
+        <p className="text-sm text-foreground/90">{note}</p>
+      </div>
+    );
+  }
+  if (downloadable) {
+    return (
+      <p className="mt-2 text-xs italic text-muted-foreground/70">No desk note recorded.</p>
+    );
+  }
+  return null;
+}
+
 export function RaiseHistoryTimeline({
   events,
   roundName,
@@ -209,17 +234,16 @@ export function RaiseHistoryTimeline({
                 <div className={last ? "pb-0" : "pb-5"}>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-sm font-medium">{event.label}</span>
-                    <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                      {event.actor}
-                    </span>
+                    {actorBadge(event.actor)}
                   </div>
                   <time
-                    className="mt-0.5 block text-xs text-muted-foreground"
+                    className="mt-1 block text-xs text-muted-foreground"
                     dateTime={event.at ?? undefined}
                   >
                     {stamp(event.at)}
                   </time>
-                  <p className="mt-1 text-sm text-muted-foreground">{event.detail}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{event.detail}</p>
+                  {noteBlock(event.note, event.downloadable)}
                   {event.downloadable && (
                     <button
                       type="button"

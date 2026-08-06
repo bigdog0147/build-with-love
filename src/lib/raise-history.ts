@@ -176,7 +176,7 @@ export function raiseHistory(input: {
         key: `interest-${interest.status}`,
         at: interest.reviewed_at ?? interest.updated_at ?? null,
         label: decision.label,
-        detail: interest.review_note ? `${decision.detail} Desk note: ${interest.review_note}` : decision.detail,
+        detail: decision.detail,
         actor: interest.status === "withdrawn" ? "Investor" : "Capital markets desk",
         tone: decision.tone,
         amount: Number(interest.indicative_amount ?? interest.amount ?? 0) || null,
@@ -206,9 +206,7 @@ export function raiseHistory(input: {
         key: `commitment-${commitment.status}`,
         at: commitment.reviewed_at ?? commitment.updated_at ?? null,
         label: decision.label,
-        detail: commitment.review_note
-          ? `${decision.detail} Desk note: ${commitment.review_note}`
-          : decision.detail,
+        detail: decision.detail,
         actor: decision.actor,
         tone: decision.tone,
         amount: Number(commitment.amount ?? 0) || null,
