@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { History, ChevronDown, Download, FileText, Table2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { History, ChevronDown, Download, FileText, Link2, Table2 } from "lucide-react";
+import { toast } from "sonner";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
   buildRaiseConfirmation,
@@ -19,6 +20,12 @@ import {
   raiseHistoryCounts,
   type RaiseHistoryCategory,
 } from "@/lib/raise-history-filters";
+import {
+  buildRaiseEventLink,
+  isRaiseEventTargeted,
+  raiseEventElementId,
+  raiseEventExists,
+} from "@/lib/raise-history-links";
 
 
 
@@ -67,22 +74,60 @@ function noteBlock(note: string | null | undefined, downloadable?: boolean) {
   return null;
 }
 
+async function copyLink(url: string) {
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Event link copied to clipboard.");
+  } catch {
+    toast.error("Could not copy the link. Copy it from the address bar instead.");
+  }
+}
+
 export function RaiseHistoryTimeline({
   events,
+  roundId,
   roundName,
   currency = "USD",
   investorName = "Investor",
+  target = null,
 }: {
   events: RaiseHistoryEvent[];
+  roundId?: string;
   roundName?: string;
   currency?: string;
   investorName?: string;
+  /** Deep-link target parsed from the URL search params. */
+  target?: { roundId: string; eventKey: string } | null;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+  const focusedRef = useRef<HTMLLIElement | null>(null);
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
   const visible = useMemo(() => filterRaiseHistory(events, active), [events, active]);
+
+  const deepLinked =
+    roundId && target && target.roundId === roundId && raiseEventExists(events, target.eventKey)
+      ? target.eventKey
+      : null;
+
+  // A shared link must land on its event: expand the panel and drop filters
+  // that would hide the row, then scroll it into view.
+  useEffect(() => {
+    if (!deepLinked) return;
+    setOpen(true);
+    setActive([]);
+  }, [deepLinked]);
+
+  useEffect(() => {
+    if (!deepLinked || !open) return;
+    const node = focusedRef.current;
+    if (!node) return;
+    const id = window.requestAnimationFrame(() => {
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [deepLinked, open, visible.length]);
 
   if (events.length === 0) return null;
 
@@ -215,8 +260,17 @@ export function RaiseHistoryTimeline({
             const last = i === visible.length - 1;
 
             const color = TONE[event.tone];
+            const focused = isRaiseEventTargeted(target, roundId ?? "", event.key);
             return (
-              <li key={event.key} className="grid grid-cols-[auto_1fr] gap-x-3">
+              <li
+                key={event.key}
+                id={roundId ? raiseEventElementId(roundId, event.key) : undefined}
+                ref={focused ? focusedRef : undefined}
+                aria-current={focused ? "true" : undefined}
+                className={`grid scroll-mt-24 grid-cols-[auto_1fr] gap-x-3 ${
+                  focused ? "rounded-lg bg-[var(--gold)]/[0.07] ring-1 ring-[var(--gold)]/40 px-2 -mx-2" : ""
+                }`}
+              >
                 <div className="flex flex-col items-center">
                   <span
                     className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full"
@@ -268,6 +322,25 @@ export function RaiseHistoryTimeline({
                     >
                       <Download className="h-3.5 w-3.5" aria-hidden />
                       Download {raiseConfirmationTitle(event.key).toLowerCase()}
+                    </button>
+                  )}
+                  {roundId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyLink(
+                          buildRaiseEventLink({
+                            origin: typeof window === "undefined" ? null : window.location.origin,
+                            roundId,
+                            eventKey: event.key,
+                          }),
+                        )
+                      }
+                      className="mt-2 ml-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+                      aria-label={`Copy shareable link to ${event.label}`}
+                    >
+                      <Link2 className="h-3.5 w-3.5" aria-hidden />
+                      Copy link
                     </button>
                   )}
                 </div>

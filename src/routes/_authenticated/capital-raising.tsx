@@ -17,9 +17,14 @@ import { raiseTimeline } from "@/lib/raise-timeline";
 import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
 import { RaiseHistoryTimeline } from "@/components/raise-history";
 import { raiseHistory } from "@/lib/raise-history";
+import { parseRaiseEventTarget } from "@/lib/raise-history-links";
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
+  validateSearch: (search: Record<string, unknown>): { round: string; event: string } => ({
+    round: typeof search['round'] === "string" ? search['round'] : "",
+    event: typeof search['event'] === "string" ? search['event'] : "",
+  }),
   head: () => ({
     meta: [
       { title: "Capital raising — Gigafactory 3X" },
@@ -44,6 +49,8 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 function CapitalRaisingPage() {
+  const search = Route.useSearch();
+  const eventTarget = parseRaiseEventTarget(search);
   const queryClient = useQueryClient();
   const fetchPortal = useServerFn(getRaisePortal);
   const submitInterest = useServerFn(submitRaiseInterest);
@@ -177,6 +184,8 @@ function CapitalRaisingPage() {
               <div className="mt-4">
                 <RaiseHistoryTimeline
                   events={history}
+                  roundId={round.id}
+                  target={eventTarget}
                   roundName={round.name}
                   currency={round.currency}
                   investorName={data?.investor?.name ?? "Investor"}
