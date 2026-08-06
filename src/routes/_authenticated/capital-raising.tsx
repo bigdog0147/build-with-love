@@ -18,17 +18,13 @@ import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
 import { RaiseHistoryTimeline } from "@/components/raise-history";
 import { raiseHistory } from "@/lib/raise-history";
 import { parseRaiseEventTarget } from "@/lib/raise-history-links";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
-
-const searchSchema = z.object({
-  round: fallback(z.string(), "").default(""),
-  event: fallback(z.string(), "").default(""),
-});
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (search: Record<string, unknown>): { round: string; event: string } => ({
+    round: typeof search['round'] === "string" ? search['round'] : "",
+    event: typeof search['event'] === "string" ? search['event'] : "",
+  }),
   head: () => ({
     meta: [
       { title: "Capital raising — Gigafactory 3X" },
