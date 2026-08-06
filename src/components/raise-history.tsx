@@ -42,6 +42,31 @@ function stamp(at: string | null) {
   });
 }
 
+function actorBadge(actor: RaiseHistoryEvent["actor"]) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+      {actor}
+    </span>
+  );
+}
+
+function noteBlock(note: string | null | undefined, downloadable?: boolean) {
+  if (note) {
+    return (
+      <div className="mt-2 border-l-2 border-[var(--gold)]/60 bg-[var(--gold)]/[0.04] pl-3 pr-2 py-1.5">
+        <span className="block text-[10px] uppercase tracking-wider text-[var(--gold)]">Desk note</span>
+        <p className="text-sm text-foreground/90">{note}</p>
+      </div>
+    );
+  }
+  if (downloadable) {
+    return (
+      <p className="mt-2 text-xs italic text-muted-foreground/70">No desk note recorded.</p>
+    );
+  }
+  return null;
+}
+
 export function RaiseHistoryTimeline({
   events,
   roundName,
