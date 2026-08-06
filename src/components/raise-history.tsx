@@ -160,6 +160,21 @@ export function RaiseHistoryTimeline({
         })}
       </div>
 
+      {events.length > 0 && (
+        <div className="mt-4 flex items-center gap-3 rounded-lg border border-[var(--gold)]/20 bg-[var(--gold)]/5 px-3 py-2">
+          <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--gold)]" aria-hidden />
+          <div className="flex flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <span className="text-sm font-medium">Latest: {events[events.length - 1]!.label}</span>
+            <time
+              className="text-xs text-muted-foreground"
+              dateTime={events[events.length - 1]!.at ?? undefined}
+            >
+              Reached {stamp(events[events.length - 1]!.at)}
+            </time>
+          </div>
+        </div>
+      )}
+
       {open && visible.length === 0 && (
         <p className="mt-4 text-sm text-muted-foreground">
           No events match the selected types. Clear the filters to see the full history.
