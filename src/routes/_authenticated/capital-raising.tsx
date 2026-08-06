@@ -17,9 +17,18 @@ import { raiseTimeline } from "@/lib/raise-timeline";
 import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
 import { RaiseHistoryTimeline } from "@/components/raise-history";
 import { raiseHistory } from "@/lib/raise-history";
+import { parseRaiseEventTarget } from "@/lib/raise-history-links";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  round: fallback(z.string(), "").default(""),
+  event: fallback(z.string(), "").default(""),
+});
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
       { title: "Capital raising — Gigafactory 3X" },
@@ -44,6 +53,8 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 function CapitalRaisingPage() {
+  const search = Route.useSearch();
+  const eventTarget = parseRaiseEventTarget(search);
   const queryClient = useQueryClient();
   const fetchPortal = useServerFn(getRaisePortal);
   const submitInterest = useServerFn(submitRaiseInterest);
@@ -177,6 +188,8 @@ function CapitalRaisingPage() {
               <div className="mt-4">
                 <RaiseHistoryTimeline
                   events={history}
+                  roundId={round.id}
+                  target={eventTarget}
                   roundName={round.name}
                   currency={round.currency}
                   investorName={data?.investor?.name ?? "Investor"}
