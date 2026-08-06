@@ -234,17 +234,16 @@ export function RaiseHistoryTimeline({
                 <div className={last ? "pb-0" : "pb-5"}>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="text-sm font-medium">{event.label}</span>
-                    <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                      {event.actor}
-                    </span>
+                    {actorBadge(event.actor)}
                   </div>
                   <time
-                    className="mt-0.5 block text-xs text-muted-foreground"
+                    className="mt-1 block text-xs text-muted-foreground"
                     dateTime={event.at ?? undefined}
                   >
                     {stamp(event.at)}
                   </time>
-                  <p className="mt-1 text-sm text-muted-foreground">{event.detail}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{event.detail}</p>
+                  {noteBlock(event.note, event.downloadable)}
                   {event.downloadable && (
                     <button
                       type="button"
