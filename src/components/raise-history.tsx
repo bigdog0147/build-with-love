@@ -142,8 +142,11 @@ export function RaiseHistoryTimeline({
     investorName,
   };
 
+  const confirmationCount = downloadableRaiseEvents(events).length;
+
   const toggle = (key: RaiseHistoryCategory) =>
     setActive((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
 
 
   return (
