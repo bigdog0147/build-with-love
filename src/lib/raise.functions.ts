@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validateCommitment } from "@/lib/investments";
+import type { RaiseRoundOverride } from "@/lib/raise-round-preferences";
 import { notifyInvestor } from "@/lib/investments.server";
 import { raiseAdvanceNotice } from "@/lib/raise-timeline";
 import { notifyRaiseAdvance } from "@/lib/raise-notifications.server";
@@ -15,7 +16,8 @@ export const getRaisePortal = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [rounds, interests, commitments, wallets, kyc, profile] = await Promise.all([
+    const [rounds, interests, commitments, wallets, kyc, profile, roundPrefs, globalPrefs] =
+      await Promise.all([
       supabase.from("raise_rounds").select(ROUND_SELECT).neq("status", "draft").order("sort_order"),
       supabase
         .from("raise_interests")
@@ -28,6 +30,15 @@ export const getRaisePortal = createServerFn({ method: "GET" })
       supabase.from("wallets").select("id, code, label, balance").eq("user_id", userId).order("sort_order"),
       supabase.from("kyc_profiles").select("id_status").eq("user_id", userId).maybeSingle(),
       supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle(),
+      supabase
+        .from("raise_round_preferences")
+        .select("round_id, email_enabled, inapp_enabled")
+        .eq("user_id", userId),
+      supabase
+        .from("notification_preferences")
+        .select("raise_email, raise_inapp")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
     if (rounds.error) throw new Error(rounds.error.message);
 
@@ -50,6 +61,36 @@ export const getRaisePortal = createServerFn({ method: "GET" })
       idStatus: (kyc.data?.id_status as string | undefined) ?? "not_started",
       // Named on downloaded decision confirmations.
       investor: { name: profile.data?.display_name ?? "Investor" },
+      // Per-round alert opt-ins plus the global raise baseline they narrow.
+      roundPreferences: (roundPrefs.data ?? []) as RaiseRoundOverride[],
+      raiseGlobal: (globalPrefs.data ?? {}) as { raise_email?: boolean; raise_inapp?: boolean },
+    };
+  });
+
+/** Opt in or out of alerts for one round. Missing row means "follow global settings". */
+export const updateRaiseRoundPreference = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { roundId: string; email: boolean; inapp: boolean }) => ({
+    roundId: String(input.roundId ?? ""),
+    email: Boolean(input.email),
+    inapp: Boolean(input.inapp),
+  }))
+  .handler(async ({ data, context }) => {
+    if (!data.roundId) throw new Error("Round is required.");
+    const { error } = await context.supabase.from("raise_round_preferences").upsert(
+      {
+        user_id: context.userId,
+        round_id: data.roundId,
+        email_enabled: data.email,
+        inapp_enabled: data.inapp,
+      } as never,
+      { onConflict: "user_id,round_id" },
+    );
+    if (error) throw new Error(error.message);
+    return {
+      ok: true as const,
+      message:
+        data.email || data.inapp ? "Round alert preferences saved." : "Alerts muted for this round.",
     };
   });
 
