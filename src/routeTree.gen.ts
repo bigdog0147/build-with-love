@@ -56,6 +56,7 @@ import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCapitalRaisingRouteImport } from './routes/_authenticated/capital-raising'
 import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_authenticated/marketplace.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as ApiPublicNotificationDigestRouteImport } from './routes/api/public/notification-digest'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
 import { Route as ApiPublicDocumentNotificationRetryRouteImport } from './routes/api/public/document-notification-retry'
 import { Route as ApiPublicDocumentAccessRouteImport } from './routes/api/public/document-access'
@@ -329,6 +330,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicNotificationDigestRoute =
+  ApiPublicNotificationDigestRouteImport.update({
+    id: '/api/public/notification-digest',
+    path: '/api/public/notification-digest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFxRefreshRoute = ApiPublicFxRefreshRouteImport.update({
   id: '/api/public/fx-refresh',
   path: '/api/public/fx-refresh',
@@ -566,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
+  '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -643,6 +651,7 @@ export interface FileRoutesByTo {
   '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
+  '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/marketplace': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -722,6 +731,7 @@ export interface FileRoutesById {
   '/api/public/document-access': typeof ApiPublicDocumentAccessRoute
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
+  '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -801,6 +811,7 @@ export interface FileRouteTypes {
     | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
+    | '/api/public/notification-digest'
     | '/admin/'
     | '/marketplace/'
     | '/admin/customer/$id'
@@ -878,6 +889,7 @@ export interface FileRouteTypes {
     | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
+    | '/api/public/notification-digest'
     | '/admin'
     | '/marketplace'
     | '/admin/customer/$id'
@@ -956,6 +968,7 @@ export interface FileRouteTypes {
     | '/api/public/document-access'
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
+    | '/api/public/notification-digest'
     | '/_authenticated/admin/'
     | '/_authenticated/marketplace/'
     | '/_authenticated/admin/customer/$id'
@@ -993,6 +1006,7 @@ export interface RootRouteChildren {
   ApiPublicDocumentAccessRoute: typeof ApiPublicDocumentAccessRoute
   ApiPublicDocumentNotificationRetryRoute: typeof ApiPublicDocumentNotificationRetryRoute
   ApiPublicFxRefreshRoute: typeof ApiPublicFxRefreshRoute
+  ApiPublicNotificationDigestRoute: typeof ApiPublicNotificationDigestRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1329,6 +1343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/notification-digest': {
+      id: '/api/public/notification-digest'
+      path: '/api/public/notification-digest'
+      fullPath: '/api/public/notification-digest'
+      preLoaderRoute: typeof ApiPublicNotificationDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/fx-refresh': {
       id: '/api/public/fx-refresh'
       path: '/api/public/fx-refresh'
@@ -1664,6 +1685,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDocumentNotificationRetryRoute:
     ApiPublicDocumentNotificationRetryRoute,
   ApiPublicFxRefreshRoute: ApiPublicFxRefreshRoute,
+  ApiPublicNotificationDigestRoute: ApiPublicNotificationDigestRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
@@ -1671,13 +1693,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

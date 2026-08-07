@@ -7,6 +7,7 @@
  */
 import { serviceClient } from "./admin-guard.server";
 import { sendTemplateEmailWithRetry } from "./email-retry.server";
+import { scheduleDelivery, type DeliveryWindow } from "./notification-schedule";
 
 export type NotificationCategory = "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports" | "raise";
 
@@ -31,6 +32,8 @@ export type DispatchResult = {
   emailAttempts?: number;
   /** True when the failure was transient and another attempt could succeed. */
   emailRetryable?: boolean;
+  /** Set when quiet hours or a digest cadence pushed the email into the future. */
+  emailDeferredUntil?: string;
 };
 
 type Prefs = Record<string, boolean>;
@@ -73,6 +76,16 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
 
   if (!allows(prefs, input.category, "email")) {
     result.emailSkippedReason = "customer_opted_out";
+    return result;
+  }
+
+  // Quiet hours and digest cadences delay the email, never the in-app notice.
+  const decision = scheduleDelivery(input.category, prefs as DeliveryWindow);
+  if (decision.mode === "deferred") {
+    const { queueDeferredEmail } = await import("./notification-digest.server");
+    const queued = await queueDeferredEmail(db, input, decision);
+    result.emailSkippedReason = queued ? `deferred_${decision.reason}` : "deferred_queue_failed";
+    result.emailDeferredUntil = decision.deliverAfter.toISOString();
     return result;
   }
 
