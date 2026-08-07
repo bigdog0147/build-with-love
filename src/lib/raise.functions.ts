@@ -81,15 +81,30 @@ export const submitRaiseInterest = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (existing) {
+      const nextStatus = existing.status === "declined" ? "submitted" : existing.status;
       const { error } = await supabase
         .from("raise_interests")
         .update({
           indicative_amount: data.amount,
           note: data.note || null,
-          status: existing.status === "declined" ? "submitted" : existing.status,
+          status: nextStatus,
         })
         .eq("id", existing.id);
       if (error) throw new Error(error.message);
+      // Re-submitting after a decline is a genuine timeline advance; a plain
+      // amount edit at the same stage is not, so it is not re-announced.
+      if (existing.status === "declined") {
+        await notifyRaiseAdvance({
+          userId,
+          roundId: round.id,
+          roundName: round.name,
+          roundStatus: String(round.status),
+          currency: round.currency,
+          interestStatus: "submitted",
+          amount: data.amount,
+          event: `interest-resubmitted-${existing.id}`,
+        });
+      }
       return { message: `Your indication of interest in ${round.name} was updated.` };
     }
 
@@ -101,6 +116,18 @@ export const submitRaiseInterest = createServerFn({ method: "POST" })
       note: data.note || null,
     });
     if (error) throw new Error(error.message);
+
+    await notifyRaiseAdvance({
+      userId,
+      roundId: round.id,
+      roundName: round.name,
+      roundStatus: String(round.status),
+      currency: round.currency,
+      interestStatus: "submitted",
+      amount: data.amount,
+      event: "interest-submitted",
+    });
+
     return { message: `Interest registered for ${round.name}. The capital markets desk will be in touch.` };
   });
 
@@ -108,6 +135,13 @@ export const withdrawRaiseInterest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => ({ id: String(input.id ?? "") }))
   .handler(async ({ data, context }) => {
+    const { data: interest } = await context.supabase
+      .from("raise_interests")
+      .select("id, round_id, indicative_amount, currency")
+      .eq("id", data.id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
     const { error } = await context.supabase
       .from("raise_interests")
       .update({ status: "withdrawn" })
@@ -115,8 +149,29 @@ export const withdrawRaiseInterest = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .in("status", ["submitted", "invited"]);
     if (error) throw new Error(error.message);
+
+    if (interest) {
+      const { data: round } = await context.supabase
+        .from("raise_rounds")
+        .select("id, name, currency, status")
+        .eq("id", interest.round_id)
+        .maybeSingle();
+      await notifyRaiseAdvance({
+        userId: context.userId,
+        roundId: interest.round_id,
+        roundName: round?.name ?? "Capital raise",
+        roundStatus: String(round?.status ?? "open"),
+        currency: interest.currency ?? round?.currency ?? "USD",
+        interestStatus: "withdrawn",
+        amount: Number(interest.indicative_amount ?? 0) || null,
+        event: `interest-withdrawn-${interest.id}`,
+        tone: "warning",
+      });
+    }
+
     return { message: "Interest withdrawn." };
   });
+
 
 /** Stage 2 — confirm an invited commitment; the amount is held from the wallet. */
 export const fundRaiseCommitment = createServerFn({ method: "POST" })
