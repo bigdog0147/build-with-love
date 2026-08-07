@@ -56,6 +56,7 @@ import { Route as AuthenticatedCardsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedCapitalRaisingRouteImport } from './routes/_authenticated/capital-raising'
 import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_authenticated/marketplace.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as ApiPublicRaiseConfirmationRouteImport } from './routes/api/public/raise-confirmation'
 import { Route as ApiPublicNotificationDigestRouteImport } from './routes/api/public/notification-digest'
 import { Route as ApiPublicFxRefreshRouteImport } from './routes/api/public/fx-refresh'
 import { Route as ApiPublicDocumentNotificationRetryRouteImport } from './routes/api/public/document-notification-retry'
@@ -330,6 +331,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicRaiseConfirmationRoute =
+  ApiPublicRaiseConfirmationRouteImport.update({
+    id: '/api/public/raise-confirmation',
+    path: '/api/public/raise-confirmation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicNotificationDigestRoute =
   ApiPublicNotificationDigestRouteImport.update({
     id: '/api/public/notification-digest',
@@ -574,6 +581,7 @@ export interface FileRoutesByFullPath {
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
+  '/api/public/raise-confirmation': typeof ApiPublicRaiseConfirmationRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -652,6 +660,7 @@ export interface FileRoutesByTo {
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
+  '/api/public/raise-confirmation': typeof ApiPublicRaiseConfirmationRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/marketplace': typeof AuthenticatedMarketplaceIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -732,6 +741,7 @@ export interface FileRoutesById {
   '/api/public/document-notification-retry': typeof ApiPublicDocumentNotificationRetryRoute
   '/api/public/fx-refresh': typeof ApiPublicFxRefreshRoute
   '/api/public/notification-digest': typeof ApiPublicNotificationDigestRoute
+  '/api/public/raise-confirmation': typeof ApiPublicRaiseConfirmationRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/marketplace/': typeof AuthenticatedMarketplaceIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
@@ -812,6 +822,7 @@ export interface FileRouteTypes {
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/api/public/notification-digest'
+    | '/api/public/raise-confirmation'
     | '/admin/'
     | '/marketplace/'
     | '/admin/customer/$id'
@@ -890,6 +901,7 @@ export interface FileRouteTypes {
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/api/public/notification-digest'
+    | '/api/public/raise-confirmation'
     | '/admin'
     | '/marketplace'
     | '/admin/customer/$id'
@@ -969,6 +981,7 @@ export interface FileRouteTypes {
     | '/api/public/document-notification-retry'
     | '/api/public/fx-refresh'
     | '/api/public/notification-digest'
+    | '/api/public/raise-confirmation'
     | '/_authenticated/admin/'
     | '/_authenticated/marketplace/'
     | '/_authenticated/admin/customer/$id'
@@ -1007,6 +1020,7 @@ export interface RootRouteChildren {
   ApiPublicDocumentNotificationRetryRoute: typeof ApiPublicDocumentNotificationRetryRoute
   ApiPublicFxRefreshRoute: typeof ApiPublicFxRefreshRoute
   ApiPublicNotificationDigestRoute: typeof ApiPublicNotificationDigestRoute
+  ApiPublicRaiseConfirmationRoute: typeof ApiPublicRaiseConfirmationRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1342,6 +1356,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/raise-confirmation': {
+      id: '/api/public/raise-confirmation'
+      path: '/api/public/raise-confirmation'
+      fullPath: '/api/public/raise-confirmation'
+      preLoaderRoute: typeof ApiPublicRaiseConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/notification-digest': {
       id: '/api/public/notification-digest'
@@ -1686,6 +1707,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicDocumentNotificationRetryRoute,
   ApiPublicFxRefreshRoute: ApiPublicFxRefreshRoute,
   ApiPublicNotificationDigestRoute: ApiPublicNotificationDigestRoute,
+  ApiPublicRaiseConfirmationRoute: ApiPublicRaiseConfirmationRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
@@ -1693,13 +1715,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
