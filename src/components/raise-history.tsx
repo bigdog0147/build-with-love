@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Download,
   FileArchive,
-  FileText,
   Link2,
   Table2,
   X,

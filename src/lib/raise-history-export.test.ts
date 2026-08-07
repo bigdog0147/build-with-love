@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { RaiseHistoryEvent } from "./raise-history";
 import {
+  buildRaiseHistoryExportPreview,
   buildRaiseHistoryCsv,
   buildRaiseHistoryReportHtml,
   csvCell,
@@ -142,5 +143,58 @@ describe("buildRaiseHistoryReportHtml", () => {
   it("handles an empty history", () => {
     const empty = buildRaiseHistoryReportHtml({ ...input, events: [] });
     expect(empty.html).toContain("No status events recorded yet.");
+  });
+});
+
+describe("buildRaiseHistoryExportPreview", () => {
+  const input = {
+    events,
+    roundName: "Series C — Robotics",
+    currency: "USD",
+    investorName: "Ada Investor",
+    generatedAt: "2026-03-01T10:00:00.000Z",
+  };
+
+  it("lists the same columns as the CSV header", () => {
+    const preview = buildRaiseHistoryExportPreview(input);
+    const csvHeader = buildRaiseHistoryCsv(input)
+      .split("\r\n")
+      .find((l) => l.startsWith("Stage"))!;
+    expect(preview.columns.join(",")).toBe(csvHeader);
+  });
+
+  it("previews one row per exported event with matching cell counts", () => {
+    const preview = buildRaiseHistoryExportPreview(input);
+    expect(preview.rowCount).toBe(events.length);
+    expect(preview.rows).toHaveLength(events.length);
+    for (const row of preview.rows) expect(row).toHaveLength(preview.columns.length);
+    expect(preview.rows[0]![0]).toBe(events[0]!.label);
+  });
+
+  it("surfaces the metadata block and both file names", () => {
+    const preview = buildRaiseHistoryExportPreview({
+      ...input,
+      rangeLabel: "1–31 January 2026",
+      rangeSlug: "2026-01-01-2026-01-31",
+      filterLabel: "Desk decision",
+      filterSlug: "decision",
+    });
+    expect(preview.meta.map((m) => m.label)).toEqual([
+      "Round",
+      "Investor",
+      "Date range",
+      "Event types",
+      "Currency",
+    ]);
+    expect(preview.meta[2]!.value).toBe("1–31 January 2026");
+    expect(preview.csvFileName).toContain("-decision-");
+    expect(preview.csvFileName.endsWith(".csv")).toBe(true);
+    expect(preview.pdfFileName.endsWith(".pdf")).toBe(true);
+  });
+
+  it("reports an empty export when filters exclude everything", () => {
+    const preview = buildRaiseHistoryExportPreview({ ...input, events: [] });
+    expect(preview.rowCount).toBe(0);
+    expect(preview.rows).toEqual([]);
   });
 });
