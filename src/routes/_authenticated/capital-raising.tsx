@@ -206,8 +206,11 @@ function CapitalRaisingPage() {
                   roundName={round.name}
                   currency={round.currency}
                   investorName={data?.investor?.name ?? "Investor"}
+                  onDownload={logDownload}
                 />
+                <ConfirmationDownloadLog roundId={round.id} />
               </div>
+
 
               <RaiseRoundAlerts
                 roundId={round.id}
