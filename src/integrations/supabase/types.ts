@@ -421,6 +421,53 @@ export type Database = {
         }
         Relationships: []
       }
+      confirmation_downloads: {
+        Row: {
+          created_at: string
+          document_count: number
+          document_title: string
+          event_key: string
+          id: string
+          reference: string | null
+          round_id: string | null
+          round_name: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_count?: number
+          document_title: string
+          event_key: string
+          id?: string
+          reference?: string | null
+          round_id?: string | null
+          round_name: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_count?: number
+          document_title?: string
+          event_key?: string
+          id?: string
+          reference?: string | null
+          round_id?: string | null
+          round_name?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confirmation_downloads_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "raise_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currency_settings: {
         Row: {
           code: string
