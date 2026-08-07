@@ -356,21 +356,31 @@ export function RaiseHistoryTimeline({
                   {event.downloadable && (
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         downloadRaiseConfirmation({
-                            kind: event.key,
-                            reference: event.reference ?? event.key,
-                            roundName: roundName ?? "Capital raise",
-                            currency,
-                            investorName,
-                            amount: event.amount ?? null,
-                            decidedAt: event.at,
-                            actor: event.actor,
-                            headline: event.label,
-                            detail: event.detail,
+                          kind: event.key,
+                          reference: event.reference ?? event.key,
+                          roundName: roundName ?? "Capital raise",
+                          currency,
+                          investorName,
+                          amount: event.amount ?? null,
+                          decidedAt: event.at,
+                          actor: event.actor,
+                          headline: event.label,
+                          detail: event.detail,
                           note: event.note ?? null,
-                        })
-                      }
+                        });
+                        onDownload?.({
+                          roundId: roundId ?? null,
+                          roundName: roundName ?? "Capital raise",
+                          eventKey: event.key,
+                          documentTitle: raiseConfirmationTitle(event.key),
+                          reference: event.reference ?? event.key,
+                          source: "portal",
+                          documentCount: 1,
+                        });
+                      }}
+
                       className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
                     >
                       <Download className="h-3.5 w-3.5" aria-hidden />
