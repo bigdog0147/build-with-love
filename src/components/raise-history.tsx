@@ -94,6 +94,7 @@ export function RaiseHistoryTimeline({
   currency = "USD",
   investorName = "Investor",
   target = null,
+  onDownload,
 }: {
   events: RaiseHistoryEvent[];
   roundId?: string;
@@ -102,7 +103,18 @@ export function RaiseHistoryTimeline({
   investorName?: string;
   /** Deep-link target parsed from the URL search params. */
   target?: { roundId: string; eventKey: string } | null;
+  /** Called after a confirmation download so it can be written to the audit trail. */
+  onDownload?: (entry: {
+    roundId: string | null;
+    roundName: string;
+    eventKey: string;
+    documentTitle: string;
+    reference: string | null;
+    source: "portal" | "bulk";
+    documentCount: number;
+  }) => void;
 }) {
+
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
   const focusedRef = useRef<HTMLLIElement | null>(null);
@@ -209,10 +221,20 @@ export function RaiseHistoryTimeline({
                 toast.success(
                   `Bundled ${count} confirmation ${count === 1 ? "document" : "documents"} into a ZIP archive.`,
                 );
+                onDownload?.({
+                  roundId: roundId ?? null,
+                  roundName: exportInput.roundName,
+                  eventKey: "bulk",
+                  documentTitle: "All confirmation documents",
+                  reference: null,
+                  source: "bulk",
+                  documentCount: count,
+                });
               } else {
                 toast.error("No confirmation documents are available for this round yet.");
               }
             }}
+
             className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs text-[var(--gold)] transition-colors hover:border-[var(--gold)]/70"
             aria-label={`Download all ${confirmationCount} confirmation documents for this round as a ZIP archive`}
           >
@@ -334,21 +356,31 @@ export function RaiseHistoryTimeline({
                   {event.downloadable && (
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         downloadRaiseConfirmation({
-                            kind: event.key,
-                            reference: event.reference ?? event.key,
-                            roundName: roundName ?? "Capital raise",
-                            currency,
-                            investorName,
-                            amount: event.amount ?? null,
-                            decidedAt: event.at,
-                            actor: event.actor,
-                            headline: event.label,
-                            detail: event.detail,
+                          kind: event.key,
+                          reference: event.reference ?? event.key,
+                          roundName: roundName ?? "Capital raise",
+                          currency,
+                          investorName,
+                          amount: event.amount ?? null,
+                          decidedAt: event.at,
+                          actor: event.actor,
+                          headline: event.label,
+                          detail: event.detail,
                           note: event.note ?? null,
-                        })
-                      }
+                        });
+                        onDownload?.({
+                          roundId: roundId ?? null,
+                          roundName: roundName ?? "Capital raise",
+                          eventKey: event.key,
+                          documentTitle: raiseConfirmationTitle(event.key),
+                          reference: event.reference ?? event.key,
+                          source: "portal",
+                          documentCount: 1,
+                        });
+                      }}
+
                       className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
                     >
                       <Download className="h-3.5 w-3.5" aria-hidden />

@@ -20,6 +20,9 @@ import { raiseHistory } from "@/lib/raise-history";
 import { parseRaiseEventTarget } from "@/lib/raise-history-links";
 import { RaiseRoundAlerts } from "@/components/raise-round-alerts";
 import { indexOverrides } from "@/lib/raise-round-preferences";
+import { ConfirmationDownloadLog } from "@/components/confirmation-download-log";
+import { recordConfirmationDownload } from "@/lib/confirmation-downloads.functions";
+
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
@@ -59,6 +62,16 @@ function CapitalRaisingPage() {
   const withdrawInterest = useServerFn(withdrawRaiseInterest);
   const fund = useServerFn(fundRaiseCommitment);
   const cancel = useServerFn(cancelRaiseCommitment);
+  const recordDownload = useServerFn(recordConfirmationDownload);
+
+  // The audit trail is append-only; a failed write must never block the file
+  // the investor already has, so it stays silent and just refreshes the list.
+  const logDownload = (entry: Parameters<typeof recordDownload>[0]["data"]) => {
+    void recordDownload({ data: entry })
+      .then(() => queryClient.invalidateQueries({ queryKey: ["confirmation-downloads"] }))
+      .catch(() => undefined);
+  };
+
 
   const { data, isLoading } = useQuery({ queryKey: ["raise-portal"], queryFn: () => fetchPortal({} as never) });
   const [amounts, setAmounts] = useState<Record<string, string>>({});
@@ -193,8 +206,11 @@ function CapitalRaisingPage() {
                   roundName={round.name}
                   currency={round.currency}
                   investorName={data?.investor?.name ?? "Investor"}
+                  onDownload={logDownload}
                 />
+                <ConfirmationDownloadLog roundId={round.id} />
               </div>
+
 
               <RaiseRoundAlerts
                 roundId={round.id}
