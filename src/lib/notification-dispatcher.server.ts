@@ -76,6 +76,16 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
     return result;
   }
 
+  // Quiet hours and digest cadences delay the email, never the in-app notice.
+  const decision = scheduleDelivery(input.category, prefs as DeliveryWindow);
+  if (decision.mode === "deferred") {
+    const { queueDeferredEmail } = await import("./notification-digest.server");
+    const queued = await queueDeferredEmail(db, input, decision);
+    result.emailSkippedReason = queued ? `deferred_${decision.reason}` : "deferred_queue_failed";
+    result.emailDeferredUntil = decision.deliverAfter.toISOString();
+    return result;
+  }
+
   const { data: user } = await db.auth.admin.getUserById(input.userId);
   const email = user?.user?.email as string | undefined;
   if (!email) {
