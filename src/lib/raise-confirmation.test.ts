@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildRaiseConfirmation, raiseConfirmationTitle } from "./raise-confirmation";
+import {
+  buildRaiseConfirmation,
+  buildRaiseConfirmationPdf,
+  raiseConfirmationTitle,
+} from "./raise-confirmation";
 
 const base = {
   kind: "commitment-accepted",
@@ -34,7 +38,7 @@ describe("raise confirmation documents", () => {
 
   it("builds a dated, slugged file name", () => {
     expect(buildRaiseConfirmation(base).fileName).toBe(
-      "gf3x-series-c-cell-plant-acceptance-confirmation-2026-03-04.html",
+      "gf3x-series-c-cell-plant-acceptance-confirmation-2026-03-04.pdf",
     );
   });
 
@@ -47,5 +51,24 @@ describe("raise confirmation documents", () => {
     const doc = buildRaiseConfirmation({ ...base, note: '<script>alert("x")</script>' });
     expect(doc.html).not.toContain("<script>");
     expect(doc.html).toContain("&lt;script&gt;");
+  });
+}
+  it("renders a real PDF file", () => {
+    const pdf = buildRaiseConfirmationPdf(base);
+    const text = new TextDecoder("latin1").decode(pdf.bytes);
+    expect(text.startsWith("%PDF-1.4")).toBe(true);
+    expect(text.trimEnd().endsWith("%%EOF")).toBe(true);
+    expect(text).toContain("startxref");
+    expect(text).toContain("Ada Lovelace");
+    expect(text).toContain("cmt-1");
+    expect(pdf.fileName.endsWith(".pdf")).toBe(true);
+    expect(pdf.bytes.byteLength).toBeGreaterThan(1000);
+  });
+
+  it("keeps money and unsupported glyphs printable", () => {
+    const pdf = buildRaiseConfirmationPdf({ ...base, currency: "EUR", roundName: "Série C" });
+    const text = new TextDecoder("latin1").decode(pdf.bytes);
+    expect(text).toContain("EUR");
+    expect(text).not.toMatch(/[^\x00-\x7f]/);
   });
 });
