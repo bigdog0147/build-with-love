@@ -51,6 +51,23 @@ export const Route = createFileRoute("/api/public/raise-confirmation")({
         }
 
         const doc = buildRaiseConfirmationPdf(verified.payload.c);
+
+        // Append-only audit trail entry so the investor sees email-link
+        // downloads next to portal downloads. Never blocks the file.
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.from("confirmation_downloads").insert({
+            user_id: verified.payload.u,
+            round_name: verified.payload.c.roundName,
+            event_key: verified.payload.c.kind,
+            document_title: doc.title,
+            reference: verified.payload.c.reference ?? null,
+            source: "email_link",
+            document_count: 1,
+          } as never);
+        } catch {
+          // Recording is best-effort; the document is still delivered.
+        }
         // `view=1` renders it in the browser; the email link downloads the file.
         const inline = url.searchParams.get("view") === "1";
         return new Response(doc.bytes as unknown as BodyInit, {
