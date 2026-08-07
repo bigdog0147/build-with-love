@@ -3,7 +3,6 @@ import { History, ChevronDown, Download, FileText, Link2, Table2 } from "lucide-
 import { toast } from "sonner";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
-  buildRaiseConfirmation,
   downloadRaiseConfirmation,
   raiseConfirmationTitle,
 } from "@/lib/raise-confirmation";
@@ -302,8 +301,7 @@ export function RaiseHistoryTimeline({
                     <button
                       type="button"
                       onClick={() =>
-                        downloadRaiseConfirmation(
-                          buildRaiseConfirmation({
+                        downloadRaiseConfirmation({
                             kind: event.key,
                             reference: event.reference ?? event.key,
                             roundName: roundName ?? "Capital raise",
@@ -314,9 +312,8 @@ export function RaiseHistoryTimeline({
                             actor: event.actor,
                             headline: event.label,
                             detail: event.detail,
-                            note: event.note ?? null,
-                          }),
-                        )
+                          note: event.note ?? null,
+                        })
                       }
                       className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
                     >

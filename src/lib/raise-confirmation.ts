@@ -8,6 +8,8 @@
  * any server-side document generation.
  */
 
+import { PDF_LAYOUT, PdfDocument } from "./pdf-document";
+
 export type RaiseConfirmationKind =
   | "interest-submitted"
   | "interest-invited"
@@ -40,8 +42,10 @@ export interface RaiseConfirmationInput {
 }
 
 export interface RaiseConfirmationDocument {
+  /** PDF file name, e.g. gf3x-series-c-acceptance-confirmation-2026-03-04.pdf */
   fileName: string;
   title: string;
+  /** Print-ready HTML rendering, kept for on-screen preview. */
   html: string;
 }
 
@@ -189,20 +193,84 @@ export function buildRaiseConfirmation(
 
   const datePart = (input.decidedAt ?? generatedAt).slice(0, 10);
   return {
-    fileName: `gf3x-${slug(input.roundName)}-${slug(title)}-${datePart}.html`,
+    fileName: `gf3x-${slug(input.roundName)}-${slug(title)}-${datePart}.pdf`,
     title,
     html,
   };
 }
 
-/** Triggers a browser download of a confirmation document; no-ops on the server. */
-export function downloadRaiseConfirmation(doc: RaiseConfirmationDocument) {
+/**
+ * Renders the confirmation as a real PDF file.
+ *
+ * Built with the dependency-free writer so the identical bytes are produced in
+ * the browser (portal download) and in the Worker (signed email link), with no
+ * headless browser or print dialog involved.
+ */
+export function buildRaiseConfirmationPdf(input: RaiseConfirmationInput): {
+  fileName: string;
+  title: string;
+  bytes: Uint8Array;
+} {
+  const doc = buildRaiseConfirmation(input);
+  const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const hasAmount = input.amount !== undefined && input.amount !== null && input.amount !== "";
+
+  const pdf = new PdfDocument(`${doc.title} — ${input.roundName}`);
+  const gold: [number, number, number] = [0.66, 0.53, 0.24];
+  const grey: [number, number, number] = [0.42, 0.42, 0.45];
+
+  pdf.rect(PDF_LAYOUT.MARGIN, 40, PDF_LAYOUT.CONTENT_WIDTH, 2.5, gold);
+  pdf.space(22);
+  pdf.text("GIGAFACTORY 3X", { font: "bold", size: 15, color: gold, spaceAfter: 2 });
+  pdf.text("Capital Markets Desk", { size: 9, color: grey, spaceAfter: 14 });
+  pdf.rule([0.88, 0.88, 0.89]);
+  pdf.space(12);
+
+  pdf.text(doc.title, { font: "bold", size: 19, spaceAfter: 6 });
+  pdf.text(input.detail, { size: 11, color: [0.25, 0.25, 0.28], spaceAfter: 18 });
+
+  const rows: [string, string][] = [
+    ["Investor", input.investorName || "Investor"],
+    ["Round", input.roundName],
+    ["Decision", input.headline],
+    ["Recorded by", input.actor],
+    ["Decision date", formatStamp(input.decidedAt ?? null)],
+    ["Reference", input.reference],
+  ];
+  if (hasAmount) rows.splice(3, 0, ["Amount", formatMoney(input.amount, input.currency)]);
+  for (const [label, value] of rows) pdf.row(label, value);
+
+  if (input.note) {
+    pdf.space(14);
+    const noteText = `Desk note: ${input.note}`;
+    const noteTop = pdf.y;
+    pdf.text(noteText, { size: 10.5, indent: 14, spaceAfter: 6 });
+    // Accent bar drawn to the measured height of the wrapped note.
+    pdf.rect(PDF_LAYOUT.MARGIN, noteTop, 2, Math.max(14, pdf.y - noteTop - 6), gold);
+  }
+
+  pdf.space(20);
+  pdf.rule([0.88, 0.88, 0.89]);
+  pdf.space(8);
+  pdf.text(
+    `Generated ${formatStamp(generatedAt)} from your capital raising portal. This document restates a ` +
+      "decision already recorded in your account and issued by email; it is a confirmation record, " +
+      "not an offer or a solicitation to invest.",
+    { size: 8.5, color: grey },
+  );
+
+  return { fileName: doc.fileName, title: doc.title, bytes: pdf.toBytes() };
+}
+
+/** Triggers a browser download of the confirmation PDF; no-ops on the server. */
+export function downloadRaiseConfirmation(input: RaiseConfirmationInput) {
   if (typeof document === "undefined") return;
-  const blob = new Blob([doc.html], { type: "text/html;charset=utf-8" });
+  const { fileName, bytes } = buildRaiseConfirmationPdf(input);
+  const blob = new Blob([bytes as BlobPart], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = doc.fileName;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   a.remove();
