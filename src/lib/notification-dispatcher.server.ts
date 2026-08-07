@@ -22,6 +22,8 @@ export type DispatchInput = {
   templateData?: Record<string, unknown>;
   /** Stable key so retries of the same logical event never duplicate an email. */
   idempotencyKey?: string;
+  /** Capital raising only: applies the investor's per-round opt-in/opt-out. */
+  roundId?: string;
 };
 
 export type DispatchResult = {
@@ -55,12 +57,31 @@ function allows(prefs: Prefs, category: NotificationCategory, channel: "email" |
   return value === undefined ? true : Boolean(value);
 }
 
+/** Per-round override for capital raising alerts; missing row means "follow globals". */
+async function loadRoundOverride(db: any, userId: string, roundId: string) {
+  const { data } = await db
+    .from("raise_round_preferences")
+    .select("email_enabled, inapp_enabled")
+    .eq("user_id", userId)
+    .eq("round_id", roundId)
+    .maybeSingle();
+  return (data as { email_enabled: boolean; inapp_enabled: boolean } | null) ?? null;
+}
+
 export async function dispatchNotification(input: DispatchInput): Promise<DispatchResult> {
   const db = await serviceClient();
   const prefs = await loadPreferences(db, input.userId);
   const result: DispatchResult = { inapp: false, email: false };
 
-  if (allows(prefs, input.category, "inapp")) {
+  // Capital raising alerts can be muted round by round from the investor portal.
+  let roundAllows = { email: true, inapp: true };
+  if (input.category === "raise" && input.roundId) {
+    const override = await loadRoundOverride(db, input.userId, input.roundId);
+    if (override)
+      roundAllows = { email: Boolean(override.email_enabled), inapp: Boolean(override.inapp_enabled) };
+  }
+
+  if (allows(prefs, input.category, "inapp") && roundAllows.inapp) {
     const { error } = await db.from("notifications").insert({
       user_id: input.userId,
       kind: input.category,
@@ -73,6 +94,11 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
   }
 
   if (!input.template) return result;
+
+  if (!roundAllows.email) {
+    result.emailSkippedReason = "round_muted";
+    return result;
+  }
 
   if (!allows(prefs, input.category, "email")) {
     result.emailSkippedReason = "customer_opted_out";

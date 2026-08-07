@@ -58,6 +58,7 @@ export async function notifyRaiseAdvance(input: RaiseAdvanceInput) {
       ended: advance.ended ?? "",
       note: input.note || "",
     },
+    roundId: input.roundId,
     idempotencyKey: `raise-advance-${input.roundId}-${input.userId}-${input.event}`,
   });
 }

@@ -18,6 +18,8 @@ import { RaiseStatusTimeline } from "@/components/raise-status-timeline";
 import { RaiseHistoryTimeline } from "@/components/raise-history";
 import { raiseHistory } from "@/lib/raise-history";
 import { parseRaiseEventTarget } from "@/lib/raise-history-links";
+import { RaiseRoundAlerts } from "@/components/raise-round-alerts";
+import { indexOverrides } from "@/lib/raise-round-preferences";
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
@@ -92,6 +94,8 @@ function CapitalRaisingPage() {
   });
 
   const rounds = data?.rounds ?? [];
+  const alertOverrides = indexOverrides(data?.roundPreferences);
+  const raiseGlobal = data?.raiseGlobal ?? {};
   const verified = data?.idStatus === "verified";
 
   return (
@@ -191,6 +195,13 @@ function CapitalRaisingPage() {
                   investorName={data?.investor?.name ?? "Investor"}
                 />
               </div>
+
+              <RaiseRoundAlerts
+                roundId={round.id}
+                roundName={round.name}
+                global={raiseGlobal}
+                override={alertOverrides[round.id]}
+              />
 
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <div className="rounded-xl border border-border/70 p-4">
