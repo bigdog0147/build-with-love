@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { ConfirmationDownload } from './confirmation-download'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -19,6 +20,9 @@ interface Props {
   currency?: string
   note?: string
   name?: string
+  /** Signed download link for the matching confirmation document. */
+  confirmationUrl?: string
+  confirmationTitle?: string
 }
 
 const COPY: Record<string, { heading: string; body: string; steps: string[] }> = {
@@ -62,6 +66,8 @@ const Email = ({
   currency = 'USD',
   note,
   name,
+  confirmationUrl,
+  confirmationTitle,
 }: Props) => {
   const copy = COPY[outcome] ?? COPY['accepted']!
   return (
@@ -89,6 +95,7 @@ const Email = ({
               {i + 1}. {s}
             </Text>
           ))}
+          <ConfirmationDownload url={confirmationUrl} title={confirmationTitle} />
           <Hr style={hr} />
           <Text style={footer}>
             Gigafactory 3X — Capital Markets. This message relates to a commitment on your account

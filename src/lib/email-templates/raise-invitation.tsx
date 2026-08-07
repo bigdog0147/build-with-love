@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { ConfirmationDownload } from './confirmation-download'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -20,6 +21,9 @@ interface Props {
   minimumTicket?: number | string
   note?: string
   name?: string
+  /** Signed download link for the matching confirmation document. */
+  confirmationUrl?: string
+  confirmationTitle?: string
 }
 
 const Email = ({
@@ -30,6 +34,8 @@ const Email = ({
   minimumTicket,
   note,
   name,
+  confirmationUrl,
+  confirmationTitle,
 }: Props) => {
   const invited = outcome === 'invited'
   const heading = invited ? 'Invitation to commit' : 'Interest not progressed'
@@ -75,6 +81,7 @@ const Email = ({
               portal.
             </Text>
           )}
+          <ConfirmationDownload url={confirmationUrl} title={confirmationTitle} />
           <Hr style={hr} />
           <Text style={footer}>
             Gigafactory 3X — Capital Markets. This message relates to a capital raise you registered
