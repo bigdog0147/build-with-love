@@ -94,6 +94,7 @@ export function RaiseHistoryTimeline({
   currency = "USD",
   investorName = "Investor",
   target = null,
+  onDownload,
 }: {
   events: RaiseHistoryEvent[];
   roundId?: string;
@@ -102,7 +103,18 @@ export function RaiseHistoryTimeline({
   investorName?: string;
   /** Deep-link target parsed from the URL search params. */
   target?: { roundId: string; eventKey: string } | null;
+  /** Called after a confirmation download so it can be written to the audit trail. */
+  onDownload?: (entry: {
+    roundId: string | null;
+    roundName: string;
+    eventKey: string;
+    documentTitle: string;
+    reference: string | null;
+    source: "portal" | "bulk";
+    documentCount: number;
+  }) => void;
 }) {
+
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
   const focusedRef = useRef<HTMLLIElement | null>(null);
