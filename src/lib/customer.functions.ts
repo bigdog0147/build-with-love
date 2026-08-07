@@ -179,6 +179,21 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Bulk sets the read state of every notification owned by the signed-in customer. */
+export const setAllNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { read: boolean }) => ({ read: Boolean(input?.read) }))
+  .handler(async ({ context, data }) => {
+    const query = context.supabase
+      .from("notifications")
+      .update({ read_at: data.read ? new Date().toISOString() : null })
+      .eq("user_id", context.userId);
+    const { error } = data.read ? await query.is("read_at", null) : await query.not("read_at", "is", null);
+    if (error) throw error;
+    return { ok: true, read: data.read };
+  });
+
+
 /** Toggles the read state of a single alert owned by the signed-in customer. */
 export const setNotificationRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
