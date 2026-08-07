@@ -53,3 +53,18 @@ export function filterRaiseHistory(
   const set = new Set(active);
   return events.filter((event) => set.has(raiseHistoryCategory(event)));
 }
+
+/** Human label of the active type filters, for export headers. */
+export function raiseHistoryFilterLabel(active: RaiseHistoryCategory[]): string {
+  if (!active || active.length === 0) return "All event types";
+  const order = RAISE_HISTORY_CATEGORIES.filter((c) => active.includes(c.key)).map((c) => c.label);
+  return order.join(", ");
+}
+
+/** Compact slug of the active type filters, appended to export file names. */
+export function raiseHistoryFilterSlug(active: RaiseHistoryCategory[]): string | null {
+  if (!active || active.length === 0) return null;
+  const keys = RAISE_HISTORY_CATEGORIES.filter((c) => active.includes(c.key)).map((c) => c.key);
+  if (keys.length === 0) return null;
+  return keys.join("-");
+}
