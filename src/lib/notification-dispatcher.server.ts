@@ -22,6 +22,8 @@ export type DispatchInput = {
   templateData?: Record<string, unknown>;
   /** Stable key so retries of the same logical event never duplicate an email. */
   idempotencyKey?: string;
+  /** Capital raising only: applies the investor's per-round opt-in/opt-out. */
+  roundId?: string;
 };
 
 export type DispatchResult = {
