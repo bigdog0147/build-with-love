@@ -851,6 +851,19 @@ export const adminUpdateRoundStatus = createServerFn({ method: "POST" })
             closesAt: round.closes_at ? String(round.closes_at).slice(0, 10) : "",
             note: data.note || "",
           },
+          confirmation: {
+            kind: `round-${data.status}`,
+            reference: round.id,
+            roundName: round.name,
+            currency: round.currency,
+            investorName: "",
+            amount: Number(round.target_amount ?? 0) || null,
+            decidedAt: new Date().toISOString(),
+            actor: "Capital markets desk",
+            headline: titles[data.status]!,
+            detail: details[data.status]!,
+            note: data.note || null,
+          },
           idempotencyKey: `raise-round-${round.id}-${data.status}-${userId}`,
         });
         notified += 1;
