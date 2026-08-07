@@ -6,6 +6,8 @@
  * then sorted oldest-first so investors can audit the whole journey.
  */
 
+import { change, changes, type RaiseHistoryChange } from "./raise-history-diff";
+
 export type RaiseHistoryTone = "neutral" | "progress" | "success" | "warning";
 
 export interface RaiseHistoryEvent {
@@ -24,6 +26,8 @@ export interface RaiseHistoryEvent {
   reference?: string | null;
   /** Decision events can be downloaded as a confirmation document. */
   downloadable?: boolean;
+  /** Field-level before/after diff for the transition this event records. */
+  changes?: RaiseHistoryChange[];
 }
 
 interface RoundLike {
@@ -154,6 +158,7 @@ export function raiseHistory(input: {
       detail: ROUND_STATUS.open.detail,
       actor: "Capital markets desk",
       tone: "progress",
+      changes: changes(change("Round status", "draft", "open")),
     });
   }
 
@@ -168,6 +173,14 @@ export function raiseHistory(input: {
       )}.`,
       actor: "Investor",
       tone: "progress",
+      changes: changes(
+        change("Indication status", null, "pending"),
+        change(
+          "Indicative amount",
+          null,
+          money(interest.indicative_amount ?? interest.amount, interest.currency || currency),
+        ),
+      ),
     });
 
     const decision = INTEREST_DECISION[interest.status];
@@ -183,6 +196,10 @@ export function raiseHistory(input: {
         note: interest.review_note ?? null,
         reference: interest.id ?? null,
         downloadable: true,
+        changes: changes(
+          change("Indication status", "pending", interest.status),
+          change("Desk note", null, interest.review_note ?? null),
+        ),
       });
     }
   }
@@ -198,6 +215,14 @@ export function raiseHistory(input: {
       )}, awaiting funding.`,
       actor: "Investor",
       tone: "progress",
+      changes: changes(
+        change("Commitment status", null, "pending"),
+        change(
+          "Commitment amount",
+          null,
+          money(commitment.amount, commitment.currency || currency),
+        ),
+      ),
     });
 
     const decision = COMMITMENT_DECISION[commitment.status];
@@ -213,6 +238,10 @@ export function raiseHistory(input: {
         note: commitment.review_note ?? null,
         reference: commitment.id ?? null,
         downloadable: true,
+        changes: changes(
+          change("Commitment status", "pending", commitment.status),
+          change("Desk note", null, commitment.review_note ?? null),
+        ),
       });
     }
   }
@@ -229,6 +258,7 @@ export function raiseHistory(input: {
       tone: roundClose.tone,
       reference: round.id ?? null,
       downloadable: true,
+      changes: changes(change("Round status", "open", round.status)),
     });
   }
 
