@@ -221,10 +221,20 @@ export function RaiseHistoryTimeline({
                 toast.success(
                   `Bundled ${count} confirmation ${count === 1 ? "document" : "documents"} into a ZIP archive.`,
                 );
+                onDownload?.({
+                  roundId: roundId ?? null,
+                  roundName: exportInput.roundName,
+                  eventKey: "bulk",
+                  documentTitle: "All confirmation documents",
+                  reference: null,
+                  source: "bulk",
+                  documentCount: count,
+                });
               } else {
                 toast.error("No confirmation documents are available for this round yet.");
               }
             }}
+
             className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs text-[var(--gold)] transition-colors hover:border-[var(--gold)]/70"
             aria-label={`Download all ${confirmationCount} confirmation documents for this round as a ZIP archive`}
           >
