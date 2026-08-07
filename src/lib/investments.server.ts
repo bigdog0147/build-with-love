@@ -240,7 +240,33 @@ export async function notifyInvestor(input: {
   category?: "announcements" | "reports" | "raise";
   /** Capital raising only: lets the investor's per-round opt-out apply. */
   roundId?: string;
+  /**
+   * Capital raising only: the confirmation document for this decision. The
+   * platform cannot attach files, so a signed download link for the identical
+   * document is folded into the email instead.
+   */
+  confirmation?: import("./raise-confirmation").RaiseConfirmationInput;
 }) {
+  let templateData = input.templateData;
+  if (input.confirmation) {
+    const { raiseConfirmationLink, investorDisplayName } = await import(
+      "./raise-confirmation-link.server"
+    );
+    const confirmation = {
+      ...input.confirmation,
+      investorName:
+        input.confirmation.investorName || (await investorDisplayName(input.userId)),
+    };
+    const link = await raiseConfirmationLink(input.userId, confirmation);
+    if (link) {
+      templateData = {
+        ...(templateData ?? {}),
+        confirmationUrl: link.url,
+        confirmationTitle: link.title,
+      };
+    }
+  }
+
   const payload = {
     userId: input.userId,
     category: input.category ?? ("announcements" as const),
@@ -248,7 +274,7 @@ export async function notifyInvestor(input: {
     detail: input.detail,
     tone: input.tone ?? "info",
     template: input.template,
-    templateData: input.templateData,
+    templateData,
     idempotencyKey: input.idempotencyKey,
     roundId: input.roundId,
   };
