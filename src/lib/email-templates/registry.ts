@@ -10,6 +10,7 @@ import { template as commitmentStatusTemplate } from './commitment-status'
 import { template as raiseRoundUpdateTemplate } from './raise-round-update'
 import { template as subscriptionStatusTemplate } from './subscription-status'
 import { template as documentPublishedTemplate } from './document-published'
+import { template as raiseTimelineAdvanceTemplate } from './raise-timeline-advance'
 
 
 
