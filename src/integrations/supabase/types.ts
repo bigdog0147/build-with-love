@@ -1235,6 +1235,63 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_digest_queue: {
+        Row: {
+          attempts: number
+          category: string
+          created_at: string
+          deliver_after: string
+          detail: string
+          error: string | null
+          id: string
+          idempotency_key: string | null
+          reason: string
+          sent_at: string | null
+          status: string
+          template: string | null
+          template_data: Json
+          title: string
+          tone: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          category: string
+          created_at?: string
+          deliver_after?: string
+          detail: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string | null
+          reason?: string
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          template_data?: Json
+          title: string
+          tone?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          category?: string
+          created_at?: string
+          deliver_after?: string
+          detail?: string
+          error?: string | null
+          id?: string
+          idempotency_key?: string | null
+          reason?: string
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          template_data?: Json
+          title?: string
+          tone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           announcements_email: boolean
@@ -1242,15 +1299,21 @@ export type Database = {
           created_at: string
           deposits_email: boolean
           deposits_inapp: boolean
+          digest_hour: number
           kyc_email: boolean
           kyc_inapp: boolean
           locale: string | null
+          quiet_hours_enabled: boolean
+          quiet_hours_end: number
+          quiet_hours_start: number
+          raise_digest: string
           raise_email: boolean
           raise_inapp: boolean
           reports_email: boolean
           reports_inapp: boolean
           security_email: boolean
           security_inapp: boolean
+          time_zone: string
           updated_at: string
           user_id: string
           withdrawals_email: boolean
@@ -1262,15 +1325,21 @@ export type Database = {
           created_at?: string
           deposits_email?: boolean
           deposits_inapp?: boolean
+          digest_hour?: number
           kyc_email?: boolean
           kyc_inapp?: boolean
           locale?: string | null
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          raise_digest?: string
           raise_email?: boolean
           raise_inapp?: boolean
           reports_email?: boolean
           reports_inapp?: boolean
           security_email?: boolean
           security_inapp?: boolean
+          time_zone?: string
           updated_at?: string
           user_id: string
           withdrawals_email?: boolean
@@ -1282,15 +1351,21 @@ export type Database = {
           created_at?: string
           deposits_email?: boolean
           deposits_inapp?: boolean
+          digest_hour?: number
           kyc_email?: boolean
           kyc_inapp?: boolean
           locale?: string | null
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          raise_digest?: string
           raise_email?: boolean
           raise_inapp?: boolean
           reports_email?: boolean
           reports_inapp?: boolean
           security_email?: boolean
           security_inapp?: boolean
+          time_zone?: string
           updated_at?: string
           user_id?: string
           withdrawals_email?: boolean
