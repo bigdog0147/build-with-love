@@ -4,7 +4,15 @@ import {
   filterRaiseHistory,
   raiseHistoryCategory,
   raiseHistoryCounts,
+  raiseHistoryFilterLabel,
+  raiseHistoryFilterSlug,
+  type RaiseHistoryCategory,
 } from "./raise-history-filters";
+import {
+  buildRaiseHistoryCsv,
+  buildRaiseHistoryReportHtml,
+  raiseHistoryCsvFileName,
+} from "./raise-history-export";
 
 const event = (key: string): RaiseHistoryEvent => ({
   key,
