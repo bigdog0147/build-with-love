@@ -130,7 +130,7 @@ function NotificationsPage() {
                   {n.roundId && (
                     <Link
                       to="/capital-raising"
-                      search={{ round: n.roundId }}
+                      search={{ round: n.roundId, event: "" }}
                       className="inline-flex items-center gap-1 text-[var(--gold)] hover:underline"
                     >
                       View round <ArrowRight className="h-3 w-3" />
