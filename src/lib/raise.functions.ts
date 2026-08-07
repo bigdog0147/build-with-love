@@ -275,7 +275,7 @@ export const cancelRaiseCommitment = createServerFn({ method: "POST" })
     const db = await serviceClient();
     const { data: commitment } = await db
       .from("raise_commitments")
-      .select("id, status")
+      .select("id, round_id, status, amount, currency")
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .maybeSingle();
@@ -287,7 +287,27 @@ export const cancelRaiseCommitment = createServerFn({ method: "POST" })
       .update({ status: "cancelled" })
       .eq("id", commitment.id);
     if (error) throw new Error(error.message);
+
+    const { data: round } = await db
+      .from("raise_rounds")
+      .select("id, name, currency, status")
+      .eq("id", commitment.round_id)
+      .maybeSingle();
+    await notifyRaiseAdvance({
+      userId: context.userId,
+      roundId: commitment.round_id,
+      roundName: round?.name ?? "Capital raise",
+      roundStatus: String(round?.status ?? "open"),
+      currency: commitment.currency ?? round?.currency ?? "USD",
+      interestStatus: "invited",
+      commitmentStatus: "cancelled",
+      amount: Number(commitment.amount ?? 0) || null,
+      event: `commitment-cancelled-${commitment.id}`,
+      tone: "warning",
+    });
+
     return { message: "Commitment cancelled." };
+
   });
 
 /* ─────────────────────────── administration ─────────────────────────── */
