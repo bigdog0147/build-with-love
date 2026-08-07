@@ -393,8 +393,10 @@ export function RaiseHistoryTimeline({
 
       {open && visible.length === 0 && (
         <p className="mt-4 text-sm text-muted-foreground">
-          No events match the selected types. Clear the filters to see the full history.
+          No events match the selected {rangeActive ? "date range" : "types"}. Clear the filters to
+          see the full history.
         </p>
+
       )}
 
       {open && visible.length > 0 && (
