@@ -63,7 +63,13 @@ export const getNotificationPreferences = createServerFn({ method: "GET" })
       )
       .eq("user_id", context.userId)
       .maybeSingle();
-    return { ...DEFAULTS, ...(data ?? {}) };
+    const row = (data ?? {}) as Record<string, unknown>;
+    return {
+      ...DEFAULTS,
+      ...row,
+      raise_digest: normalizeDigest(row["raise_digest"]),
+      time_zone: safeTimeZone(row["time_zone"]),
+    };
   });
 
 export const updateNotificationPreferences = createServerFn({ method: "POST" })
