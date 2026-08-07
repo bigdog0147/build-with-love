@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { ArrowRight, Bell, CheckCheck, ChevronLeft, ChevronRight, Dot } from "lucide-react";
+import { ArrowRight, Bell, CheckCheck, ChevronLeft, ChevronRight, Dot, MailOpen } from "lucide-react";
 import { DashShell, PageHeading, cx } from "@/components/dashboard-chrome";
-import { listNotifications, markNotificationsRead, setNotificationRead } from "@/lib/customer.functions";
+import { listNotifications, setAllNotificationsRead, setNotificationRead } from "@/lib/customer.functions";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   component: NotificationsPage,
@@ -36,7 +36,7 @@ const PAGE_SIZE = 10;
 
 function NotificationsPage() {
   const fetchNotifications = useServerFn(listNotifications);
-  const markAll = useServerFn(markNotificationsRead);
+  const markAll = useServerFn(setAllNotificationsRead);
   const setRead = useServerFn(setNotificationRead);
   const queryClient = useQueryClient();
 
@@ -51,7 +51,7 @@ function NotificationsPage() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["notifications"] });
 
   const mark = useMutation({
-    mutationFn: () => markAll({} as never),
+    mutationFn: (read: boolean) => markAll({ data: { read } }),
     onSuccess: invalidate,
   });
 
@@ -97,16 +97,24 @@ function NotificationsPage() {
         <span className="text-xs text-muted-foreground">
           {unread > 0 ? `${unread} new alert${unread === 1 ? "" : "s"}` : "You're all caught up"}
         </span>
-        {unread > 0 && (
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => mark.mutate()}
-            disabled={mark.isPending}
-            className="ml-auto inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-60"
+            onClick={() => mark.mutate(true)}
+            disabled={mark.isPending || unread === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
           >
             <CheckCheck className="h-3.5 w-3.5" /> Mark all read
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => mark.mutate(false)}
+            disabled={mark.isPending || (data?.total ?? 0) === unread}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
+          >
+            <MailOpen className="h-3.5 w-3.5" /> Mark all unread
+          </button>
+        </div>
       </div>
 
       <div className="glass rounded-2xl p-2" aria-busy={isFetching}>
