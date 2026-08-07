@@ -40,8 +40,10 @@ export interface RaiseConfirmationInput {
 }
 
 export interface RaiseConfirmationDocument {
+  /** PDF file name, e.g. gf3x-series-c-acceptance-confirmation-2026-03-04.pdf */
   fileName: string;
   title: string;
+  /** Print-ready HTML rendering, kept for on-screen preview. */
   html: string;
 }
 
