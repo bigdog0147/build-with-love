@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { History, ChevronDown, Download, FileText, Link2, Table2 } from "lucide-react";
+import { History, ChevronDown, Download, FileArchive, FileText, Link2, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
   downloadRaiseConfirmation,
   raiseConfirmationTitle,
 } from "@/lib/raise-confirmation";
+import {
+  downloadBulkRaiseConfirmations,
+  downloadableRaiseEvents,
+} from "@/lib/raise-confirmations-bulk";
+
 import {
   buildRaiseHistoryCsv,
   buildRaiseHistoryReportHtml,
