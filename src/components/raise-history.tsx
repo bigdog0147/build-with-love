@@ -192,7 +192,33 @@ export function RaiseHistoryTimeline({
           <FileText className="h-3.5 w-3.5" aria-hidden />
           Download history PDF
         </button>
+        {confirmationCount > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              const count = downloadBulkRaiseConfirmations({
+                events,
+                roundName: exportInput.roundName,
+                currency,
+                investorName,
+              });
+              if (count > 0) {
+                toast.success(
+                  `Bundled ${count} confirmation ${count === 1 ? "document" : "documents"} into a ZIP archive.`,
+                );
+              } else {
+                toast.error("No confirmation documents are available for this round yet.");
+              }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs text-[var(--gold)] transition-colors hover:border-[var(--gold)]/70"
+            aria-label={`Download all ${confirmationCount} confirmation documents for this round as a ZIP archive`}
+          >
+            <FileArchive className="h-3.5 w-3.5" aria-hidden />
+            Download all confirmations ({confirmationCount})
+          </button>
+        )}
       </div>
+
 
       <div
         className="mt-3 flex flex-wrap items-center gap-2"
