@@ -257,6 +257,7 @@ export const fundRaiseCommitment = createServerFn({ method: "POST" })
     await notifyInvestor({
       userId,
       category: "raise",
+      roundId: round.id,
       title: `Capital raise: ${fundedStep.stageLabel}`,
       detail: `${amount.toLocaleString()} ${round.currency} is held against your commitment to ${round.name}, pending final acceptance. Next step: ${fundedStep.nextStep}`,
       tone: "info",
@@ -478,6 +479,7 @@ export const adminReviewInterest = createServerFn({ method: "POST" })
     await notifyInvestor({
       userId: interest.user_id,
       category: "raise",
+      roundId: interest.round_id,
       title: invited ? `Capital raise: ${interestStep.stageLabel}` : "Interest not progressed",
       detail: invited
         ? `You are invited to commit capital to ${round?.name ?? "the round"}. Next step: ${interestStep.nextStep}`
@@ -552,6 +554,7 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
       await notifyInvestor({
         userId: commitment.user_id,
         category: "raise",
+        roundId: commitment.round_id,
         title: "Commitment released",
         detail: `${amount.toLocaleString()} ${commitment.currency} held for ${round?.name ?? "the round"} has been returned to your wallet.${data.note ? ` ${data.note}` : ""}`,
         tone: "warning",
@@ -638,6 +641,7 @@ export const adminReviewCommitment = createServerFn({ method: "POST" })
     await notifyInvestor({
       userId: commitment.user_id,
       category: "raise",
+      roundId: commitment.round_id,
       title: `Capital raise: ${acceptedStep.stageLabel}`,
       detail: `Your ${amount.toLocaleString()} ${commitment.currency} commitment to ${round?.name ?? "the round"} has been accepted and deployed. Next step: ${acceptedStep.nextStep}`,
       tone: "success",
@@ -739,6 +743,7 @@ export const adminUpdateRoundStatus = createServerFn({ method: "POST" })
         await notifyInvestor({
           userId,
           category: "raise",
+          roundId: round.id,
           title: titles[data.status]!,
           detail: `${details[data.status]!}${data.note ? ` ${data.note}` : ""}`,
           tone: tones[data.status] ?? "info",
