@@ -22,6 +22,10 @@ export interface RaiseHistoryExportInput {
   rangeLabel?: string | null;
   /** Compact range slug appended to export file names. */
   rangeSlug?: string | null;
+  /** Human label for the active timeline type filters, when any are applied. */
+  filterLabel?: string | null;
+  /** Compact filter slug appended to export file names. */
+  filterSlug?: string | null;
 }
 
 export interface RaiseHistoryExportDocument {
@@ -108,6 +112,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Investor", input.investorName].map(csvCell).join(","));
   lines.push(["Generated", generatedAt].map(csvCell).join(","));
   lines.push(["Date range", input.rangeLabel ?? "All dates"].map(csvCell).join(","));
+  lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   lines.push("");
   lines.push(HEADERS.map(csvCell).join(","));
@@ -143,10 +148,12 @@ export function raiseHistoryCsvFileName(input: {
   roundName: string;
   generatedAt?: string;
   rangeSlug?: string | null;
+  filterSlug?: string | null;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
-  return `gf3x-${slug(input.roundName)}-status-history${range}-${stamp}.csv`;
+  const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
+  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}-${stamp}.csv`;
 }
 
 /** Printable statement of the full status history, ready to save as PDF. */
@@ -245,7 +252,9 @@ export function buildRaiseHistoryReportHtml(
     <p class="lede">
       ${escape(input.roundName)} — prepared for ${escape(input.investorName)}.
       ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
-      Date range: ${escape(input.rangeLabel ?? "All dates")}. All timestamps are shown in UTC.
+      Date range: ${escape(input.rangeLabel ?? "All dates")}.
+      Event types: ${escape(input.filterLabel ?? "All event types")}.
+      All timestamps are shown in UTC.
     </p>
     <table>
       <thead>
@@ -272,7 +281,7 @@ export function buildRaiseHistoryReportHtml(
   return {
     fileName: `gf3x-${slug(input.roundName)}-status-history${
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
-    }-${generatedAt.slice(0, 10)}.html`,
+    }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}-${generatedAt.slice(0, 10)}.html`,
     title,
     html,
   };

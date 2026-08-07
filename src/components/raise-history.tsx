@@ -34,6 +34,8 @@ import {
 import {
   RAISE_HISTORY_CATEGORIES,
   filterRaiseHistory,
+  raiseHistoryFilterLabel,
+  raiseHistoryFilterSlug,
   raiseHistoryCounts,
   type RaiseHistoryCategory,
 } from "@/lib/raise-history-filters";
@@ -182,6 +184,8 @@ export function RaiseHistoryTimeline({
     investorName,
     rangeLabel,
     rangeSlug: raiseHistoryRangeSlug(range),
+    filterLabel: raiseHistoryFilterLabel(active),
+    filterSlug: raiseHistoryFilterSlug(active),
   };
 
   const confirmationCount = downloadableRaiseEvents(events).length;
@@ -280,6 +284,7 @@ export function RaiseHistoryTimeline({
               raiseHistoryCsvFileName({
                 roundName: exportInput.roundName,
                 rangeSlug: exportInput.rangeSlug,
+                filterSlug: exportInput.filterSlug,
               }),
               buildRaiseHistoryCsv(exportInput),
               "text/csv",

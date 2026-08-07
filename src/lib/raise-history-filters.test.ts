@@ -4,7 +4,15 @@ import {
   filterRaiseHistory,
   raiseHistoryCategory,
   raiseHistoryCounts,
+  raiseHistoryFilterLabel,
+  raiseHistoryFilterSlug,
+  type RaiseHistoryCategory,
 } from "./raise-history-filters";
+import {
+  buildRaiseHistoryCsv,
+  buildRaiseHistoryReportHtml,
+  raiseHistoryCsvFileName,
+} from "./raise-history-export";
 
 const event = (key: string): RaiseHistoryEvent => ({
   key,
@@ -70,5 +78,64 @@ describe("filterRaiseHistory", () => {
 
   it("can return an empty list", () => {
     expect(filterRaiseHistory([event("round-open")], ["funding"])).toEqual([]);
+  });
+});
+
+describe("filter labels for exports", () => {
+  it("defaults to all types when nothing is selected", () => {
+    expect(raiseHistoryFilterLabel([])).toBe("All event types");
+    expect(raiseHistoryFilterSlug([])).toBeNull();
+  });
+
+  it("labels and slugs selected types in chip order", () => {
+    expect(raiseHistoryFilterLabel(["decision", "round"])).toBe("Round, Desk decision");
+    expect(raiseHistoryFilterSlug(["decision", "round"])).toBe("round-decision");
+  });
+});
+
+describe("exports follow the active filters", () => {
+  const events = [
+    { key: "round-open", at: "2026-01-01T00:00:00.000Z", label: "Round opened", detail: "d", actor: "Capital markets desk", tone: "progress" },
+    { key: "interest-invited", at: "2026-01-05T00:00:00.000Z", label: "Invitation issued", detail: "d", actor: "Capital markets desk", tone: "success" },
+  ] as RaiseHistoryEvent[];
+
+  it("csv only contains the filtered events and names the filter", () => {
+    const active: RaiseHistoryCategory[] = ["decision"];
+    const csv = buildRaiseHistoryCsv({
+      events: filterRaiseHistory(events, active),
+      roundName: "Series C",
+      currency: "USD",
+      investorName: "Ada",
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      filterLabel: raiseHistoryFilterLabel(active),
+      filterSlug: raiseHistoryFilterSlug(active),
+    });
+    expect(csv).toContain("Event types,Desk decision");
+    expect(csv).toContain("Invitation issued");
+    expect(csv).not.toContain("Round opened");
+    expect(csv).toContain("Events,1");
+  });
+
+  it("pdf lede and file names carry the filter", () => {
+    const active: RaiseHistoryCategory[] = ["decision"];
+    const doc = buildRaiseHistoryReportHtml({
+      events: filterRaiseHistory(events, active),
+      roundName: "Series C",
+      currency: "USD",
+      investorName: "Ada",
+      generatedAt: "2026-02-01T00:00:00.000Z",
+      filterLabel: raiseHistoryFilterLabel(active),
+      filterSlug: raiseHistoryFilterSlug(active),
+    });
+    expect(doc.html).toContain("Event types: Desk decision");
+    expect(doc.html).not.toContain("Round opened");
+    expect(doc.fileName).toContain("-decision-");
+    expect(
+      raiseHistoryCsvFileName({
+        roundName: "Series C",
+        generatedAt: "2026-02-01T00:00:00.000Z",
+        filterSlug: raiseHistoryFilterSlug(active),
+      }),
+    ).toBe("gf3x-series-c-status-history-decision-2026-02-01.csv");
   });
 });
