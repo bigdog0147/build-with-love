@@ -15,6 +15,10 @@ export interface RaiseHistoryExportInput {
   currency: string;
   investorName: string;
   generatedAt?: string;
+  /** Human label for the selected export date range, when one is applied. */
+  rangeLabel?: string | null;
+  /** Compact range slug appended to export file names. */
+  rangeSlug?: string | null;
 }
 
 export interface RaiseHistoryExportDocument {
@@ -96,6 +100,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Round", input.roundName].map(csvCell).join(","));
   lines.push(["Investor", input.investorName].map(csvCell).join(","));
   lines.push(["Generated", generatedAt].map(csvCell).join(","));
+  lines.push(["Date range", input.rangeLabel ?? "All dates"].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   lines.push("");
   lines.push(HEADERS.map(csvCell).join(","));
@@ -123,9 +128,14 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
 }
 
 /** CSV file name for a round's status history. */
-export function raiseHistoryCsvFileName(input: { roundName: string; generatedAt?: string }) {
+export function raiseHistoryCsvFileName(input: {
+  roundName: string;
+  generatedAt?: string;
+  rangeSlug?: string | null;
+}) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
-  return `gf3x-${slug(input.roundName)}-status-history-${stamp}.csv`;
+  const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
+  return `gf3x-${slug(input.roundName)}-status-history${range}-${stamp}.csv`;
 }
 
 /** Printable statement of the full status history, ready to save as PDF. */
@@ -202,7 +212,7 @@ export function buildRaiseHistoryReportHtml(
     <p class="lede">
       ${escape(input.roundName)} — prepared for ${escape(input.investorName)}.
       ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
-      All timestamps are shown in UTC.
+      Date range: ${escape(input.rangeLabel ?? "All dates")}. All timestamps are shown in UTC.
     </p>
     <table>
       <thead>
@@ -227,7 +237,9 @@ export function buildRaiseHistoryReportHtml(
 </html>`;
 
   return {
-    fileName: `gf3x-${slug(input.roundName)}-status-history-${generatedAt.slice(0, 10)}.html`,
+    fileName: `gf3x-${slug(input.roundName)}-status-history${
+      input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
+    }-${generatedAt.slice(0, 10)}.html`,
     title,
     html,
   };
