@@ -8,6 +8,8 @@
  * any server-side document generation.
  */
 
+import { PDF_LAYOUT, PdfDocument } from "./pdf-document";
+
 export type RaiseConfirmationKind =
   | "interest-submitted"
   | "interest-invited"
