@@ -242,8 +242,11 @@ export function buildRaiseConfirmationPdf(input: RaiseConfirmationInput): {
 
   if (input.note) {
     pdf.space(14);
-    pdf.rect(PDF_LAYOUT.MARGIN, pdf.y, 2, 40, gold);
-    pdf.text(`Desk note: ${input.note}`, { size: 10.5, indent: 14, spaceAfter: 6 });
+    const noteText = `Desk note: ${input.note}`;
+    const noteTop = pdf.y;
+    pdf.text(noteText, { size: 10.5, indent: 14, spaceAfter: 6 });
+    // Accent bar drawn to the measured height of the wrapped note.
+    pdf.rect(PDF_LAYOUT.MARGIN, noteTop, 2, Math.max(14, pdf.y - noteTop - 6), gold);
   }
 
   pdf.space(20);
