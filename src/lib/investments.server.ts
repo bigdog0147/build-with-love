@@ -238,6 +238,8 @@ export async function notifyInvestor(input: {
   awaitDelivery?: boolean;
   /** Preference category the notice is filtered against. Defaults to announcements. */
   category?: "announcements" | "reports" | "raise";
+  /** Capital raising only: lets the investor's per-round opt-out apply. */
+  roundId?: string;
 }) {
   const payload = {
     userId: input.userId,
@@ -248,6 +250,7 @@ export async function notifyInvestor(input: {
     template: input.template,
     templateData: input.templateData,
     idempotencyKey: input.idempotencyKey,
+    roundId: input.roundId,
   };
 
   if (!input.awaitDelivery) {
