@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { ConfirmationDownload } from './confirmation-download'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -24,6 +25,9 @@ interface Props {
   ended?: 'declined' | 'withdrawn' | 'released' | 'cancelled' | ''
   note?: string
   name?: string
+  /** Signed download link for the matching confirmation document. */
+  confirmationUrl?: string
+  confirmationTitle?: string
 }
 
 const ENDED_COPY: Record<string, string> = {
@@ -42,6 +46,8 @@ const Email = ({
   ended,
   note,
   name,
+  confirmationUrl,
+  confirmationTitle,
 }: Props) => {
   const endedCopy = ended ? ENDED_COPY[ended] : undefined
   return (
@@ -75,6 +81,7 @@ const Email = ({
               <Text style={step}>{nextStep}</Text>
             </>
           ) : null}
+          <ConfirmationDownload url={confirmationUrl} title={confirmationTitle} />
           <Hr style={hr} />
           <Text style={footer}>
             Gigafactory 3X — Capital Markets. This message relates to a capital raise you are

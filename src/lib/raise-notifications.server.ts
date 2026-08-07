@@ -23,6 +23,11 @@ export type RaiseAdvanceInput = {
   /** Distinguishes the advance in the idempotency key (e.g. "interest-submitted"). */
   event: string;
   tone?: "info" | "success" | "warning" | "danger";
+  /** Reference printed on the confirmation document (commitment/interest id). */
+  reference?: string;
+  /** Who recorded the decision, printed on the confirmation document. */
+  actor?: string;
+  decidedAt?: string;
 };
 
 /** Human copy for the in-app notice; the email uses the same stage + next step. */
@@ -59,6 +64,21 @@ export async function notifyRaiseAdvance(input: RaiseAdvanceInput) {
       note: input.note || "",
     },
     roundId: input.roundId,
+    // Email attachments are unsupported, so the identical confirmation document
+    // is folded in as a signed, per-recipient download link.
+    confirmation: {
+      kind: input.event,
+      reference: input.reference || `${input.roundId}-${input.event}`,
+      roundName: input.roundName,
+      currency: input.currency,
+      investorName: "",
+      amount: input.amount ?? null,
+      decidedAt: input.decidedAt ?? new Date().toISOString(),
+      actor: input.actor || "Capital markets desk",
+      headline: advance.stageLabel,
+      detail: detailFor(advance.stageLabel, advance.nextStep, advance.ended, input.roundName),
+      note: input.note ?? null,
+    },
     idempotencyKey: `raise-advance-${input.roundId}-${input.userId}-${input.event}`,
   });
 }

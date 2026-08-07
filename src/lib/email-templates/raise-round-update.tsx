@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components'
+import { ConfirmationDownload } from './confirmation-download'
 import type { TemplateEntry } from './registry'
 
 interface Props {
@@ -21,6 +22,9 @@ interface Props {
   closesAt?: string
   note?: string
   name?: string
+  /** Signed download link for the matching confirmation document. */
+  confirmationUrl?: string
+  confirmationTitle?: string
 }
 
 const COPY: Record<string, { heading: string; body: string; steps: string[] }> = {
@@ -71,6 +75,8 @@ const Email = ({
   closesAt,
   note,
   name,
+  confirmationUrl,
+  confirmationTitle,
 }: Props) => {
   const copy = COPY[outcome] ?? COPY['open']!
   return (
@@ -106,6 +112,7 @@ const Email = ({
               {i + 1}. {s}
             </Text>
           ))}
+          <ConfirmationDownload url={confirmationUrl} title={confirmationTitle} />
           <Hr style={hr} />
           <Text style={footer}>
             Gigafactory 3X — Capital Markets. This message relates to a capital raise you are
