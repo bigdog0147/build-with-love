@@ -32,6 +32,8 @@ export type DispatchResult = {
   emailAttempts?: number;
   /** True when the failure was transient and another attempt could succeed. */
   emailRetryable?: boolean;
+  /** Set when quiet hours or a digest cadence pushed the email into the future. */
+  emailDeferredUntil?: string;
 };
 
 type Prefs = Record<string, boolean>;
