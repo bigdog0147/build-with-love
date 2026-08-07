@@ -2,12 +2,15 @@
  * Pure builders for exporting the investor-facing capital raising status
  * history as a CSV file or a printable (PDF-ready) statement.
  *
+ * Every stage also carries a before/after diff of the fields that changed.
+ *
  * Both exports carry every recorded stage with its full timestamp (ISO plus a
  * human-readable UTC stamp), the actor label that recorded it, amounts and any
  * desk note, so the download is an auditable copy of the on-screen timeline.
  */
 
 import type { RaiseHistoryEvent } from "./raise-history";
+import { formatChange, formatChangeSummary } from "./raise-history-diff";
 
 export interface RaiseHistoryExportInput {
   events: RaiseHistoryEvent[];
@@ -89,6 +92,10 @@ const HEADERS = [
   "Currency",
   "Detail",
   "Desk note",
+  "Changed fields",
+  "Before",
+  "After",
+  "Change summary",
   "Reference",
 ] as const;
 
@@ -117,6 +124,10 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
         event.amount === null || event.amount === undefined ? "" : input.currency,
         event.detail,
         event.note ?? "",
+        (event.changes ?? []).map((c) => c.field).join("; "),
+        (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
+        (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
+        formatChangeSummary(event.changes),
         event.reference ?? "",
       ]
         .map(csvCell)
@@ -151,6 +162,19 @@ export function buildRaiseHistoryReportHtml(
           <td>
             <strong>${escape(event.label)}</strong>
             <div class="detail">${escape(event.detail)}</div>
+            ${
+              event.changes && event.changes.length
+                ? `<ul class="diff">${event.changes
+                    .map(
+                      (c) =>
+                        `<li><span class="field">${escape(c.field)}</span>
+                           <span class="was">${escape(c.from ?? "—")}</span>
+                           <span class="arrow">&rarr;</span>
+                           <span class="now">${escape(c.to ?? "—")}</span></li>`,
+                    )
+                    .join("")}</ul>`
+                : ""
+            }
             ${event.note ? `<div class="note">Desk note: ${escape(event.note)}</div>` : ""}
             ${event.reference ? `<div class="ref">Reference ${escape(event.reference)}</div>` : ""}
           </td>
@@ -190,6 +214,12 @@ export function buildRaiseHistoryReportHtml(
   td.num, th.num { text-align: right; white-space: nowrap; }
   .detail { color: #b6b5b1; margin-top: 3px; }
   .note { border-left: 2px solid #d4af62; padding-left: 10px; margin-top: 6px; color: #d8d7d3; }
+  .diff { list-style: none; margin: 8px 0 0; padding: 0; }
+  .diff li { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; margin-top: 3px; }
+  .diff .field { color: #8a8a90; text-transform: uppercase; letter-spacing: 0.08em; }
+  .diff .was { color: #b6b5b1; text-decoration: line-through; }
+  .diff .arrow { color: #d4af62; }
+  .diff .now { color: #f5f4f1; font-weight: 600; }
   .ref { color: #7e7e84; font-size: 11px; margin-top: 4px; }
   footer { border-top: 1px solid #2a2a2d; padding-top: 18px; color: #7e7e84; font-size: 11px; }
   @media print {
@@ -199,6 +229,9 @@ export function buildRaiseHistoryReportHtml(
     th, td, .brand, footer { border-color: #dddddd; }
     .lede, th, footer, .detail, .ref { color: #555555; }
     .note { color: #222222; border-color: #8a6d24; }
+    .diff .field, .diff .was { color: #555555; }
+    .diff .arrow { color: #8a6d24; }
+    .diff .now { color: #111111; }
   }
 </style>
 </head>
