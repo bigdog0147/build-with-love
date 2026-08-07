@@ -52,7 +52,8 @@ describe("raise confirmation documents", () => {
     expect(doc.html).not.toContain("<script>");
     expect(doc.html).toContain("&lt;script&gt;");
   });
-}
+
+
   it("renders a real PDF file", () => {
     const pdf = buildRaiseConfirmationPdf(base);
     const text = new TextDecoder("latin1").decode(pdf.bytes);
