@@ -9,7 +9,7 @@
  * forged or edited link cannot produce a document.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { buildRaiseConfirmation } from "@/lib/raise-confirmation";
+import { buildRaiseConfirmationPdf } from "@/lib/raise-confirmation";
 import {
   RAISE_CONFIRMATION_MESSAGES,
   verifyRaiseConfirmationToken,
@@ -50,16 +50,14 @@ export const Route = createFileRoute("/api/public/raise-confirmation")({
           return notice(RAISE_CONFIRMATION_MESSAGES[reason], reason === "expired" ? 410 : 403);
         }
 
-        const doc = buildRaiseConfirmation(verified.payload.c);
+        const doc = buildRaiseConfirmationPdf(verified.payload.c);
         // `view=1` renders it in the browser; the email link downloads the file.
         const inline = url.searchParams.get("view") === "1";
-        return new Response(doc.html, {
+        return new Response(doc.bytes as unknown as BodyInit, {
           status: 200,
           headers: {
-            "Content-Type": "text/html; charset=utf-8",
-            "Content-Disposition": inline
-              ? "inline"
-              : `attachment; filename="${doc.fileName}"`,
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${doc.fileName}"`,
             "Cache-Control": "no-store",
             "X-Robots-Tag": "noindex",
           },

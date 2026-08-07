@@ -3,7 +3,6 @@ import { History, ChevronDown, Download, FileText, Link2, Table2 } from "lucide-
 import { toast } from "sonner";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
-  buildRaiseConfirmation,
   downloadRaiseConfirmation,
   raiseConfirmationTitle,
 } from "@/lib/raise-confirmation";
