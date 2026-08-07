@@ -31,6 +31,7 @@ import {
   printRaiseHistoryReport,
   raiseHistoryCsvFileName,
 } from "@/lib/raise-history-export";
+import { RaiseHistoryExportPreviewDialog } from "@/components/raise-history-export-preview";
 import {
   RAISE_HISTORY_CATEGORIES,
   filterRaiseHistory,
@@ -141,6 +142,7 @@ export function RaiseHistoryTimeline({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const focusedRef = useRef<HTMLLIElement | null>(null);
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
@@ -279,7 +281,18 @@ export function RaiseHistoryTimeline({
         )}
         <button
           type="button"
-          onClick={() =>
+          onClick={() => setPreviewOpen(true)}
+          aria-haspopup="dialog"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+        >
+          <Table2 className="h-3.5 w-3.5" aria-hidden />
+          Preview &amp; export history
+        </button>
+        <RaiseHistoryExportPreviewDialog
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          input={exportInput}
+          onConfirmCsv={() => {
             downloadTextFile(
               raiseHistoryCsvFileName({
                 roundName: exportInput.roundName,
@@ -288,21 +301,14 @@ export function RaiseHistoryTimeline({
               }),
               buildRaiseHistoryCsv(exportInput),
               "text/csv",
-            )
-          }
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
-        >
-          <Table2 className="h-3.5 w-3.5" aria-hidden />
-          Download history CSV
-        </button>
-        <button
-          type="button"
-          onClick={() => printRaiseHistoryReport(buildRaiseHistoryReportHtml(exportInput))}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
-        >
-          <FileText className="h-3.5 w-3.5" aria-hidden />
-          Download history PDF
-        </button>
+            );
+            setPreviewOpen(false);
+          }}
+          onConfirmPdf={() => {
+            printRaiseHistoryReport(buildRaiseHistoryReportHtml(exportInput));
+            setPreviewOpen(false);
+          }}
+        />
         {confirmationCount > 0 && (
           <button
             type="button"
