@@ -62,6 +62,16 @@ function CapitalRaisingPage() {
   const withdrawInterest = useServerFn(withdrawRaiseInterest);
   const fund = useServerFn(fundRaiseCommitment);
   const cancel = useServerFn(cancelRaiseCommitment);
+  const recordDownload = useServerFn(recordConfirmationDownload);
+
+  // The audit trail is append-only; a failed write must never block the file
+  // the investor already has, so it stays silent and just refreshes the list.
+  const logDownload = (entry: Parameters<typeof recordDownload>[0]["data"]) => {
+    void recordDownload({ data: entry })
+      .then(() => queryClient.invalidateQueries({ queryKey: ["confirmation-downloads"] }))
+      .catch(() => undefined);
+  };
+
 
   const { data, isLoading } = useQuery({ queryKey: ["raise-portal"], queryFn: () => fetchPortal({} as never) });
   const [amounts, setAmounts] = useState<Record<string, string>>({});
