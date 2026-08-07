@@ -103,6 +103,70 @@ const HEADERS = [
   "Reference",
 ] as const;
 
+/** Ordered column names of the export, matching HEADERS. */
+export const RAISE_HISTORY_EXPORT_COLUMNS: readonly string[] = HEADERS;
+
+/** One export row: the exact cell values written to CSV, in column order. */
+export function historyRowCells(event: RaiseHistoryEvent, currency: string): string[] {
+  return [
+    event.label,
+    event.at ?? "",
+    formatHistoryStamp(event.at),
+    event.actor,
+    event.tone,
+    event.amount === null || event.amount === undefined ? "" : String(event.amount),
+    event.amount === null || event.amount === undefined ? "" : currency,
+    event.detail,
+    event.note ?? "",
+    (event.changes ?? []).map((c) => c.field).join("; "),
+    (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
+    (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
+    formatChangeSummary(event.changes),
+    event.reference ?? "",
+  ];
+}
+
+export interface RaiseHistoryExportPreview {
+  columns: readonly string[];
+  rows: string[][];
+  meta: { label: string; value: string }[];
+  rowCount: number;
+  csvFileName: string;
+  pdfFileName: string;
+}
+
+/**
+ * Exactly what a download will contain: the header row, every data row in
+ * export order, and the metadata block written above the table.
+ */
+export function buildRaiseHistoryExportPreview(
+  input: RaiseHistoryExportInput,
+): RaiseHistoryExportPreview {
+  const generatedAt = input.generatedAt ?? new Date().toISOString();
+  return {
+    columns: RAISE_HISTORY_EXPORT_COLUMNS,
+    rows: input.events.map((event) => historyRowCells(event, input.currency)),
+    meta: [
+      { label: "Round", value: input.roundName },
+      { label: "Investor", value: input.investorName },
+      { label: "Date range", value: input.rangeLabel ?? "All dates" },
+      { label: "Event types", value: input.filterLabel ?? "All event types" },
+      { label: "Currency", value: input.currency },
+    ],
+    rowCount: input.events.length,
+    csvFileName: raiseHistoryCsvFileName({
+      roundName: input.roundName,
+      generatedAt,
+      rangeSlug: input.rangeSlug,
+      filterSlug: input.filterSlug,
+    }),
+    pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
+      /\.html$/,
+      ".pdf",
+    ),
+  };
+}
+
 /** Full status history as CSV, oldest event first. */
 export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
@@ -118,26 +182,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(HEADERS.map(csvCell).join(","));
 
   for (const event of input.events) {
-    lines.push(
-      [
-        event.label,
-        event.at ?? "",
-        formatHistoryStamp(event.at),
-        event.actor,
-        event.tone,
-        event.amount ?? "",
-        event.amount === null || event.amount === undefined ? "" : input.currency,
-        event.detail,
-        event.note ?? "",
-        (event.changes ?? []).map((c) => c.field).join("; "),
-        (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
-        (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
-        formatChangeSummary(event.changes),
-        event.reference ?? "",
-      ]
-        .map(csvCell)
-        .join(","),
-    );
+    lines.push(historyRowCells(event, input.currency).map(csvCell).join(","));
   }
 
   return lines.join("\r\n");
