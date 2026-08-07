@@ -45,5 +45,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'raise-round-update': raiseRoundUpdateTemplate,
   'subscription-status': subscriptionStatusTemplate,
   'document-published': documentPublishedTemplate,
+  'raise-timeline-advance': raiseTimelineAdvanceTemplate,
 }
 
