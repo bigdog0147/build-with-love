@@ -1606,6 +1606,44 @@ export type Database = {
           },
         ]
       }
+      raise_round_preferences: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          inapp_enabled: boolean
+          round_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          inapp_enabled?: boolean
+          round_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          inapp_enabled?: boolean
+          round_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raise_round_preferences_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "raise_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       raise_rounds: {
         Row: {
           closes_at: string | null
