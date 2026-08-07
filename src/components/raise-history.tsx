@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { History, ChevronDown, Download, FileArchive, FileText, Link2, Table2 } from "lucide-react";
+import {
+  History,
+  CalendarRange,
+  ChevronDown,
+  Download,
+  FileArchive,
+  FileText,
+  Link2,
+  Table2,
+  X,
+} from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import type { RaiseHistoryEvent, RaiseHistoryTone } from "@/lib/raise-history";
 import {
@@ -24,6 +37,14 @@ import {
   raiseHistoryCounts,
   type RaiseHistoryCategory,
 } from "@/lib/raise-history-filters";
+import {
+  EMPTY_RAISE_HISTORY_RANGE,
+  filterRaiseHistoryByRange,
+  hasRaiseHistoryRange,
+  raiseHistoryRangeLabel,
+  raiseHistoryRangeSlug,
+  type RaiseHistoryRange,
+} from "@/lib/raise-history-range";
 import {
   buildRaiseEventLink,
   isRaiseEventTargeted,
@@ -117,10 +138,16 @@ export function RaiseHistoryTimeline({
 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+  const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const focusedRef = useRef<HTMLLIElement | null>(null);
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
-  const visible = useMemo(() => filterRaiseHistory(events, active), [events, active]);
+  const visible = useMemo(
+    () => filterRaiseHistoryByRange(filterRaiseHistory(events, active), range),
+    [events, active, range],
+  );
+  const rangeActive = hasRaiseHistoryRange(range);
+  const rangeLabel = raiseHistoryRangeLabel(range);
 
   const deepLinked =
     roundId && target && target.roundId === roundId && raiseEventExists(events, target.eventKey)
@@ -133,6 +160,7 @@ export function RaiseHistoryTimeline({
     if (!deepLinked) return;
     setOpen(true);
     setActive([]);
+    setRange(EMPTY_RAISE_HISTORY_RANGE);
   }, [deepLinked]);
 
   useEffect(() => {
@@ -152,6 +180,8 @@ export function RaiseHistoryTimeline({
     roundName: roundName ?? "Capital raise",
     currency,
     investorName,
+    rangeLabel,
+    rangeSlug: raiseHistoryRangeSlug(range),
   };
 
   const confirmationCount = downloadableRaiseEvents(events).length;
@@ -173,7 +203,9 @@ export function RaiseHistoryTimeline({
           <History className="h-4 w-4 text-[var(--gold)]" aria-hidden />
           Status history
           <span className="text-xs font-sans uppercase tracking-widest text-muted-foreground">
-            {active.length > 0 ? `${visible.length} of ${events.length}` : events.length}{" "}
+            {active.length > 0 || rangeActive
+              ? `${visible.length} of ${events.length}`
+              : events.length}{" "}
             {events.length === 1 ? "event" : "events"}
           </span>
 
@@ -184,12 +216,71 @@ export function RaiseHistoryTimeline({
         />
       </button>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label={`Select the export date range. Current range: ${rangeLabel}`}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+                rangeActive
+                  ? "border-[var(--gold)]/60 bg-[var(--gold)]/10 text-[var(--gold)]"
+                  : "border-border text-muted-foreground hover:border-[var(--gold)]/50 hover:text-foreground"
+              }`}
+            >
+              <CalendarRange className="h-3.5 w-3.5" aria-hidden />
+              {rangeLabel}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto p-0">
+            <Calendar
+              mode="range"
+              numberOfMonths={2}
+              defaultMonth={range.from ?? undefined}
+              selected={
+                range.from || range.to
+                  ? ({ from: range.from ?? undefined, to: range.to ?? undefined } as DateRange)
+                  : undefined
+              }
+              onSelect={(picked: DateRange | undefined) =>
+                setRange({ from: picked?.from ?? null, to: picked?.to ?? null })
+              }
+              className="pointer-events-auto p-3"
+            />
+            <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2">
+              <span className="text-xs text-muted-foreground">
+                Exports include {visible.length} of {events.length}{" "}
+                {events.length === 1 ? "event" : "events"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setRange(EMPTY_RAISE_HISTORY_RANGE)}
+                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
+                Clear
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        {rangeActive && (
+          <button
+            type="button"
+            onClick={() => setRange(EMPTY_RAISE_HISTORY_RANGE)}
+            aria-label="Clear the export date range"
+            className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+          >
+            <X className="h-3 w-3" aria-hidden />
+            Clear dates
+          </button>
+        )}
         <button
           type="button"
           onClick={() =>
             downloadTextFile(
-              raiseHistoryCsvFileName({ roundName: exportInput.roundName }),
+              raiseHistoryCsvFileName({
+                roundName: exportInput.roundName,
+                rangeSlug: exportInput.rangeSlug,
+              }),
               buildRaiseHistoryCsv(exportInput),
               "text/csv",
             )
