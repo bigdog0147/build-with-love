@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { validateCommitment } from "@/lib/investments";
 import { notifyInvestor } from "@/lib/investments.server";
 import { raiseAdvanceNotice } from "@/lib/raise-timeline";
+import { notifyRaiseAdvance } from "@/lib/raise-notifications.server";
 import { moveWalletBalance } from "@/lib/withdrawals.server";
 import { logAdminAction, requireAdminPermission, serviceClient } from "@/lib/admin-guard.server";
 
