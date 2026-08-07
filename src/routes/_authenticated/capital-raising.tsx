@@ -20,6 +20,9 @@ import { raiseHistory } from "@/lib/raise-history";
 import { parseRaiseEventTarget } from "@/lib/raise-history-links";
 import { RaiseRoundAlerts } from "@/components/raise-round-alerts";
 import { indexOverrides } from "@/lib/raise-round-preferences";
+import { ConfirmationDownloadLog } from "@/components/confirmation-download-log";
+import { recordConfirmationDownload } from "@/lib/confirmation-downloads.functions";
+
 
 export const Route = createFileRoute("/_authenticated/capital-raising")({
   component: CapitalRaisingPage,
