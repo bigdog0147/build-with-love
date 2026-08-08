@@ -180,7 +180,18 @@ function SettingsPage() {
         </button>
       </form>
 
-      <NotificationPreferencesPanel />
+      <Link
+        to="/notification-settings"
+        className="inline-flex max-w-2xl items-center justify-between gap-4 rounded-2xl border border-border p-6 glass hover:border-[var(--gold)]/60"
+      >
+        <span>
+          <span className="block font-display text-lg">Notification settings</span>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Choose in-app and email delivery for each notice type, quiet hours and digest cadence.
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--gold)]" />
+      </Link>
     </DashShell>
   );
 }
