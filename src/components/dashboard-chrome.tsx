@@ -53,6 +53,7 @@ export function Sidebar() {
     { icon: ShieldCheck, label: "Verification", to: "/verify" as const },
     { icon: BadgeCheck, label: "Review status", to: "/verification-status" as const },
     { icon: Bell, label: "Notifications", to: "/notifications" as const },
+    { icon: BellRing, label: "Notification settings", to: "/notification-settings" as const },
     { icon: FileText, label: "Documents", to: "/documents" as const },
     { icon: LifeBuoy, label: "Support", to: "/support" as const },
     { icon: Shield, label: "Security", to: "/security" as const },
