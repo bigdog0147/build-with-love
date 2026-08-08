@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { getDashboard } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { DashShell, PageHeading } from "@/components/dashboard-chrome";
-import { NotificationPreferencesPanel } from "@/components/notification-preferences";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
