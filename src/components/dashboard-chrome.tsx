@@ -6,6 +6,7 @@ import {
   Banknote,
   History,
   Bell,
+  BellRing,
   FileText,
   LifeBuoy,
   CreditCard,
