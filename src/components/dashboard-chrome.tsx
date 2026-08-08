@@ -128,6 +128,7 @@ export function MobileNav() {
     { label: "Verification", to: "/verify" as const },
     { label: "Review status", to: "/verification-status" as const },
     { label: "Notifications", to: "/notifications" as const },
+    { label: "Notification settings", to: "/notification-settings" as const },
     { label: "Documents", to: "/documents" as const },
     { label: "Support", to: "/support" as const },
     { label: "Security", to: "/security" as const },
