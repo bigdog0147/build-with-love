@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { getDashboard } from "@/lib/dashboard.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { DashShell, PageHeading } from "@/components/dashboard-chrome";
-import { NotificationPreferencesPanel } from "@/components/notification-preferences";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -180,7 +181,18 @@ function SettingsPage() {
         </button>
       </form>
 
-      <NotificationPreferencesPanel />
+      <Link
+        to="/notification-settings"
+        className="inline-flex max-w-2xl items-center justify-between gap-4 rounded-2xl border border-border p-6 glass hover:border-[var(--gold)]/60"
+      >
+        <span>
+          <span className="block font-display text-lg">Notification settings</span>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Choose in-app and email delivery for each notice type, quiet hours and digest cadence.
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-[var(--gold)]" />
+      </Link>
     </DashShell>
   );
 }
