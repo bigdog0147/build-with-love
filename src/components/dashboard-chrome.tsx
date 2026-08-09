@@ -27,8 +27,9 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { getDashboard } from "@/lib/dashboard.functions";
+import { getUnreadNotificationCount } from "@/lib/customer.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export function cx(...c: (string | false | undefined)[]) {
@@ -154,6 +155,61 @@ export function MobileNav() {
   );
 }
 
+function NotificationBell() {
+  const queryClient = useQueryClient();
+  const fetchUnread = useServerFn(getUnreadNotificationCount);
+  const { data } = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: () => fetchUnread({} as never),
+    refetchInterval: 30_000,
+    staleTime: 5_000,
+  });
+  const count = data?.count ?? 0;
+
+  useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let subscribed = false;
+
+    import("@/integrations/supabase/client").then(({ supabase: sb }) => {
+      channel = sb
+        .channel("portal-unread-notifications")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "notifications" },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+          },
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") subscribed = true;
+        });
+    });
+
+    return () => {
+      if (channel && subscribed) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [queryClient]);
+
+  const label = count > 0 ? `${count} unread notification${count === 1 ? "" : "s"}` : "Notifications";
+
+  return (
+    <RouterLink
+      to="/notifications"
+      aria-label={label}
+      className="relative grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground"
+    >
+      <Bell className="h-4 w-4" />
+      {count > 0 && (
+        <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--danger)] px-1 text-[10px] font-semibold text-[var(--destructive-foreground)]">
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </RouterLink>
+  );
+}
+
 export function TopBar() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -178,13 +234,7 @@ export function TopBar() {
           className="w-full rounded-xl border border-border bg-[var(--surface)] py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-[var(--gold)]/60"
         />
       </div>
-      <RouterLink
-        to="/notifications"
-        aria-label="Notifications"
-        className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-[var(--surface)] text-muted-foreground hover:text-foreground"
-      >
-        <Bell className="h-4 w-4" />
-      </RouterLink>
+      <NotificationBell />
       <RouterLink
         to="/settings"
         className="flex items-center gap-3 rounded-xl border border-border bg-[var(--surface)] py-1.5 pl-1.5 pr-3"
