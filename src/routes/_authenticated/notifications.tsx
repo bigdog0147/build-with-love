@@ -1,12 +1,38 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { ArrowRight, Bell, CheckCheck, ChevronLeft, ChevronRight, Dot, MailOpen } from "lucide-react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import {
+  ArrowRight,
+  Bell,
+  CheckCheck,
+  ChevronLeft,
+  ChevronRight,
+  Dot,
+  MailOpen,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { DashShell, PageHeading, cx } from "@/components/dashboard-chrome";
 import { listNotifications, setAllNotificationsRead, setNotificationRead } from "@/lib/customer.functions";
 
+const searchSchema = z.object({
+  page: fallback(z.number().int(), 1).default(1),
+  unreadOnly: fallback(z.boolean(), false).default(false),
+  round: fallback(z.string(), "").default(""),
+  type: fallback(z.string(), "").default(""),
+});
+
+const TYPE_LABELS: Record<string, string> = {
+  "": "All types",
+  alert: "Alerts",
+  transaction: "Transactions",
+  ticket: "Support tickets",
+};
+
 export const Route = createFileRoute("/_authenticated/notifications")({
+  validateSearch: zodValidator(searchSchema),
   component: NotificationsPage,
   head: () => ({
     meta: [
@@ -35,17 +61,18 @@ const TONES: Record<string, string> = {
 const PAGE_SIZE = 10;
 
 function NotificationsPage() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/notifications" });
   const fetchNotifications = useServerFn(listNotifications);
   const markAll = useServerFn(setAllNotificationsRead);
   const setRead = useServerFn(setNotificationRead);
   const queryClient = useQueryClient();
 
-  const [page, setPage] = useState(1);
-  const [unreadOnly, setUnreadOnly] = useState(false);
+  const { page, unreadOnly, round, type } = search;
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["notifications", page, unreadOnly],
-    queryFn: () => fetchNotifications({ data: { page, pageSize: PAGE_SIZE, unreadOnly } }),
+    queryKey: ["notifications", page, unreadOnly, round, type],
+    queryFn: () => fetchNotifications({ data: { page, pageSize: PAGE_SIZE, unreadOnly, round, type } }),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -63,6 +90,13 @@ function NotificationsPage() {
   const items = data?.items ?? [];
   const unread = data?.unread ?? 0;
   const pageCount = data?.pageCount ?? 1;
+  const rounds = data?.rounds ?? [];
+
+  const updateSearch = (patch: Partial<typeof search>) => {
+    navigate({ search: (prev: typeof search) => ({ ...prev, ...patch, page: 1 }) });
+  };
+
+  const activeFilters = [round && "round", type && "type"].filter(Boolean).length;
 
   return (
     <DashShell>
@@ -72,48 +106,94 @@ function NotificationsPage() {
         sub="Verification milestones, ledger movements, capital raise decisions and support responses."
       />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex rounded-lg border border-border p-0.5 text-xs">
-          {[
-            { key: false, label: "All" },
-            { key: true, label: `Unread${unread ? ` (${unread})` : ""}` },
-          ].map((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-lg border border-border p-0.5 text-xs">
+            {[
+              { key: false, label: "All" },
+              { key: true, label: `Unread${unread ? ` (${unread})` : ""}` },
+            ].map((t) => (
+              <button
+                key={String(t.key)}
+                type="button"
+                onClick={() => updateSearch({ unreadOnly: t.key })}
+                className={cx(
+                  "rounded-md px-3 py-1.5 transition-colors",
+                  unreadOnly === t.key ? "bg-[var(--gold)]/15 text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <SlidersHorizontal className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select
+                aria-label="Filter by round"
+                value={round}
+                onChange={(e) => updateSearch({ round: e.target.value })}
+                className="h-8 appearance-none rounded-lg border border-border bg-transparent pl-8 pr-6 text-xs text-foreground focus:border-[var(--gold)] focus:outline-none"
+              >
+                <option value="">All rounds</option>
+                {rounds.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative">
+              <SlidersHorizontal className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <select
+                aria-label="Filter by alert type"
+                value={type}
+                onChange={(e) => updateSearch({ type: e.target.value })}
+                className="h-8 appearance-none rounded-lg border border-border bg-transparent pl-8 pr-6 text-xs text-foreground focus:border-[var(--gold)] focus:outline-none"
+              >
+                {Object.entries(TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {activeFilters > 0 && (
             <button
-              key={String(t.key)}
               type="button"
-              onClick={() => {
-                setUnreadOnly(t.key);
-                setPage(1);
-              }}
-              className={cx(
-                "rounded-md px-3 py-1.5 transition-colors",
-                unreadOnly === t.key ? "bg-[var(--gold)]/15 text-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
+              onClick={() => updateSearch({ round: "", type: "" })}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
-              {t.label}
+              <X className="h-3 w-3" /> Clear filters
             </button>
-          ))}
-        </div>
-        <span className="text-xs text-muted-foreground">
-          {unread > 0 ? `${unread} new alert${unread === 1 ? "" : "s"}` : "You're all caught up"}
-        </span>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => mark.mutate(true)}
-            disabled={mark.isPending || unread === 0}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
-          >
-            <CheckCheck className="h-3.5 w-3.5" /> Mark all read
-          </button>
-          <button
-            type="button"
-            onClick={() => mark.mutate(false)}
-            disabled={mark.isPending || (data?.total ?? 0) === unread}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
-          >
-            <MailOpen className="h-3.5 w-3.5" /> Mark all unread
-          </button>
+          )}
+
+          <span className="text-xs text-muted-foreground">
+            {unread > 0 ? `${unread} new alert${unread === 1 ? "" : "s"}` : "You're all caught up"}
+          </span>
+
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => mark.mutate(true)}
+              disabled={mark.isPending || unread === 0}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
+            >
+              <CheckCheck className="h-3.5 w-3.5" /> Mark all read
+            </button>
+            <button
+              type="button"
+              onClick={() => mark.mutate(false)}
+              disabled={mark.isPending || (data?.total ?? 0) === unread}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs hover:border-[var(--gold)]/60 disabled:opacity-40"
+            >
+              <MailOpen className="h-3.5 w-3.5" /> Mark all unread
+            </button>
+          </div>
         </div>
       </div>
 
@@ -121,7 +201,11 @@ function NotificationsPage() {
         {isLoading && <p className="p-6 text-sm text-muted-foreground">Loading activity…</p>}
         {!isLoading && items.length === 0 && (
           <p className="p-6 text-sm text-muted-foreground">
-            {unreadOnly ? "No unread notifications." : "No notifications yet."}
+            {unreadOnly
+              ? "No unread notifications."
+              : activeFilters
+                ? "No notifications match the selected filters."
+                : "No notifications yet."}
           </p>
         )}
         <ul className="divide-y divide-border/60">
@@ -167,7 +251,7 @@ function NotificationsPage() {
         <nav className="flex items-center justify-between text-xs" aria-label="Notification pages">
           <button
             type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => navigate({ search: (prev: typeof search) => ({ ...prev, page: Math.max(1, prev.page - 1) }) })}
             disabled={page <= 1}
             className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 disabled:opacity-40"
           >
@@ -178,7 +262,7 @@ function NotificationsPage() {
           </span>
           <button
             type="button"
-            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            onClick={() => navigate({ search: (prev: typeof search) => ({ ...prev, page: Math.min(pageCount, prev.page + 1) }) })}
             disabled={page >= pageCount}
             className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 disabled:opacity-40"
           >

@@ -65,15 +65,20 @@ export type NotificationFeed = {
   total: number;
   pageCount: number;
   unread: number;
+  rounds: { id: string; name: string }[];
 };
+
+const VALID_SOURCES: CustomerNotification["source"][] = ["alert", "transaction", "ticket"];
 
 /** Paginated activity feed: automated notices plus transactions and support tickets. */
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { page?: number; pageSize?: number; unreadOnly?: boolean } | undefined) => ({
+  .inputValidator((input: { page?: number; pageSize?: number; unreadOnly?: boolean; round?: string; type?: string } | undefined) => ({
     page: Math.max(1, Math.floor(Number(input?.page ?? 1)) || 1),
     pageSize: Math.min(50, Math.max(5, Math.floor(Number(input?.pageSize ?? 10)) || 10)),
     unreadOnly: Boolean(input?.unreadOnly),
+    round: String(input?.round ?? "").trim().slice(0, 64),
+    type: String(input?.type ?? "").trim().slice(0, 32),
   }))
   .handler(async ({ context, data }): Promise<NotificationFeed> => {
     const [alerts, tx, tickets, commitments, interests] = await Promise.all([
@@ -161,9 +166,15 @@ export const listNotifications = createServerFn({ method: "GET" })
 
     items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
     const unread = items.filter((i) => !i.read).length;
-    const visible = data.unreadOnly ? items.filter((i) => !i.read) : items;
+    let visible = data.unreadOnly ? items.filter((i) => !i.read) : items;
+    if (data.round) {
+      visible = visible.filter((i) => i.roundId === data.round);
+    }
+    if (data.type && VALID_SOURCES.includes(data.type as CustomerNotification["source"])) {
+      visible = visible.filter((i) => i.source === data.type);
+    }
     const page = paginate(visible, data.page, data.pageSize);
-    return { ...page, unread };
+    return { ...page, unread, rounds };
   });
 
 /** Marks every automated notification for the signed-in customer as read. */
