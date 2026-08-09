@@ -251,7 +251,7 @@ function NotificationsPage() {
         <nav className="flex items-center justify-between text-xs" aria-label="Notification pages">
           <button
             type="button"
-            onClick={() => navigate({ search: (prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }) })}
+            onClick={() => navigate({ search: (prev: typeof search) => ({ ...prev, page: Math.max(1, prev.page - 1) }) })}
             disabled={page <= 1}
             className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 disabled:opacity-40"
           >
@@ -262,7 +262,7 @@ function NotificationsPage() {
           </span>
           <button
             type="button"
-            onClick={() => navigate({ search: (prev) => ({ ...prev, page: Math.min(pageCount, prev.page + 1) }) })}
+            onClick={() => navigate({ search: (prev: typeof search) => ({ ...prev, page: Math.min(pageCount, prev.page + 1) }) })}
             disabled={page >= pageCount}
             className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 disabled:opacity-40"
           >
