@@ -27,8 +27,9 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { getDashboard } from "@/lib/dashboard.functions";
+import { getUnreadNotificationCount } from "@/lib/customer.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export function cx(...c: (string | false | undefined)[]) {
