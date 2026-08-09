@@ -1,10 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { ArrowRight, Bell, CheckCheck, ChevronLeft, ChevronRight, Dot, MailOpen } from "lucide-react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { ArrowRight, Bell, CheckCheck, ChevronLeft, ChevronRight, Dot, MailOpen, SlidersHorizontal } from "lucide-react";
 import { DashShell, PageHeading, cx } from "@/components/dashboard-chrome";
 import { listNotifications, setAllNotificationsRead, setNotificationRead } from "@/lib/customer.functions";
+
+const searchSchema = z.object({
+  page: fallback(z.number().int(), 1).default(1),
+  unreadOnly: fallback(z.boolean(), false).default(false),
+  round: fallback(z.string(), "").default(""),
+  type: fallback(z.string(), "").default(""),
+});
+
+const TYPE_LABELS: Record<string, string> = {
+  "": "All types",
+  alert: "Alerts",
+  transaction: "Transactions",
+  ticket: "Support tickets",
+};
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   component: NotificationsPage,
