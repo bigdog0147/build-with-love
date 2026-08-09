@@ -53,7 +53,7 @@ function NotificationSettingsPage() {
       <p className="text-xs text-muted-foreground">
         Compliance decisions such as verification outcomes are always written to your in-app inbox, even when
         email delivery is switched off. Per-round overrides for individual capital raises live on the{" "}
-        <Link to="/capital-raising" className="text-[var(--gold)] hover:underline">
+        <Link to="/capital-raising" search={{ round: "", event: "" }} className="text-[var(--gold)] hover:underline">
           capital raising
         </Link>{" "}
         page.
