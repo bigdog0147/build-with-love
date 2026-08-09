@@ -166,9 +166,15 @@ export const listNotifications = createServerFn({ method: "GET" })
 
     items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
     const unread = items.filter((i) => !i.read).length;
-    const visible = data.unreadOnly ? items.filter((i) => !i.read) : items;
+    let visible = data.unreadOnly ? items.filter((i) => !i.read) : items;
+    if (data.round) {
+      visible = visible.filter((i) => i.roundId === data.round);
+    }
+    if (data.type && VALID_SOURCES.includes(data.type as CustomerNotification["source"])) {
+      visible = visible.filter((i) => i.source === data.type);
+    }
     const page = paginate(visible, data.page, data.pageSize);
-    return { ...page, unread };
+    return { ...page, unread, rounds };
   });
 
 /** Marks every automated notification for the signed-in customer as read. */
