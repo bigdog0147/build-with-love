@@ -65,15 +65,20 @@ export type NotificationFeed = {
   total: number;
   pageCount: number;
   unread: number;
+  rounds: { id: string; name: string }[];
 };
+
+const VALID_SOURCES: CustomerNotification["source"][] = ["alert", "transaction", "ticket"];
 
 /** Paginated activity feed: automated notices plus transactions and support tickets. */
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { page?: number; pageSize?: number; unreadOnly?: boolean } | undefined) => ({
+  .inputValidator((input: { page?: number; pageSize?: number; unreadOnly?: boolean; round?: string; type?: string } | undefined) => ({
     page: Math.max(1, Math.floor(Number(input?.page ?? 1)) || 1),
     pageSize: Math.min(50, Math.max(5, Math.floor(Number(input?.pageSize ?? 10)) || 10)),
     unreadOnly: Boolean(input?.unreadOnly),
+    round: String(input?.round ?? "").trim().slice(0, 64),
+    type: String(input?.type ?? "").trim().slice(0, 32),
   }))
   .handler(async ({ context, data }): Promise<NotificationFeed> => {
     const [alerts, tx, tickets, commitments, interests] = await Promise.all([
