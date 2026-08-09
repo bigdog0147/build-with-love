@@ -212,6 +212,19 @@ export const setNotificationRead = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Returns the exact number of unread notifications for the signed-in customer. */
+export const getUnreadNotificationCount = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ count: number }> => {
+    const { count, error } = await context.supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", context.userId)
+      .is("read_at", null);
+    if (error) throw error;
+    return { count: count ?? 0 };
+  });
+
 
 
 export type CustomerDocument = {
