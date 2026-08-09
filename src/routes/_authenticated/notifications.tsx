@@ -93,7 +93,7 @@ function NotificationsPage() {
   const rounds = data?.rounds ?? [];
 
   const updateSearch = (patch: Partial<typeof search>) => {
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: 1 }) });
+    navigate({ search: (prev: typeof search) => ({ ...prev, ...patch, page: 1 }) });
   };
 
   const activeFilters = [round && "round", type && "type"].filter(Boolean).length;
