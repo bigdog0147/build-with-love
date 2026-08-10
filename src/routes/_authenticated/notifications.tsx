@@ -69,6 +69,10 @@ function NotificationsPage() {
   const setRead = useServerFn(setNotificationRead);
   const queryClient = useQueryClient();
 
+  useRealtimeNotifications("portal-notifications-list");
+
+
+
   const { page, unreadOnly, round, type } = search;
 
   const { data, isLoading, isFetching } = useQuery({
