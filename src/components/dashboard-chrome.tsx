@@ -156,7 +156,6 @@ export function MobileNav() {
 }
 
 function NotificationBell() {
-  const queryClient = useQueryClient();
   const fetchUnread = useServerFn(getUnreadNotificationCount);
   const { data } = useQuery({
     queryKey: ["notifications", "unread-count"],
@@ -166,31 +165,7 @@ function NotificationBell() {
   });
   const count = data?.count ?? 0;
 
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    let subscribed = false;
-
-    import("@/integrations/supabase/client").then(({ supabase: sb }) => {
-      channel = sb
-        .channel("portal-unread-notifications")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "notifications" },
-          () => {
-            queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
-          },
-        )
-        .subscribe((status) => {
-          if (status === "SUBSCRIBED") subscribed = true;
-        });
-    });
-
-    return () => {
-      if (channel && subscribed) {
-        supabase.removeChannel(channel);
-      }
-    };
-  }, [queryClient]);
+  useRealtimeNotifications("portal-unread-notifications");
 
   const label = count > 0 ? `${count} unread notification${count === 1 ? "" : "s"}` : "Notifications";
 
