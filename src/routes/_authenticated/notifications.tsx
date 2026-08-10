@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { DashShell, PageHeading, cx } from "@/components/dashboard-chrome";
+import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import { listNotifications, setAllNotificationsRead, setNotificationRead } from "@/lib/customer.functions";
 
 const searchSchema = z.object({
