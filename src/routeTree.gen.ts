@@ -68,6 +68,7 @@ import { Route as AuthenticatedAdminSocialRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminSecurityRouteImport } from './routes/_authenticated/admin/security'
 import { Route as AuthenticatedAdminRiskRouteImport } from './routes/_authenticated/admin/risk'
+import { Route as AuthenticatedAdminRaiseEmailsRouteImport } from './routes/_authenticated/admin/raise-emails'
 import { Route as AuthenticatedAdminOperationsRouteImport } from './routes/_authenticated/admin/operations'
 import { Route as AuthenticatedAdminLocalizationRouteImport } from './routes/_authenticated/admin/localization'
 import { Route as AuthenticatedAdminKycRouteImport } from './routes/_authenticated/admin/kyc'
@@ -401,6 +402,12 @@ const AuthenticatedAdminRiskRoute = AuthenticatedAdminRiskRouteImport.update({
   path: '/admin/risk',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRaiseEmailsRoute =
+  AuthenticatedAdminRaiseEmailsRouteImport.update({
+    id: '/admin/raise-emails',
+    path: '/admin/raise-emails',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminOperationsRoute =
   AuthenticatedAdminOperationsRouteImport.update({
     id: '/admin/operations',
@@ -579,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/admin/raise-emails': typeof AuthenticatedAdminRaiseEmailsRoute
   '/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -659,6 +667,7 @@ export interface FileRoutesByTo {
   '/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/admin/raise-emails': typeof AuthenticatedAdminRaiseEmailsRoute
   '/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -741,6 +750,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/kyc': typeof AuthenticatedAdminKycRoute
   '/_authenticated/admin/localization': typeof AuthenticatedAdminLocalizationRoute
   '/_authenticated/admin/operations': typeof AuthenticatedAdminOperationsRoute
+  '/_authenticated/admin/raise-emails': typeof AuthenticatedAdminRaiseEmailsRoute
   '/_authenticated/admin/risk': typeof AuthenticatedAdminRiskRoute
   '/_authenticated/admin/security': typeof AuthenticatedAdminSecurityRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
@@ -823,6 +833,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/localization'
     | '/admin/operations'
+    | '/admin/raise-emails'
     | '/admin/risk'
     | '/admin/security'
     | '/admin/settings'
@@ -903,6 +914,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/localization'
     | '/admin/operations'
+    | '/admin/raise-emails'
     | '/admin/risk'
     | '/admin/security'
     | '/admin/settings'
@@ -984,6 +996,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/kyc'
     | '/_authenticated/admin/localization'
     | '/_authenticated/admin/operations'
+    | '/_authenticated/admin/raise-emails'
     | '/_authenticated/admin/risk'
     | '/_authenticated/admin/security'
     | '/_authenticated/admin/settings'
@@ -1454,6 +1467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRiskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/raise-emails': {
+      id: '/_authenticated/admin/raise-emails'
+      path: '/admin/raise-emails'
+      fullPath: '/admin/raise-emails'
+      preLoaderRoute: typeof AuthenticatedAdminRaiseEmailsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/operations': {
       id: '/_authenticated/admin/operations'
       path: '/admin/operations'
@@ -1635,6 +1655,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminKycRoute: typeof AuthenticatedAdminKycRoute
   AuthenticatedAdminLocalizationRoute: typeof AuthenticatedAdminLocalizationRoute
   AuthenticatedAdminOperationsRoute: typeof AuthenticatedAdminOperationsRoute
+  AuthenticatedAdminRaiseEmailsRoute: typeof AuthenticatedAdminRaiseEmailsRoute
   AuthenticatedAdminRiskRoute: typeof AuthenticatedAdminRiskRoute
   AuthenticatedAdminSecurityRoute: typeof AuthenticatedAdminSecurityRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
@@ -1685,6 +1706,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminKycRoute: AuthenticatedAdminKycRoute,
   AuthenticatedAdminLocalizationRoute: AuthenticatedAdminLocalizationRoute,
   AuthenticatedAdminOperationsRoute: AuthenticatedAdminOperationsRoute,
+  AuthenticatedAdminRaiseEmailsRoute: AuthenticatedAdminRaiseEmailsRoute,
   AuthenticatedAdminRiskRoute: AuthenticatedAdminRiskRoute,
   AuthenticatedAdminSecurityRoute: AuthenticatedAdminSecurityRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
