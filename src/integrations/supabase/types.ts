@@ -1339,6 +1339,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_dispatch_log: {
+        Row: {
+          attempts: number
+          category: string
+          created_at: string
+          detail: string | null
+          id: string
+          idempotency_key: string | null
+          label: string
+          retryable: boolean
+          status: string
+          template: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          category: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          idempotency_key?: string | null
+          label: string
+          retryable?: boolean
+          status: string
+          template?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          category?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          idempotency_key?: string | null
+          label?: string
+          retryable?: boolean
+          status?: string
+          template?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           announcements_email: boolean
