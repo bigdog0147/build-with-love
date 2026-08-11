@@ -10,6 +10,7 @@
 import type { DispatchInput, DispatchResult } from "./notification-dispatcher.server";
 import { computeBackoffMs, isRetryableEmailError } from "./email-retry.server";
 import type { DispatchFailureReport } from "./email-dispatch-report.server";
+import type { DispatchAuditRecord } from "./email-dispatch-audit.server";
 
 export type DispatchJob = DispatchInput & { label?: string };
 
@@ -25,6 +26,8 @@ export type RunOptions = {
   sleep?: (ms: number) => Promise<void>;
   /** Called once per job that never succeeded, after all retries. */
   report?: (report: DispatchFailureReport) => Promise<unknown> | unknown;
+  /** Called once per finished job with the audit record (sent / skipped / failed). */
+  audit?: (record: DispatchAuditRecord) => Promise<unknown> | unknown;
 };
 
 const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -44,6 +47,21 @@ async function reportFailure(
     console.error("[dispatch] failure reporting failed", error);
   }
 }
+
+/** Writes one audit row per finished job; never blocks or fails the dispatch. */
+async function audit(options: RunOptions, record: DispatchAuditRecord): Promise<void> {
+  try {
+    if (options.audit) {
+      await options.audit(record);
+      return;
+    }
+    const { recordDispatchAudit } = await import("./email-dispatch-audit.server");
+    await recordDispatchAudit(record);
+  } catch (error) {
+    console.error("[dispatch] audit logging failed", error);
+  }
+}
+
 
 /**
  * Runs jobs sequentially, isolating failures so one bad recipient never blocks
