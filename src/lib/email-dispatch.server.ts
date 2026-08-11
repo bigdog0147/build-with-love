@@ -8,35 +8,124 @@
  * the underlying dispatcher.
  */
 import type { DispatchInput, DispatchResult } from "./notification-dispatcher.server";
+import { computeBackoffMs, isRetryableEmailError } from "./email-retry.server";
+import type { DispatchFailureReport } from "./email-dispatch-report.server";
 
 export type DispatchJob = DispatchInput & { label?: string };
 
 export type JobOutcome =
-  | { ok: true; label: string; result: DispatchResult }
-  | { ok: false; label: string; error: string };
+  | { ok: true; label: string; result: DispatchResult; attempts: number }
+  | { ok: false; label: string; error: string; attempts: number; retryable: boolean };
 
-/** Runs jobs sequentially, isolating failures so one bad recipient never blocks the rest. */
+export type RunOptions = {
+  /** Total attempts per job, including the first one. */
+  attempts?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  sleep?: (ms: number) => Promise<void>;
+  /** Called once per job that never succeeded, after all retries. */
+  report?: (report: DispatchFailureReport) => Promise<unknown> | unknown;
+};
+
+const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+async function reportFailure(
+  options: RunOptions,
+  report: DispatchFailureReport,
+): Promise<void> {
+  try {
+    if (options.report) {
+      await options.report(report);
+      return;
+    }
+    const { reportDispatchFailure } = await import("./email-dispatch-report.server");
+    await reportDispatchFailure(report);
+  } catch (error) {
+    console.error("[dispatch] failure reporting failed", error);
+  }
+}
+
+/**
+ * Runs jobs sequentially, isolating failures so one bad recipient never blocks
+ * the rest. Each job is retried with jittered exponential backoff while the
+ * failure looks transient (network error, 5xx, 429, retryable email outcome);
+ * terminal outcomes such as suppression or an opt-out are accepted immediately.
+ * Idempotency keys are passed through untouched, so a retry can never duplicate
+ * an accepted send. Jobs that still fail are reported for manual resend.
+ */
 export async function runDispatchJobs(
   jobs: DispatchJob[],
   dispatch: (input: DispatchInput) => Promise<DispatchResult>,
   log: (message: string, detail?: unknown) => void = console.error,
+  options: RunOptions = {},
 ): Promise<JobOutcome[]> {
+  const maxAttempts = Math.max(1, options.attempts ?? 3);
+  const baseDelayMs = options.baseDelayMs ?? 1000;
+  const maxDelayMs = options.maxDelayMs ?? 30000;
+  const sleep = options.sleep ?? defaultSleep;
+
   const outcomes: JobOutcome[] = [];
   for (const job of jobs) {
     const label = job.label ?? job.idempotencyKey ?? job.template ?? job.category;
-    try {
-      const result = await dispatch(job);
-      outcomes.push({ ok: true, label, result });
-      if (!result.email && result.emailSkippedReason)
-        log(`[dispatch] email not sent for ${label}: ${result.emailSkippedReason}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      outcomes.push({ ok: false, label, error: message });
-      log(`[dispatch] job failed for ${label}`, message);
+    let lastError = "The notice was not delivered.";
+    let retryable = true;
+    let attempt = 0;
+
+    while (attempt < maxAttempts) {
+      attempt += 1;
+      let waitMs: number | null = null;
+      try {
+        const result = await dispatch(job);
+        if (!result.email && result.emailSkippedReason)
+          log(`[dispatch] email not sent for ${label}: ${result.emailSkippedReason}`);
+        // A transient email failure inside the dispatcher is worth another pass;
+        // the in-app notice is idempotent per attempt via the dedupe key.
+        if (result.emailRetryable && !result.email && attempt < maxAttempts) {
+          lastError = result.emailSkippedReason ?? lastError;
+          retryable = true;
+          waitMs = computeBackoffMs(attempt, { baseDelayMs, maxDelayMs });
+        } else {
+          outcomes.push({ ok: true, label, result, attempts: attempt });
+          break;
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
+        retryable = isRetryableEmailError(error);
+        log(`[dispatch] attempt ${attempt}/${maxAttempts} failed for ${label}`, lastError);
+        if (!retryable || attempt === maxAttempts) {
+          outcomes.push({ ok: false, label, error: lastError, attempts: attempt, retryable });
+          await reportFailure(options, {
+            label,
+            userId: job.userId,
+            category: job.category,
+            template: job.template,
+            idempotencyKey: job.idempotencyKey,
+            attempts: attempt,
+            error: lastError,
+            retryable,
+          });
+          break;
+        }
+        waitMs = computeBackoffMs(
+          attempt,
+          {
+            baseDelayMs,
+            maxDelayMs,
+            retryAfterSeconds:
+              (error as { retryAfterSeconds?: number | null } | null)?.retryAfterSeconds ?? null,
+          },
+        );
+      }
+
+      if (waitMs !== null) {
+        log(`[dispatch] retrying ${label} in ${waitMs}ms`);
+        await sleep(waitMs);
+      }
     }
   }
   return outcomes;
 }
+
 
 /** Cloudflare-style deferral when the runtime exposes it; otherwise a detached promise. */
 function resolveWaitUntil(): ((p: Promise<unknown>) => void) | null {
