@@ -150,7 +150,19 @@ export async function runDispatchJobs(
             error: lastError,
             retryable,
           });
+          await audit(options, {
+            label,
+            userId: job.userId,
+            category: job.category,
+            template: job.template,
+            idempotencyKey: job.idempotencyKey,
+            status: "failed",
+            attempts: attempt,
+            detail: lastError,
+            retryable,
+          });
           break;
+
         }
         waitMs = computeBackoffMs(
           attempt,
