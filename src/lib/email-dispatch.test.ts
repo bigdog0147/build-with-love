@@ -121,3 +121,65 @@ describe("runDispatchJobs retries", () => {
     ]);
   });
 });
+
+describe("dispatch audit log", () => {
+  const opts = { attempts: 3, baseDelayMs: 1, maxDelayMs: 2, sleep: async () => {} };
+  const job = (over: Partial<DispatchJob> = {}): DispatchJob => ({
+    userId: "u1",
+    category: "raise",
+    title: "t",
+    detail: "d",
+    template: "raise-timeline-advance",
+    idempotencyKey: "raise-advance-1",
+    ...over,
+  });
+
+  it("records a sent email with its idempotency key and attempt count", async () => {
+    const audit = vi.fn();
+    const dispatch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValue({ inapp: true, email: true });
+
+    await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, audit });
+
+    expect(audit).toHaveBeenCalledTimes(1);
+    expect(audit.mock.calls[0]?.[0]).toMatchObject({
+      status: "sent",
+      attempts: 2,
+      idempotencyKey: "raise-advance-1",
+      template: "raise-timeline-advance",
+      category: "raise",
+      userId: "u1",
+    });
+  });
+
+  it("records an opt-out as skipped with the reason", async () => {
+    const audit = vi.fn();
+    const dispatch = vi
+      .fn()
+      .mockResolvedValue({ inapp: true, email: false, emailSkippedReason: "customer_opted_out" });
+
+    await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, audit });
+
+    expect(audit.mock.calls[0]?.[0]).toMatchObject({
+      status: "skipped",
+      detail: "customer_opted_out",
+      attempts: 1,
+    });
+  });
+
+  it("records an exhausted delivery as failed", async () => {
+    const audit = vi.fn();
+    const dispatch = vi.fn().mockRejectedValue(new Error("boom"));
+
+    await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, audit, report: vi.fn() });
+
+    expect(audit.mock.calls[0]?.[0]).toMatchObject({
+      status: "failed",
+      detail: "boom",
+      attempts: 3,
+      retryable: true,
+    });
+  });
+});
