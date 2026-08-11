@@ -19,7 +19,9 @@ describe("runDispatchJobs", () => {
       .mockResolvedValue({ inapp: true, email: true });
     const log = vi.fn();
 
-    const out = await runDispatchJobs([job({ idempotencyKey: "a" }), job({ idempotencyKey: "b" })], dispatch, log);
+    const out = await runDispatchJobs([job({ idempotencyKey: "a" }), job({ idempotencyKey: "b" })], dispatch, log, {
+      attempts: 1,
+    });
 
     expect(dispatch).toHaveBeenCalledTimes(2);
     expect(out[0]).toMatchObject({ ok: false, label: "a", error: "boom" });
