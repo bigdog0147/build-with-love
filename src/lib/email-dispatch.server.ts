@@ -86,8 +86,21 @@ export async function runDispatchJobs(
           waitMs = computeBackoffMs(attempt, { baseDelayMs, maxDelayMs });
         } else {
           outcomes.push({ ok: true, label, result, attempts: attempt });
+          if (result.emailRetryable && !result.email) {
+            await reportFailure(options, {
+              label,
+              userId: job.userId,
+              category: job.category,
+              template: job.template,
+              idempotencyKey: job.idempotencyKey,
+              attempts: attempt,
+              error: result.emailSkippedReason ?? lastError,
+              retryable: true,
+            });
+          }
           break;
         }
+
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
         retryable = isRetryableEmailError(error);
