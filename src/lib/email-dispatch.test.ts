@@ -51,3 +51,71 @@ describe("runDispatchJobs", () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 });
+
+describe("runDispatchJobs retries", () => {
+  const opts = { baseDelayMs: 1, maxDelayMs: 2, sleep: async () => {} };
+
+  it("retries a transient throw and succeeds", async () => {
+    const dispatch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network down"))
+      .mockResolvedValue({ inapp: true, email: true });
+    const report = vi.fn();
+
+    const out = await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, report });
+
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(out[0]).toMatchObject({ ok: true, attempts: 2 });
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("does not retry terminal failures and reports them", async () => {
+    const dispatch = vi.fn().mockRejectedValue(
+      Object.assign(new Error("not verified"), { code: "domain_not_verified", status: 403 }),
+    );
+    const report = vi.fn();
+
+    const out = await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, report });
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(out[0]).toMatchObject({ ok: false, retryable: false, attempts: 1 });
+    expect(report).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives up after the attempt budget and reports for manual resend", async () => {
+    const dispatch = vi.fn().mockRejectedValue(new Error("boom"));
+    const report = vi.fn();
+
+    const out = await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, attempts: 3, report });
+
+    expect(dispatch).toHaveBeenCalledTimes(3);
+    expect(out[0]).toMatchObject({ ok: false, attempts: 3, retryable: true });
+    expect(report.mock.calls[0]?.[0]).toMatchObject({ attempts: 3, error: "boom" });
+  });
+
+  it("retries a retryable email outcome reported by the dispatcher", async () => {
+    const dispatch = vi
+      .fn()
+      .mockResolvedValueOnce({ inapp: true, email: false, emailRetryable: true, emailSkippedReason: "429" })
+      .mockResolvedValue({ inapp: true, email: true });
+    const report = vi.fn();
+
+    const out = await runDispatchJobs([job()], dispatch, vi.fn(), { ...opts, report });
+
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(out[0]).toMatchObject({ ok: true, attempts: 2 });
+    expect(report).not.toHaveBeenCalled();
+  });
+
+  it("never mutates the idempotency key across retries", async () => {
+    const dispatch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValue({ inapp: true, email: true });
+    await runDispatchJobs([job({ idempotencyKey: "raise-advance-1" })], dispatch, vi.fn(), opts);
+    expect(dispatch.mock.calls.map((c) => c[0].idempotencyKey)).toEqual([
+      "raise-advance-1",
+      "raise-advance-1",
+    ]);
+  });
+});
