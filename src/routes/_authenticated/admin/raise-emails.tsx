@@ -48,6 +48,8 @@ function RaiseEmailPreviewPage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
       <Link
         to="/admin/operations"
+        search={{ tab: "notifications" }}
+
         className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-[var(--gold)]"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to operations
