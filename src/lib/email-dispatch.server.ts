@@ -104,7 +104,8 @@ export async function runDispatchJobs(
           waitMs = computeBackoffMs(attempt, { baseDelayMs, maxDelayMs });
         } else {
           outcomes.push({ ok: true, label, result, attempts: attempt });
-          if (result.emailRetryable && !result.email) {
+          const emailFailed = Boolean(result.emailRetryable && !result.email);
+          if (emailFailed) {
             await reportFailure(options, {
               label,
               userId: job.userId,
@@ -116,7 +117,21 @@ export async function runDispatchJobs(
               retryable: true,
             });
           }
+          await audit(options, {
+            label,
+            userId: job.userId,
+            category: job.category,
+            template: job.template,
+            idempotencyKey: job.idempotencyKey,
+            status: emailFailed ? "failed" : result.email ? "sent" : "skipped",
+            attempts: attempt,
+            detail: result.email
+              ? null
+              : (result.emailSkippedReason ?? (job.template ? lastError : "in_app_only")),
+            retryable: emailFailed,
+          });
           break;
+
         }
 
       } catch (error) {
