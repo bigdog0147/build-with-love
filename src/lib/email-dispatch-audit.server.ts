@@ -5,6 +5,18 @@
  * per job — sent, skipped, or failed — so the desk can prove what was dispatched,
  * with which idempotency key, when, and with what outcome.
  */
+/** One delivery attempt, captured for the admin audit viewer. */
+export type DispatchAttempt = {
+  attempt: number;
+  startedAt: string;
+  durationMs: number;
+  outcome: "sent" | "skipped" | "retry" | "failed";
+  error?: string | null;
+  retryable?: boolean;
+  /** Backoff waited before the next attempt, when there was one. */
+  backoffMs?: number | null;
+};
+
 export type DispatchAuditStatus = "sent" | "skipped" | "failed";
 
 export type DispatchAuditRecord = {
@@ -17,6 +29,8 @@ export type DispatchAuditRecord = {
   attempts: number;
   detail?: string | null;
   retryable?: boolean;
+  /** Per-attempt trail (timings, backoff, failure reasons). */
+  trail?: DispatchAttempt[];
   /** Original notice content, stored so an admin resend can replay it exactly. */
   payload?: Record<string, unknown> | null;
   /** Set when this row is itself an admin-triggered resend of an earlier row. */
@@ -49,6 +63,7 @@ export async function recordDispatchAudit(record: DispatchAuditRecord): Promise<
       attempts: record.attempts,
       detail: record.detail ?? null,
       retryable: Boolean(record.retryable),
+      attempt_trail: record.trail ?? [],
       payload: record.payload ?? null,
       resent_from: record.resentFrom ?? null,
       resent_by: record.resentBy ?? null,
