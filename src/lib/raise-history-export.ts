@@ -336,7 +336,9 @@ export function buildRaiseHistoryReportHtml(
   return {
     fileName: `gf3x-${slug(input.roundName)}-status-history${
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
-    }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}-${generatedAt.slice(0, 10)}.html`,
+    }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
+      input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
+    }-${generatedAt.slice(0, 10)}.html`,
     title,
     html,
   };
