@@ -107,3 +107,45 @@ describe("diff-only export", () => {
     expect(html).not.toContain("Round opened");
   });
 });
+
+describe("include/exclude diff columns", () => {
+  const base = {
+    events,
+    roundName: "Series C — Robotics",
+    currency: "USD",
+    investorName: "Ada Investor",
+    generatedAt: "2026-03-01T10:00:00.000Z",
+  };
+
+  it("drops the diff columns from the full export when excluded", () => {
+    const columns = exportColumns({ ...base, includeDiff: false });
+    expect(columns).not.toContain("Changed fields");
+    expect(columns).not.toContain("Before");
+    expect(columns).not.toContain("After");
+    expect(columns).not.toContain("Change summary");
+    expect(columns).toContain("Reference");
+    const rows = exportRows({ ...base, includeDiff: false });
+    expect(rows[0]!).toHaveLength(columns.length);
+  });
+
+  it("keeps the diff columns by default", () => {
+    expect(exportColumns(base)).toContain("Change summary");
+  });
+
+  it("records the toggle in metadata and file names", () => {
+    const preview = buildRaiseHistoryExportPreview({ ...base, includeDiff: false });
+    expect(preview.meta.find((m) => m.label === "Diff columns")!.value).toBe("Excluded");
+    expect(preview.csvFileName).toContain("-no-diff");
+    expect(preview.pdfFileName).toContain("-no-diff");
+    expect(buildRaiseHistoryCsv({ ...base, includeDiff: false })).toContain(
+      "Diff columns,Excluded",
+    );
+  });
+
+  it("omits the inline diff visuals from the printable statement when excluded", () => {
+    const withDiff = buildRaiseHistoryReportHtml(base).html;
+    const withoutDiff = buildRaiseHistoryReportHtml({ ...base, includeDiff: false }).html;
+    expect(withDiff).toContain('<ul class="diff">');
+    expect(withoutDiff).not.toContain('<ul class="diff">');
+  });
+});
