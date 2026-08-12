@@ -353,7 +353,7 @@ export function buildRaiseHistoryReportHtml(
             <strong>${escape(event.label)}</strong>
             <div class="detail">${escape(event.detail)}</div>
             ${
-              event.changes && event.changes.length
+              showDiff && event.changes && event.changes.length
                 ? `<ul class="diff">${event.changes
                     .map(
                       (c) =>
@@ -365,6 +365,7 @@ export function buildRaiseHistoryReportHtml(
                     .join("")}</ul>`
                 : ""
             }
+
             ${event.note ? `<div class="note">Desk note: ${escape(event.note)}</div>` : ""}
             ${event.reference ? `<div class="ref">Reference ${escape(event.reference)}</div>` : ""}
           </td>
