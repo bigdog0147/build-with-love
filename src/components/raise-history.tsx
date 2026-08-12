@@ -314,6 +314,20 @@ export function RaiseHistoryTimeline({
         )}
         <button
           type="button"
+          onClick={() => setDiffOnly((v) => !v)}
+          aria-pressed={diffOnly}
+          aria-label="Export only the changed fields of each status transition"
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+            diffOnly
+              ? "border-[var(--gold)]/60 bg-[var(--gold)]/10 text-[var(--gold)]"
+              : "border-border text-muted-foreground hover:border-[var(--gold)]/50 hover:text-foreground"
+          }`}
+        >
+          <GitCompareArrows className="h-3.5 w-3.5" aria-hidden />
+          Diff-only export
+        </button>
+        <button
+          type="button"
           onClick={() => setPreviewOpen(true)}
           aria-haspopup="dialog"
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
@@ -331,7 +345,10 @@ export function RaiseHistoryTimeline({
                 roundName: exportInput.roundName,
                 rangeSlug: exportInput.rangeSlug,
                 filterSlug: exportInput.filterSlug,
+                fieldSlug: exportInput.fieldSlug,
+                diffOnly: exportInput.diffOnly,
               }),
+
               buildRaiseHistoryCsv(exportInput),
               "text/csv",
             );
