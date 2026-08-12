@@ -449,6 +449,45 @@ function DispatchLogPage() {
             )}
             Refresh
           </button>
+
+          <button
+            type="button"
+            onClick={() => (live ? setLive(false) : resumeLive())}
+            aria-pressed={live}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
+              live
+                ? "border-[var(--gold)]/60 text-[var(--gold)]"
+                : "border-border text-muted-foreground hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+            }`}
+          >
+            {live ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {live ? "Pause live updates" : "Resume live updates"}
+          </button>
+
+          <span
+            className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground"
+            aria-live="polite"
+          >
+            <Radio
+              className={`h-3.5 w-3.5 ${
+                live && connected ? "animate-pulse text-emerald-400" : "text-muted-foreground"
+              }`}
+            />
+            {live ? (connected ? "Live" : "Connecting…") : "Paused"}
+          </span>
+
+          {pendingLive > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setPage(1);
+                resumeLive();
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]"
+            >
+              {pendingLive} new {pendingLive === 1 ? "entry" : "entries"} — show latest
+            </button>
+          ) : null}
         </div>
       </header>
 
