@@ -272,9 +272,36 @@ export function buildRaiseHistoryReportHtml(
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const title = "Capital Raising — Status History";
 
-  const rows = input.events
-    .map(
-      (event) => `<tr>
+  const diffEvents = input.diffOnly
+    ? input.events.filter((event) => (event.changes ?? []).length > 0)
+    : [];
+
+  const rows = input.diffOnly
+    ? diffEvents
+        .flatMap((event) =>
+          (event.changes ?? []).map(
+            (c) => `<tr>
+          <td>
+            <strong>${escape(event.label)}</strong>
+            <div class="ref">${escape(event.actor)}</div>
+          </td>
+          <td>
+            ${escape(formatHistoryStamp(event.at))}
+            ${event.at ? `<div class="ref">${escape(event.at)}</div>` : ""}
+          </td>
+          <td>${escape(c.field)}</td>
+          <td>
+            <span class="was">${escape(c.from ?? "—")}</span>
+            <span class="arrow">&rarr;</span>
+            <span class="now">${escape(c.to ?? "—")}</span>
+          </td>
+        </tr>`,
+          ),
+        )
+        .join("\n        ")
+    : input.events
+        .map(
+          (event) => `<tr>
           <td>
             <strong>${escape(event.label)}</strong>
             <div class="detail">${escape(event.detail)}</div>
@@ -301,8 +328,9 @@ export function buildRaiseHistoryReportHtml(
           <td>${escape(event.actor)}</td>
           <td class="num">${escape(formatMoney(event.amount ?? null, input.currency))}</td>
         </tr>`,
-    )
-    .join("\n        ");
+        )
+        .join("\n        ");
+
 
   const html = `<!doctype html>
 <html lang="en">
