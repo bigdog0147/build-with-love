@@ -32,6 +32,12 @@ export interface RaiseHistoryExportInput {
   fieldSlug?: string | null;
   /** When true, export only the changed fields of each transition. */
   diffOnly?: boolean;
+  /**
+   * When false, the full-history export drops the before/after diff columns
+   * and the inline diff visuals from the printable statement. Defaults to true.
+   */
+  includeDiff?: boolean;
+
 
 }
 
@@ -113,6 +119,19 @@ const HEADERS = [
 /** Ordered column names of the export, matching HEADERS. */
 export const RAISE_HISTORY_EXPORT_COLUMNS: readonly string[] = HEADERS;
 
+/** Diff columns that the include/exclude toggle controls. */
+export const RAISE_HISTORY_DIFF_COLUMN_NAMES: readonly string[] = [
+  "Changed fields",
+  "Before",
+  "After",
+  "Change summary",
+];
+
+/** Full-history columns with the before/after diff columns removed. */
+export const RAISE_HISTORY_EXPORT_COLUMNS_NO_DIFF: readonly string[] = HEADERS.filter(
+  (header) => !RAISE_HISTORY_DIFF_COLUMN_NAMES.includes(header),
+);
+
 const DIFF_HEADERS = [
   "Stage",
   "Timestamp (ISO 8601)",
@@ -126,8 +145,24 @@ const DIFF_HEADERS = [
 /** Ordered column names of the diff-only export (one row per changed field). */
 export const RAISE_HISTORY_DIFF_COLUMNS: readonly string[] = DIFF_HEADERS;
 
+/** True when the before/after diff columns and visuals should be written. */
+export const diffColumnsIncluded = (input: RaiseHistoryExportInput) =>
+  input.includeDiff !== false;
+
 /** One export row: the exact cell values written to CSV, in column order. */
-export function historyRowCells(event: RaiseHistoryEvent, currency: string): string[] {
+export function historyRowCells(
+  event: RaiseHistoryEvent,
+  currency: string,
+  includeDiff = true,
+): string[] {
+  const diffCells = includeDiff
+    ? [
+        (event.changes ?? []).map((c) => c.field).join("; "),
+        (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
+        (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
+        formatChangeSummary(event.changes),
+      ]
+    : [];
   return [
     event.label,
     event.at ?? "",
@@ -138,10 +173,7 @@ export function historyRowCells(event: RaiseHistoryEvent, currency: string): str
     event.amount === null || event.amount === undefined ? "" : currency,
     event.detail,
     event.note ?? "",
-    (event.changes ?? []).map((c) => c.field).join("; "),
-    (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
-    (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
-    formatChangeSummary(event.changes),
+    ...diffCells,
     event.reference ?? "",
   ];
 }
@@ -164,17 +196,26 @@ export function historyDiffRowCells(event: RaiseHistoryEvent): string[][] {
 
 /** Column list for the requested export mode. */
 export function exportColumns(input: RaiseHistoryExportInput): readonly string[] {
-  return input.diffOnly ? RAISE_HISTORY_DIFF_COLUMNS : RAISE_HISTORY_EXPORT_COLUMNS;
+  if (input.diffOnly) return RAISE_HISTORY_DIFF_COLUMNS;
+  return diffColumnsIncluded(input)
+    ? RAISE_HISTORY_EXPORT_COLUMNS
+    : RAISE_HISTORY_EXPORT_COLUMNS_NO_DIFF;
 }
 
 /** Data rows for the requested export mode, oldest event first. */
 export function exportRows(input: RaiseHistoryExportInput): string[][] {
   if (input.diffOnly) return input.events.flatMap((event) => historyDiffRowCells(event));
-  return input.events.map((event) => historyRowCells(event, input.currency));
+  return input.events.map((event) =>
+    historyRowCells(event, input.currency, diffColumnsIncluded(input)),
+  );
 }
 
 const modeLabel = (diffOnly?: boolean) =>
   diffOnly ? "Changed fields only" : "Full history";
+
+const diffColumnsLabel = (input: RaiseHistoryExportInput) =>
+  input.diffOnly ? "Included (one row per change)" : diffColumnsIncluded(input) ? "Included" : "Excluded";
+
 
 export interface RaiseHistoryExportPreview {
   columns: readonly string[];
@@ -204,6 +245,7 @@ export function buildRaiseHistoryExportPreview(
       { label: "Event types", value: input.filterLabel ?? "All event types" },
       { label: "Changed fields", value: input.fieldLabel ?? "All changed fields" },
       { label: "Export mode", value: modeLabel(input.diffOnly) },
+      { label: "Diff columns", value: diffColumnsLabel(input) },
       { label: "Currency", value: input.currency },
     ],
     rowCount: rows.length,
@@ -214,7 +256,9 @@ export function buildRaiseHistoryExportPreview(
       filterSlug: input.filterSlug,
       fieldSlug: input.fieldSlug,
       diffOnly: input.diffOnly,
+      includeDiff: diffColumnsIncluded(input),
     }),
+
     pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
       /\.html$/,
       ".pdf",
@@ -235,6 +279,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
   lines.push(["Changed fields", input.fieldLabel ?? "All changed fields"].map(csvCell).join(","));
   lines.push(["Export mode", modeLabel(input.diffOnly)].map(csvCell).join(","));
+  lines.push(["Diff columns", diffColumnsLabel(input)].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   if (input.diffOnly) lines.push(["Changes", rows.length].map(csvCell).join(","));
   lines.push("");
@@ -255,14 +300,16 @@ export function raiseHistoryCsvFileName(input: {
   filterSlug?: string | null;
   fieldSlug?: string | null;
   diffOnly?: boolean;
+  includeDiff?: boolean;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
   const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
   const fields = input.fieldSlug ? `-${slug(input.fieldSlug)}` : "";
-  const mode = input.diffOnly ? "-diff-only" : "";
+  const mode = input.diffOnly ? "-diff-only" : input.includeDiff === false ? "-no-diff" : "";
   return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}${mode}-${stamp}.csv`;
 }
+
 
 
 /** Printable statement of the full status history, ready to save as PDF. */
@@ -271,6 +318,8 @@ export function buildRaiseHistoryReportHtml(
 ): RaiseHistoryExportDocument {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const title = "Capital Raising — Status History";
+  const showDiff = diffColumnsIncluded(input);
+
 
   const diffEvents = input.diffOnly
     ? input.events.filter((event) => (event.changes ?? []).length > 0)
@@ -306,7 +355,7 @@ export function buildRaiseHistoryReportHtml(
             <strong>${escape(event.label)}</strong>
             <div class="detail">${escape(event.detail)}</div>
             ${
-              event.changes && event.changes.length
+              showDiff && event.changes && event.changes.length
                 ? `<ul class="diff">${event.changes
                     .map(
                       (c) =>
@@ -318,6 +367,7 @@ export function buildRaiseHistoryReportHtml(
                     .join("")}</ul>`
                 : ""
             }
+
             ${event.note ? `<div class="note">Desk note: ${escape(event.note)}</div>` : ""}
             ${event.reference ? `<div class="ref">Reference ${escape(event.reference)}</div>` : ""}
           </td>
@@ -397,6 +447,8 @@ export function buildRaiseHistoryReportHtml(
       Event types: ${escape(input.filterLabel ?? "All event types")}.
       Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
       Export mode: ${escape(modeLabel(input.diffOnly))}.
+      Diff columns: ${escape(diffColumnsLabel(input))}.
+
       All timestamps are shown in UTC.
     </p>
     <table>
@@ -433,7 +485,7 @@ export function buildRaiseHistoryReportHtml(
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
     }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
       input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
-    }${input.diffOnly ? "-diff-only" : ""}-${generatedAt.slice(0, 10)}.html`,
+    }${input.diffOnly ? "-diff-only" : showDiff ? "" : "-no-diff"}-${generatedAt.slice(0, 10)}.html`,
 
     title,
     html,
