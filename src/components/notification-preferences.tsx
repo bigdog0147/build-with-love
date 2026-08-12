@@ -129,6 +129,31 @@ export function NotificationPreferencesPanel() {
           raising category above — in-app notices are unaffected.
         </p>
 
+        <div className="mt-3 rounded-xl border border-border/70 bg-white/2 p-4">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            How these settings combine
+          </p>
+          <ol className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+            <li>
+              <span className="text-foreground">1. Capital raising category</span> is the ceiling. With its
+              email switch off, no raise email is sent — whatever the switches below say.
+            </li>
+            <li>
+              <span className="text-foreground">2. Per-round alerts</span> (on each round card, including
+              “Mute this round”) then narrow it further for that one round only.
+            </li>
+            <li>
+              <span className="text-foreground">3. Per-event switches below</span> apply last, across every
+              round: turning one off stops that event type even where the category and round both allow email.
+            </li>
+          </ol>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            An email arrives only when all three allow it. Switches can never raise a ceiling set above them,
+            and none of them affect in-app notices.
+          </p>
+        </div>
+
+
         <ul className="mt-4 divide-y divide-white/6">
           {RAISE_EVENT_PREFS.map((event) => {
             const on = Boolean(prefs?.[event.key]) && Boolean(prefs?.raise_email);
