@@ -318,6 +318,8 @@ export function buildRaiseHistoryReportHtml(
 ): RaiseHistoryExportDocument {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const title = "Capital Raising — Status History";
+  const showDiff = diffColumnsIncluded(input);
+
 
   const diffEvents = input.diffOnly
     ? input.events.filter((event) => (event.changes ?? []).length > 0)
