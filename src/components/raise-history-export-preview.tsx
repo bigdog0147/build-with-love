@@ -41,8 +41,10 @@ export function RaiseHistoryExportPreviewDialog({
           <DialogTitle className="font-display">Export preview</DialogTitle>
           <DialogDescription>
             {preview.rowCount} {preview.rowCount === 1 ? "row" : "rows"} and{" "}
-            {preview.columns.length} columns will be exported, in this order.
+            {preview.columns.length} columns will be exported, in this order. The leading “Changed”
+            column summarises which fields changed per row and is not written to the file.
           </DialogDescription>
+
         </DialogHeader>
 
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-border/70 p-3 text-xs sm:grid-cols-3">
