@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ArrowLeft, Code2, Eye, Mail, Table2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Code2, Eye, Mail, Search, Table2 } from "lucide-react";
+
 import { renderRaiseAdvanceEmailPreview } from "@/lib/raise-email-preview.functions";
 import {
   RAISE_EMAIL_EVENTS,
@@ -31,6 +32,31 @@ function RaiseEmailPreviewPage() {
   const renderPreview = useServerFn(renderRaiseAdvanceEmailPreview);
   const [event, setEvent] = useState<RaiseEmailEvent>("interest_submitted");
   const [view, setView] = useState<View>("rendered");
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const matches = useMemo<RaiseEmailEvent[]>(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [...RAISE_EMAIL_EVENTS];
+    return RAISE_EMAIL_EVENTS.filter(
+      (e) =>
+        RAISE_EMAIL_EVENT_LABEL[e].toLowerCase().includes(q) || e.toLowerCase().includes(q),
+    );
+  }, [query]);
+
+  useEffect(() => {
+    const onKey = (ev: KeyboardEvent) => {
+      if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "k") {
+        ev.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+
 
   const preview = useQuery({
     queryKey: ["raise-email-preview", event],
@@ -66,9 +92,30 @@ function RaiseEmailPreviewPage() {
       </header>
 
       <section className="mt-6 rounded-xl border border-border p-4">
-        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Event type</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Event type</p>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && matches[0]) {
+                  setEvent(matches[0]);
+                } else if (e.key === "Escape") {
+                  setQuery("");
+                }
+              }}
+              placeholder="Search scenarios (⌘K)"
+              aria-label="Search raise timeline event types"
+              className="w-56 rounded-lg border border-border bg-transparent py-1.5 pl-8 pr-3 text-xs outline-none placeholder:text-muted-foreground focus:border-[var(--gold)]"
+            />
+          </div>
+        </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {RAISE_EMAIL_EVENTS.map((e) => (
+          {matches.map((e) => (
             <button
               key={e}
               type="button"
@@ -84,7 +131,15 @@ function RaiseEmailPreviewPage() {
             </button>
           ))}
         </div>
+        <p aria-live="polite" className="mt-3 text-[11px] text-muted-foreground">
+          {query
+            ? `${matches.length} of ${RAISE_EMAIL_EVENTS.length} scenarios match "${query}"${
+                matches.length ? " — press Enter to jump to the first match" : ""
+              }`
+            : `${RAISE_EMAIL_EVENTS.length} scenarios. Currently previewing ${RAISE_EMAIL_EVENT_LABEL[event]}.`}
+        </p>
       </section>
+
 
       <section className="mt-4 rounded-xl border border-border">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
