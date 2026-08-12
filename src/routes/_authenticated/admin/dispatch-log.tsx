@@ -170,6 +170,9 @@ function csv(rows: DispatchLogRow[]) {
     "Total attempt ms",
     "Skip event",
     "Skip preference",
+    "Resendable",
+    "Resent from",
+    "Resent at",
   ];
   const cell = (v: string | number | boolean | null) => {
     const s = v === null || v === undefined ? "" : String(v);
@@ -191,12 +194,16 @@ function csv(rows: DispatchLogRow[]) {
       r.attemptTrail.reduce((sum, a) => sum + (a.durationMs ?? 0), 0),
       parseSkipReason(r.detail)?.event ?? "",
       parseSkipReason(r.detail)?.source ?? "",
+      r.resendable,
+      r.resentFrom ?? "",
+      r.resentAt ?? "",
     ]
       .map(cell)
       .join(","),
   );
   return [head.join(","), ...lines].join("\r\n");
 }
+
 
 function DispatchLogPage() {
   const fetchLog = useServerFn(listDispatchAuditLog);
