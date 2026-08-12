@@ -106,6 +106,16 @@ export function RaiseRoundAlerts({ roundId, roundName, global, override }: Props
         Choose how you hear about stage changes in {roundName}. Other rounds are unaffected.
       </p>
 
+      <p className="mt-1 text-xs text-muted-foreground">
+        These toggles sit under your Capital raising category ceiling: if that category is off, nothing is
+        sent here. Muting this round only silences {roundName}, and per-event switches in{" "}
+        <Link to="/settings" className="text-[var(--gold)] underline-offset-2 hover:underline">
+          notification settings
+        </Link>{" "}
+        can still hold back individual timeline events across every round.
+      </p>
+
+
       <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <Toggle
           label="Email alerts"
