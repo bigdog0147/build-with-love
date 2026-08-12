@@ -64,6 +64,7 @@ export async function notifyRaiseAdvance(input: RaiseAdvanceInput) {
       note: input.note || "",
     },
     roundId: input.roundId,
+    raiseEvent: input.event,
     // Email attachments are unsupported, so the identical confirmation document
     // is folded in as a signed, per-recipient download link.
     confirmation: {
