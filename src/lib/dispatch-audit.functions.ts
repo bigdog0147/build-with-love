@@ -8,6 +8,7 @@ import {
   applyDispatchFilters,
   mapDispatchLogRow,
   parseDispatchFilters,
+  type DispatchFilterInput,
 } from "./dispatch-audit-query";
 
 /**
