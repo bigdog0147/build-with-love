@@ -79,6 +79,7 @@ import { Route as AuthenticatedAdminExternalRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminExchangeRatesRouteImport } from './routes/_authenticated/admin/exchange-rates'
 import { Route as AuthenticatedAdminEmailTemplatesRouteImport } from './routes/_authenticated/admin/email-templates'
 import { Route as AuthenticatedAdminEmailLogsRouteImport } from './routes/_authenticated/admin/email-logs'
+import { Route as AuthenticatedAdminDispatchLogRouteImport } from './routes/_authenticated/admin/dispatch-log'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 import { Route as AuthenticatedAdminChatRouteImport } from './routes/_authenticated/admin/chat'
@@ -467,6 +468,12 @@ const AuthenticatedAdminEmailLogsRoute =
     path: '/admin/email-logs',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDispatchLogRoute =
+  AuthenticatedAdminDispatchLogRouteImport.update({
+    id: '/admin/dispatch-log',
+    path: '/admin/dispatch-log',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
@@ -576,6 +583,7 @@ export interface FileRoutesByFullPath {
   '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/dispatch-log': typeof AuthenticatedAdminDispatchLogRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
@@ -657,6 +665,7 @@ export interface FileRoutesByTo {
   '/admin/chat': typeof AuthenticatedAdminChatRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/dispatch-log': typeof AuthenticatedAdminDispatchLogRoute
   '/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
@@ -740,6 +749,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/chat': typeof AuthenticatedAdminChatRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/dispatch-log': typeof AuthenticatedAdminDispatchLogRoute
   '/_authenticated/admin/email-logs': typeof AuthenticatedAdminEmailLogsRoute
   '/_authenticated/admin/email-templates': typeof AuthenticatedAdminEmailTemplatesRoute
   '/_authenticated/admin/exchange-rates': typeof AuthenticatedAdminExchangeRatesRoute
@@ -823,6 +833,7 @@ export interface FileRouteTypes {
     | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/dispatch-log'
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/exchange-rates'
@@ -904,6 +915,7 @@ export interface FileRouteTypes {
     | '/admin/chat'
     | '/admin/customers'
     | '/admin/dashboard'
+    | '/admin/dispatch-log'
     | '/admin/email-logs'
     | '/admin/email-templates'
     | '/admin/exchange-rates'
@@ -986,6 +998,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/chat'
     | '/_authenticated/admin/customers'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/dispatch-log'
     | '/_authenticated/admin/email-logs'
     | '/_authenticated/admin/email-templates'
     | '/_authenticated/admin/exchange-rates'
@@ -1544,6 +1557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmailLogsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/dispatch-log': {
+      id: '/_authenticated/admin/dispatch-log'
+      path: '/admin/dispatch-log'
+      fullPath: '/admin/dispatch-log'
+      preLoaderRoute: typeof AuthenticatedAdminDispatchLogRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/admin/dashboard'
@@ -1645,6 +1665,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminChatRoute: typeof AuthenticatedAdminChatRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminDispatchLogRoute: typeof AuthenticatedAdminDispatchLogRoute
   AuthenticatedAdminEmailLogsRoute: typeof AuthenticatedAdminEmailLogsRoute
   AuthenticatedAdminEmailTemplatesRoute: typeof AuthenticatedAdminEmailTemplatesRoute
   AuthenticatedAdminExchangeRatesRoute: typeof AuthenticatedAdminExchangeRatesRoute
@@ -1696,6 +1717,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminChatRoute: AuthenticatedAdminChatRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminDispatchLogRoute: AuthenticatedAdminDispatchLogRoute,
   AuthenticatedAdminEmailLogsRoute: AuthenticatedAdminEmailLogsRoute,
   AuthenticatedAdminEmailTemplatesRoute: AuthenticatedAdminEmailTemplatesRoute,
   AuthenticatedAdminExchangeRatesRoute: AuthenticatedAdminExchangeRatesRoute,
