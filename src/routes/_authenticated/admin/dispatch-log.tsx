@@ -621,7 +621,70 @@ function DispatchLogPage() {
         )}
       </section>
 
+      {totalRows > 0 ? (
+        <nav
+          aria-label="Dispatch log pages"
+          className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-3"
+        >
+          <p className="text-[11px] text-muted-foreground">
+            Showing {firstRow}–{lastRow} of {totalRows} job{totalRows === 1 ? "" : "s"}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setPage(1);
+                setExpanded({});
+              }}
+              disabled={currentPage <= 1 || log.isFetching}
+              className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              aria-label="First page"
+            >
+              <ChevronsLeft className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(Math.max(currentPage - 1, 1));
+                setExpanded({});
+              }}
+              disabled={currentPage <= 1 || log.isFetching}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+            >
+              <ChevronLeft className="h-3 w-3" /> Previous
+            </button>
+            <span aria-live="polite" className="px-1 text-[11px] text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(Math.min(currentPage + 1, totalPages));
+                setExpanded({});
+              }}
+              disabled={currentPage >= totalPages || log.isFetching}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+            >
+              Next <ChevronRight className="h-3 w-3" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(totalPages);
+                setExpanded({});
+              }}
+              disabled={currentPage >= totalPages || log.isFetching}
+              className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              aria-label="Last page"
+            >
+              <ChevronsRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </nav>
+      ) : null}
+
       <DispatchLogDetailSheet id={detailId} onClose={() => setDetailId(null)} />
+
     </main>
 
   );
