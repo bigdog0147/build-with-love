@@ -276,14 +276,19 @@ function DispatchLogPage() {
   };
 
 
-  const exportCsv = () => {
-    if (!rows.length) return;
-    const blob = new Blob([csv(rows)], { type: "text/csv;charset=utf-8" });
+  const [exportingAll, setExportingAll] = useState(false);
+  const fetchExport = useServerFn(exportDispatchAuditLog);
+
+  /** Builds a filter-aware filename and triggers the browser download. */
+  const downloadCsv = (data: DispatchLogRow[], scope: "page" | "filtered") => {
+    if (!data.length) return;
+    const blob = new Blob([csv(data)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     const parts = [
       "dispatch-audit",
+      scope,
       template || null,
       status || null,
       from || null,
@@ -297,6 +302,31 @@ function DispatchLogPage() {
     a.remove();
     URL.revokeObjectURL(url);
   };
+
+  /** Pulls every row matching the active filters (all pages) and exports it. */
+  const exportFiltered = async () => {
+    setExportingAll(true);
+    try {
+      const result = await fetchExport({
+        data: { template, status, from, to, idempotencyKey },
+      });
+      if (!result.rows.length) {
+        toast.info("Nothing to export", { description: "No rows match the current filters." });
+        return;
+      }
+      downloadCsv(result.rows, "filtered");
+      toast.success(`Exported ${result.rows.length} row${result.rows.length === 1 ? "" : "s"}`, {
+        description: result.truncated
+          ? "Capped at the first 5,000 matching rows — narrow the date range for more."
+          : "All rows matching the current filters, with every visible column.",
+      });
+    } catch (error) {
+      toast.error("Export failed", { description: (error as Error).message });
+    } finally {
+      setExportingAll(false);
+    }
+  };
+
 
   const chip = (active: boolean) =>
     `rounded-lg border px-2.5 py-1.5 text-[11px] transition ${
