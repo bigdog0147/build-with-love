@@ -13,9 +13,12 @@ import {
   ChevronDown,
   ChevronRight,
   ScrollText,
+  Search,
   Send,
   X,
 } from "lucide-react";
+import { DispatchLogDetailSheet } from "@/components/admin/dispatch-log-detail";
+
 
 import {
   DISPATCH_STATUSES,
@@ -204,6 +207,8 @@ function DispatchLogPage() {
   });
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [detailId, setDetailId] = useState<string | null>(null);
+
   const toggleRow = (id: string) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -529,7 +534,15 @@ function DispatchLogPage() {
                       ) : (
                         <Send className="h-3 w-3" />
                       )}
-                      Resend
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDetailId(r.id)}
+                      title="Open the full payload, suppression and provider response detail"
+                      className="ml-1.5 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+                    >
+                      <Search className="h-3 w-3" />
+                      Details
                     </button>
                     {r.resentFrom ? (
                       <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -540,7 +553,7 @@ function DispatchLogPage() {
                 </tr>
                 {expanded[r.id] ? (
                   <tr className="border-b border-border/60 last:border-0">
-                    <td colSpan={7} className="px-3 pb-3">
+                    <td colSpan={8} className="px-3 pb-3">
                       <AttemptTrail row={r} />
                     </td>
                   </tr>
@@ -551,6 +564,9 @@ function DispatchLogPage() {
           </table>
         )}
       </section>
+
+      <DispatchLogDetailSheet id={detailId} onClose={() => setDetailId(null)} />
     </main>
+
   );
 }

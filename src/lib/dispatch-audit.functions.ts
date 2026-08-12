@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireAdminPermission, serviceClient } from "./admin-guard.server";
 import { resendIdempotencyKey } from "./dispatch-resend";
+import { normalizeAttemptTrail, type DispatchAttemptRow } from "./dispatch-attempts";
 
 /**
  * Admin-gated read of `notification_dispatch_log` — the append-only audit trail
@@ -12,15 +13,8 @@ import { resendIdempotencyKey } from "./dispatch-resend";
 export const DISPATCH_STATUSES = ["sent", "skipped", "failed"] as const;
 export type DispatchStatus = (typeof DISPATCH_STATUSES)[number];
 
-export type DispatchAttemptRow = {
-  attempt: number;
-  startedAt: string | null;
-  durationMs: number | null;
-  outcome: string;
-  error: string | null;
-  retryable: boolean;
-  backoffMs: number | null;
-};
+export type { DispatchAttemptRow };
+
 
 export type DispatchLogRow = {
   id: string;
@@ -61,21 +55,8 @@ type Input = {
 
 const MAX_ROWS = 300;
 
-function normalizeTrail(raw: unknown): DispatchAttemptRow[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .filter((e): e is Record<string, unknown> => Boolean(e) && typeof e === "object")
-    .map((e, index) => ({
-      attempt: Number(e.attempt ?? index + 1),
-      startedAt: typeof e.startedAt === "string" ? e.startedAt : null,
-      durationMs: e.durationMs === null || e.durationMs === undefined ? null : Number(e.durationMs),
-      outcome: String(e.outcome ?? "unknown"),
-      error: typeof e.error === "string" ? e.error : null,
-      retryable: Boolean(e.retryable),
-      backoffMs: e.backoffMs === null || e.backoffMs === undefined ? null : Number(e.backoffMs),
-    }))
-    .sort((a, b) => a.attempt - b.attempt);
-}
+const normalizeTrail = normalizeAttemptTrail;
+
 
 function isoOrNull(value: string | undefined, endOfDay: boolean) {
   const raw = (value ?? "").trim();
