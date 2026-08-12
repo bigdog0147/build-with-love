@@ -1397,6 +1397,9 @@ export type Database = {
           quiet_hours_start: number
           raise_digest: string
           raise_email: boolean
+          raise_event_cancelled_email: boolean
+          raise_event_interest_email: boolean
+          raise_event_withdrawn_email: boolean
           raise_inapp: boolean
           reports_email: boolean
           reports_inapp: boolean
@@ -1423,6 +1426,9 @@ export type Database = {
           quiet_hours_start?: number
           raise_digest?: string
           raise_email?: boolean
+          raise_event_cancelled_email?: boolean
+          raise_event_interest_email?: boolean
+          raise_event_withdrawn_email?: boolean
           raise_inapp?: boolean
           reports_email?: boolean
           reports_inapp?: boolean
@@ -1449,6 +1455,9 @@ export type Database = {
           quiet_hours_start?: number
           raise_digest?: string
           raise_email?: boolean
+          raise_event_cancelled_email?: boolean
+          raise_event_interest_email?: boolean
+          raise_event_withdrawn_email?: boolean
           raise_inapp?: boolean
           reports_email?: boolean
           reports_inapp?: boolean
