@@ -1348,6 +1348,10 @@ export type Database = {
           id: string
           idempotency_key: string | null
           label: string
+          payload: Json | null
+          resent_at: string | null
+          resent_by: string | null
+          resent_from: string | null
           retryable: boolean
           status: string
           template: string | null
@@ -1361,6 +1365,10 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           label: string
+          payload?: Json | null
+          resent_at?: string | null
+          resent_by?: string | null
+          resent_from?: string | null
           retryable?: boolean
           status: string
           template?: string | null
@@ -1374,12 +1382,24 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           label?: string
+          payload?: Json | null
+          resent_at?: string | null
+          resent_by?: string | null
+          resent_from?: string | null
           retryable?: boolean
           status?: string
           template?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notification_dispatch_log_resent_from_fkey"
+            columns: ["resent_from"]
+            isOneToOne: false
+            referencedRelation: "notification_dispatch_log"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {

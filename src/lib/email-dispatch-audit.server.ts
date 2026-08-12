@@ -17,6 +17,11 @@ export type DispatchAuditRecord = {
   attempts: number;
   detail?: string | null;
   retryable?: boolean;
+  /** Original notice content, stored so an admin resend can replay it exactly. */
+  payload?: Record<string, unknown> | null;
+  /** Set when this row is itself an admin-triggered resend of an earlier row. */
+  resentFrom?: string | null;
+  resentBy?: string | null;
 };
 
 /** Derives the audit status from a dispatch outcome. */
@@ -44,6 +49,10 @@ export async function recordDispatchAudit(record: DispatchAuditRecord): Promise<
       attempts: record.attempts,
       detail: record.detail ?? null,
       retryable: Boolean(record.retryable),
+      payload: record.payload ?? null,
+      resent_from: record.resentFrom ?? null,
+      resent_by: record.resentBy ?? null,
+      resent_at: record.resentFrom ? new Date().toISOString() : null,
     });
     if (error) {
       console.error("[dispatch] audit row could not be stored", error.message);

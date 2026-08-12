@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -9,12 +10,14 @@ import {
   Loader2,
   RefreshCw,
   ScrollText,
+  Send,
   X,
 } from "lucide-react";
 
 import {
   DISPATCH_STATUSES,
   listDispatchAuditLog,
+  resendDispatchJob,
   type DispatchLogRow,
 } from "@/lib/dispatch-audit.functions";
 
@@ -108,6 +111,22 @@ function DispatchLogPage() {
     queryKey: ["admin-dispatch-log", template, status, from, to, idempotencyKey],
     queryFn: () => fetchLog({ data: { template, status, from, to, idempotencyKey } }),
     retry: false,
+  });
+
+  const resendFn = useServerFn(resendDispatchJob);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const resend = useMutation({
+    mutationFn: (id: string) => resendFn({ data: { id } }),
+    onMutate: (id: string) => setResendingId(id),
+    onSettled: () => setResendingId(null),
+    onSuccess: (result) => {
+      toast.success("Resend queued", {
+        description: `New idempotency key: ${result.idempotencyKey}`,
+      });
+      void log.refetch();
+    },
+    onError: (error) =>
+      toast.error("Resend failed", { description: (error as Error).message }),
   });
 
   const rows = log.data?.rows ?? [];
@@ -314,6 +333,7 @@ function DispatchLogPage() {
                 <th className="px-3 py-2 font-medium">Template</th>
                 <th className="px-3 py-2 font-medium">Idempotency key</th>
                 <th className="px-3 py-2 font-medium">Attempts</th>
+                <th className="px-3 py-2 font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -348,6 +368,31 @@ function DispatchLogPage() {
                       <span className="ml-1 text-[10px] uppercase tracking-wider text-amber-400">
                         retryable
                       </span>
+                    ) : null}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => resend.mutate(r.id)}
+                      disabled={!r.resendable || resend.isPending}
+                      title={
+                        r.resendable
+                          ? "Queue a new dispatch with a resend-scoped idempotency key"
+                          : "No stored notice snapshot for this entry — it cannot be replayed"
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--gold)]/50 px-2.5 py-1.5 text-[11px] text-[var(--gold)] transition hover:bg-[var(--gold)]/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground disabled:hover:bg-transparent"
+                    >
+                      {resendingId === r.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Send className="h-3 w-3" />
+                      )}
+                      Resend
+                    </button>
+                    {r.resentFrom ? (
+                      <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        resend{r.resentAt ? ` · ${fmt(r.resentAt)}` : ""}
+                      </p>
                     ) : null}
                   </td>
                 </tr>
