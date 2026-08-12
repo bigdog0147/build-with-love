@@ -2,9 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Code2, Eye, Mail, Search, Send, Table2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Code2,
+  Eye,
+  Mail,
+  RotateCcw,
+  Search,
+  Send,
+  SlidersHorizontal,
+  Table2,
+} from "lucide-react";
 
 import {
+  RAISE_EMAIL_VARIABLE_KEYS,
+  type RaiseEmailVariableKey,
   renderRaiseAdvanceEmailPreview,
   sendRaiseAdvanceEmailTest,
 } from "@/lib/raise-email-preview.functions";
@@ -42,6 +54,8 @@ function RaiseEmailPreviewPage() {
   const [event, setEvent] = useState<RaiseEmailEvent>("interest_submitted");
   const [view, setView] = useState<View>("rendered");
   const [query, setQuery] = useState("");
+  const [drafts, setDrafts] = useState<Partial<Record<RaiseEmailVariableKey, string>>>({});
+  const [debouncedDrafts, setDebouncedDrafts] = useState<Record<string, string>>({});
   const searchRef = useRef<HTMLInputElement>(null);
 
   const matches = useMemo<RaiseEmailEvent[]>(() => {
@@ -67,11 +81,28 @@ function RaiseEmailPreviewPage() {
 
 
 
+  // Clear preview-only edits whenever the scenario changes.
+  useEffect(() => {
+    setDrafts({});
+  }, [event]);
+
+  // Debounce keystrokes so typing feels instant without a render per character.
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebouncedDrafts(drafts as Record<string, string>), 250);
+    return () => window.clearTimeout(id);
+  }, [drafts]);
+
   const preview = useQuery({
-    queryKey: ["raise-email-preview", event],
-    queryFn: () => renderPreview({ data: { event } }),
+    queryKey: ["raise-email-preview", event, debouncedDrafts],
+    queryFn: () => renderPreview({ data: { event, overrides: debouncedDrafts } }),
+    placeholderData: (prev) => prev,
     retry: false,
   });
+
+  const baseVariables = useMemo(
+    () => preview.data?.variables ?? ({} as Record<string, unknown>),
+    [preview.data],
+  );
 
   const views: { key: View; label: string; icon: typeof Eye }[] = [
     { key: "rendered", label: "Rendered", icon: Eye },
