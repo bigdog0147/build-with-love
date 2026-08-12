@@ -34,6 +34,11 @@ type View = "rendered" | "text" | "variables";
 
 function RaiseEmailPreviewPage() {
   const renderPreview = useServerFn(renderRaiseAdvanceEmailPreview);
+  const sendTest = useServerFn(sendRaiseAdvanceEmailTest);
+  const testSend = useMutation({
+    mutationFn: (e: RaiseEmailEvent) => sendTest({ data: { event: e } }),
+  });
+
   const [event, setEvent] = useState<RaiseEmailEvent>("interest_submitted");
   const [view, setView] = useState<View>("rendered");
   const [query, setQuery] = useState("");
