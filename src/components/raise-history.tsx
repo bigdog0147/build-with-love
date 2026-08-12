@@ -7,6 +7,7 @@ import {
   FileArchive,
   FileDiff,
   Link2,
+  SlidersHorizontal,
   Table2,
   X,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import {
 import {
   filterRaiseHistoryByFields,
   hasRaiseFieldFilter,
+  raiseFieldKey,
   raiseHistoryFieldCounts,
   raiseHistoryFieldLabel,
   raiseHistoryFieldSlug,
