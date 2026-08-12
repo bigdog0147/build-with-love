@@ -3,6 +3,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireAdminPermission, serviceClient } from "./admin-guard.server";
 import { resendIdempotencyKey } from "./dispatch-resend";
 import { normalizeAttemptTrail, type DispatchAttemptRow } from "./dispatch-attempts";
+import {
+  DISPATCH_LOG_COLUMNS,
+  applyDispatchFilters,
+  mapDispatchLogRow,
+  parseDispatchFilters,
+} from "./dispatch-audit-query";
 
 /**
  * Admin-gated read of `notification_dispatch_log` — the append-only audit trail
@@ -195,6 +201,44 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       totalPages,
     };
   });
+
+/** Hard ceiling on rows pulled by a filtered CSV export. */
+export const DISPATCH_EXPORT_MAX_ROWS = 5000;
+
+export type DispatchExportResult = {
+  rows: DispatchLogRow[];
+  /** True when the filtered set exceeded the ceiling and rows were trimmed. */
+  truncated: boolean;
+};
+
+/**
+ * Returns every row matching the active filters (up to the export ceiling), so
+ * the admin can download the whole filtered result set instead of one page.
+ */
+export const exportDispatchAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: Omit<Input, "page" | "pageSize">) => parseDispatchFilters(input))
+  .handler(async ({ data, context }): Promise<DispatchExportResult> => {
+    await requireAdminPermission(context as never, "notifications");
+    const db = await serviceClient();
+
+    const { data: raw, error } = await applyDispatchFilters(
+      db
+        .from("notification_dispatch_log")
+        .select(DISPATCH_LOG_COLUMNS)
+        .order("created_at", { ascending: false })
+        .range(0, DISPATCH_EXPORT_MAX_ROWS),
+      data,
+    );
+    if (error) throw new Error(error.message);
+
+    const all = (raw ?? []) as Record<string, unknown>[];
+    return {
+      rows: all.slice(0, DISPATCH_EXPORT_MAX_ROWS).map(mapDispatchLogRow),
+      truncated: all.length > DISPATCH_EXPORT_MAX_ROWS,
+    };
+  });
+
 
 
 export type ResendDispatchResult = {

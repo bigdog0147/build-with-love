@@ -28,6 +28,8 @@ import {
   DISPATCH_PAGE_SIZES,
   DISPATCH_STATUSES,
   listDispatchAuditLog,
+  exportDispatchAuditLog,
+
   resendDispatchJob,
   type DispatchAttemptRow,
   type DispatchLogRow,
@@ -168,6 +170,9 @@ function csv(rows: DispatchLogRow[]) {
     "Total attempt ms",
     "Skip event",
     "Skip preference",
+    "Resendable",
+    "Resent from",
+    "Resent at",
   ];
   const cell = (v: string | number | boolean | null) => {
     const s = v === null || v === undefined ? "" : String(v);
@@ -189,12 +194,16 @@ function csv(rows: DispatchLogRow[]) {
       r.attemptTrail.reduce((sum, a) => sum + (a.durationMs ?? 0), 0),
       parseSkipReason(r.detail)?.event ?? "",
       parseSkipReason(r.detail)?.source ?? "",
+      r.resendable,
+      r.resentFrom ?? "",
+      r.resentAt ?? "",
     ]
       .map(cell)
       .join(","),
   );
   return [head.join(","), ...lines].join("\r\n");
 }
+
 
 function DispatchLogPage() {
   const fetchLog = useServerFn(listDispatchAuditLog);
@@ -276,14 +285,19 @@ function DispatchLogPage() {
   };
 
 
-  const exportCsv = () => {
-    if (!rows.length) return;
-    const blob = new Blob([csv(rows)], { type: "text/csv;charset=utf-8" });
+  const [exportingAll, setExportingAll] = useState(false);
+  const fetchExport = useServerFn(exportDispatchAuditLog);
+
+  /** Builds a filter-aware filename and triggers the browser download. */
+  const downloadCsv = (data: DispatchLogRow[], scope: "page" | "filtered") => {
+    if (!data.length) return;
+    const blob = new Blob([csv(data)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     const parts = [
       "dispatch-audit",
+      scope,
       template || null,
       status || null,
       from || null,
@@ -297,6 +311,31 @@ function DispatchLogPage() {
     a.remove();
     URL.revokeObjectURL(url);
   };
+
+  /** Pulls every row matching the active filters (all pages) and exports it. */
+  const exportFiltered = async () => {
+    setExportingAll(true);
+    try {
+      const result = await fetchExport({
+        data: { template, status, from, to, idempotencyKey },
+      });
+      if (!result.rows.length) {
+        toast.info("Nothing to export", { description: "No rows match the current filters." });
+        return;
+      }
+      downloadCsv(result.rows, "filtered");
+      toast.success(`Exported ${result.rows.length} row${result.rows.length === 1 ? "" : "s"}`, {
+        description: result.truncated
+          ? "Capped at the first 5,000 matching rows — narrow the date range for more."
+          : "All rows matching the current filters, with every visible column.",
+      });
+    } catch (error) {
+      toast.error("Export failed", { description: (error as Error).message });
+    } finally {
+      setExportingAll(false);
+    }
+  };
+
 
   const chip = (active: boolean) =>
     `rounded-lg border px-2.5 py-1.5 text-[11px] transition ${
@@ -328,12 +367,27 @@ function DispatchLogPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={exportCsv}
+            onClick={() => downloadCsv(rows, "page")}
             disabled={rows.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="h-3.5 w-3.5" /> This page{rows.length ? ` (${rows.length})` : ""}
+          </button>
+          <button
+            type="button"
+            onClick={exportFiltered}
+            disabled={totalRows === 0 || exportingAll}
+            title="Download every row matching the current filters, across all pages"
             className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/50 px-3 py-2 text-xs text-[var(--gold)] transition hover:bg-[var(--gold)]/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground disabled:hover:bg-transparent"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV{rows.length ? ` (${rows.length})` : ""}
+            {exportingAll ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}{" "}
+            Export filtered CSV{totalRows ? ` (${totalRows})` : ""}
           </button>
+
           <button
             type="button"
             onClick={() => log.refetch()}
