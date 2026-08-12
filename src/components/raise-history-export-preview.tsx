@@ -41,8 +41,10 @@ export function RaiseHistoryExportPreviewDialog({
           <DialogTitle className="font-display">Export preview</DialogTitle>
           <DialogDescription>
             {preview.rowCount} {preview.rowCount === 1 ? "row" : "rows"} and{" "}
-            {preview.columns.length} columns will be exported, in this order.
+            {preview.columns.length} columns will be exported, in this order. The leading “Changed”
+            column summarises which fields changed per row and is not written to the file.
           </DialogDescription>
+
         </DialogHeader>
 
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-lg border border-border/70 p-3 text-xs sm:grid-cols-3">
@@ -64,6 +66,13 @@ export function RaiseHistoryExportPreviewDialog({
                 <th scope="col" className="whitespace-nowrap px-2 py-2 text-muted-foreground">
                   #
                 </th>
+                <th
+                  scope="col"
+                  className="whitespace-nowrap px-2 py-2 font-medium uppercase tracking-wider text-muted-foreground"
+                  title="Fields that changed in this transition (summary only — not a CSV column)"
+                >
+                  Changed
+                </th>
                 {preview.columns.map((column) => (
                   <th
                     key={column}
@@ -79,16 +88,42 @@ export function RaiseHistoryExportPreviewDialog({
               {preview.rows.length === 0 && (
                 <tr>
                   <td
-                    colSpan={preview.columns.length + 1}
+                    colSpan={preview.columns.length + 2}
                     className="px-2 py-6 text-center text-muted-foreground"
                   >
                     No events match the current filters, so the export would be empty.
                   </td>
                 </tr>
               )}
-              {preview.rows.map((row, i) => (
+              {preview.rows.map((row, i) => {
+                const changed = preview.changedFields[i] ?? [];
+                return (
                 <tr key={i} className="border-t border-border/60 align-top">
                   <td className="px-2 py-2 text-muted-foreground">{i + 1}</td>
+                  <td className="px-2 py-2">
+                    {changed.length === 0 ? (
+                      <span className="text-muted-foreground/60">No change</span>
+                    ) : (
+                      <span
+                        className="flex max-w-[200px] flex-wrap gap-1"
+                        title={`${changed.length} changed: ${changed.join(", ")}`}
+                      >
+                        {changed.slice(0, 3).map((field) => (
+                          <span
+                            key={field}
+                            className="rounded border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-1.5 py-0.5 text-[10px] text-[var(--gold)]"
+                          >
+                            {field}
+                          </span>
+                        ))}
+                        {changed.length > 3 && (
+                          <span className="px-1 py-0.5 text-[10px] text-muted-foreground">
+                            +{changed.length - 3}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </td>
                   {row.map((cell, j) => (
                     <td key={j} className="max-w-[220px] px-2 py-2">
                       {cell === "" ? (
@@ -101,8 +136,10 @@ export function RaiseHistoryExportPreviewDialog({
                     </td>
                   ))}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
+
           </table>
         </div>
 

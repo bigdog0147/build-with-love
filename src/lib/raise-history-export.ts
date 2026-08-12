@@ -220,10 +220,25 @@ const diffColumnsLabel = (input: RaiseHistoryExportInput) =>
 export interface RaiseHistoryExportPreview {
   columns: readonly string[];
   rows: string[][];
+  /** Changed field labels per row, aligned with `rows` (compact summary column). */
+  changedFields: string[][];
   meta: { label: string; value: string }[];
   rowCount: number;
   csvFileName: string;
   pdfFileName: string;
+}
+
+/**
+ * Changed field labels for each export row, in the same order as `exportRows`.
+ * In diff-only mode a row is a single field change, so each entry has one label.
+ */
+export function exportRowChangedFields(input: RaiseHistoryExportInput): string[][] {
+  if (input.diffOnly) {
+    return input.events.flatMap((event) =>
+      (event.changes ?? []).map((change) => [change.field]),
+    );
+  }
+  return input.events.map((event) => (event.changes ?? []).map((change) => change.field));
 }
 
 /**
@@ -238,6 +253,7 @@ export function buildRaiseHistoryExportPreview(
   return {
     columns: exportColumns(input),
     rows,
+    changedFields: exportRowChangedFields(input),
     meta: [
       { label: "Round", value: input.roundName },
       { label: "Investor", value: input.investorName },
@@ -248,6 +264,7 @@ export function buildRaiseHistoryExportPreview(
       { label: "Diff columns", value: diffColumnsLabel(input) },
       { label: "Currency", value: input.currency },
     ],
+
     rowCount: rows.length,
     csvFileName: raiseHistoryCsvFileName({
       roundName: input.roundName,
