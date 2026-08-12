@@ -470,8 +470,28 @@ function DispatchLogPage() {
                     <p className="text-foreground">{r.label}</p>
                     <p className="text-[11px] text-muted-foreground">{r.category}</p>
                     {r.detail ? (
-                      <p className="mt-1 max-w-md text-[11px] text-muted-foreground">{r.detail}</p>
+                      <p className="mt-1 max-w-md text-[11px] text-muted-foreground">
+                        {parseSkipReason(r.detail)?.code ?? r.detail}
+                      </p>
                     ) : null}
+                    {(() => {
+                      const parsed = parseSkipReason(r.detail);
+                      if (!parsed?.event && !parsed?.source) return null;
+                      return (
+                        <p className="mt-1 flex flex-wrap gap-1.5 text-[10px]">
+                          {parsed.event ? (
+                            <span className="rounded border border-border px-1.5 py-0.5 font-mono text-muted-foreground">
+                              event: {parsed.event}
+                            </span>
+                          ) : null}
+                          {parsed.source ? (
+                            <span className="rounded border border-[var(--gold)]/40 px-1.5 py-0.5 font-mono text-[var(--gold)]">
+                              pref: {parsed.source}
+                            </span>
+                          ) : null}
+                        </p>
+                      );
+                    })()}
                   </td>
                   <td className="px-3 py-2 font-mono text-[11px] text-[var(--gold)]">
                     {r.template ?? "—"}
