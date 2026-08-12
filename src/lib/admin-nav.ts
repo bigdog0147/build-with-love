@@ -112,6 +112,13 @@ export const ADMIN_NAV: NavGroup[] = [
         to: "/admin/email-logs",
         keywords: "otp password reset email delivery bounce rejected troubleshoot logs",
       },
+      {
+        label: "Dispatch Audit Log",
+        to: "/admin/dispatch-log",
+        keywords:
+          "dispatch audit log idempotency key template status date range background email jobs sent skipped failed",
+      },
+
 
     ],
   },
