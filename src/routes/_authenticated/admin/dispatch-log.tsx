@@ -11,7 +11,11 @@ import {
   Loader2,
   RefreshCw,
   ChevronDown,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
   ChevronRight,
+
   ScrollText,
   Search,
   Send,
