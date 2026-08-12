@@ -2,13 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   ArrowLeft,
   Download,
   KeyRound,
   Loader2,
   RefreshCw,
+  ChevronDown,
+  ChevronRight,
   ScrollText,
   Send,
   X,
@@ -18,6 +20,7 @@ import {
   DISPATCH_STATUSES,
   listDispatchAuditLog,
   resendDispatchJob,
+  type DispatchAttemptRow,
   type DispatchLogRow,
 } from "@/lib/dispatch-audit.functions";
 
@@ -54,6 +57,84 @@ function statusTone(status: string) {
   if (status === "sent") return "text-emerald-400 border-emerald-400/40 bg-emerald-400/10";
   if (status === "failed") return "text-red-400 border-red-400/40 bg-red-400/10";
   return "text-amber-400 border-amber-400/40 bg-amber-400/10";
+}
+
+function ms(value: number | null) {
+  if (value === null || Number.isNaN(value)) return "—";
+  return value < 1000 ? `${Math.round(value)}ms` : `${(value / 1000).toFixed(value < 10000 ? 2 : 1)}s`;
+}
+
+const ATTEMPT_TONE: Record<string, string> = {
+  sent: "text-emerald-400 border-emerald-400/40 bg-emerald-400/10",
+  skipped: "text-amber-400 border-amber-400/40 bg-amber-400/10",
+  retry: "text-sky-400 border-sky-400/40 bg-sky-400/10",
+  failed: "text-red-400 border-red-400/40 bg-red-400/10",
+};
+
+function AttemptTrail({ row }: { row: DispatchLogRow }) {
+  const trail: DispatchAttemptRow[] = row.attemptTrail;
+  if (trail.length === 0) {
+    return (
+      <div className="rounded-lg border border-border/60 bg-background/40 p-3 text-[11px] text-muted-foreground">
+        No per-attempt trail was recorded for this entry (it predates attempt tracing).
+        {row.attempts ? ` Total attempts: ${row.attempts}.` : ""}
+        {row.detail ? ` Last reason: ${row.detail}` : ""}
+      </div>
+    );
+  }
+  const totalBackoff = trail.reduce((sum, a) => sum + (a.backoffMs ?? 0), 0);
+  const totalWork = trail.reduce((sum, a) => sum + (a.durationMs ?? 0), 0);
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+      <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+        {trail.length} attempt{trail.length === 1 ? "" : "s"} · {ms(totalWork)} working ·{" "}
+        {ms(totalBackoff)} waiting
+      </p>
+      <table className="w-full text-left text-[11px]">
+        <thead className="text-muted-foreground">
+          <tr className="border-b border-border/60">
+            <th className="py-1 pr-3 font-medium">#</th>
+            <th className="py-1 pr-3 font-medium">Started</th>
+            <th className="py-1 pr-3 font-medium">Outcome</th>
+            <th className="py-1 pr-3 font-medium">Duration</th>
+            <th className="py-1 pr-3 font-medium">Backoff before next</th>
+            <th className="py-1 font-medium">Failure reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {trail.map((a) => (
+            <tr key={`${row.id}-${a.attempt}`} className="border-b border-border/40 last:border-0">
+              <td className="py-1.5 pr-3 text-muted-foreground">{a.attempt}</td>
+              <td className="whitespace-nowrap py-1.5 pr-3 text-muted-foreground">
+                {a.startedAt ? fmt(a.startedAt) : "—"}
+              </td>
+              <td className="py-1.5 pr-3">
+                <span
+                  className={`inline-block rounded-md border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${
+                    ATTEMPT_TONE[a.outcome] ?? "border-border text-muted-foreground"
+                  }`}
+                >
+                  {a.outcome}
+                </span>
+                {a.retryable ? (
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-amber-400">
+                    retryable
+                  </span>
+                ) : null}
+              </td>
+              <td className="whitespace-nowrap py-1.5 pr-3 text-muted-foreground">
+                {ms(a.durationMs)}
+              </td>
+              <td className="whitespace-nowrap py-1.5 pr-3 text-muted-foreground">
+                {a.backoffMs ? ms(a.backoffMs) : "—"}
+              </td>
+              <td className="py-1.5 text-muted-foreground">{a.error ?? "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function fmt(ts: string) {
@@ -112,6 +193,10 @@ function DispatchLogPage() {
     queryFn: () => fetchLog({ data: { template, status, from, to, idempotencyKey } }),
     retry: false,
   });
+
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const toggleRow = (id: string) =>
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const resendFn = useServerFn(resendDispatchJob);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -327,6 +412,7 @@ function DispatchLogPage() {
           <table className="w-full text-left text-xs">
             <thead className="text-muted-foreground">
               <tr className="border-b border-border">
+                <th className="w-8 px-3 py-2 font-medium" aria-label="Expand" />
                 <th className="px-3 py-2 font-medium">When</th>
                 <th className="px-3 py-2 font-medium">Outcome</th>
                 <th className="px-3 py-2 font-medium">Notice</th>
@@ -338,7 +424,25 @@ function DispatchLogPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b border-border/60 align-top last:border-0">
+                <Fragment key={r.id}>
+                <tr className="border-b border-border/60 align-top last:border-0">
+                  <td className="px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleRow(r.id)}
+                      aria-expanded={Boolean(expanded[r.id])}
+                      aria-label={
+                        expanded[r.id] ? "Hide attempt details" : "Show attempt details"
+                      }
+                      className="rounded-md border border-border p-1 text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+                    >
+                      {expanded[r.id] ? (
+                        <ChevronDown className="h-3 w-3" />
+                      ) : (
+                        <ChevronRight className="h-3 w-3" />
+                      )}
+                    </button>
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                     {fmt(r.createdAt)}
                   </td>
@@ -396,6 +500,14 @@ function DispatchLogPage() {
                     ) : null}
                   </td>
                 </tr>
+                {expanded[r.id] ? (
+                  <tr className="border-b border-border/60 last:border-0">
+                    <td colSpan={7} className="px-3 pb-3">
+                      <AttemptTrail row={r} />
+                    </td>
+                  </tr>
+                ) : null}
+                </Fragment>
               ))}
             </tbody>
           </table>
