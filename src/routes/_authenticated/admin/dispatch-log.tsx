@@ -15,8 +15,9 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ChevronRight,
-
+  Check,
   ScrollText,
+
   Search,
   Send,
   X,
