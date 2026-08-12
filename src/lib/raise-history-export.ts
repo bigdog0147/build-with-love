@@ -279,6 +279,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
   lines.push(["Changed fields", input.fieldLabel ?? "All changed fields"].map(csvCell).join(","));
   lines.push(["Export mode", modeLabel(input.diffOnly)].map(csvCell).join(","));
+  lines.push(["Diff columns", diffColumnsLabel(input)].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   if (input.diffOnly) lines.push(["Changes", rows.length].map(csvCell).join(","));
   lines.push("");
@@ -299,14 +300,16 @@ export function raiseHistoryCsvFileName(input: {
   filterSlug?: string | null;
   fieldSlug?: string | null;
   diffOnly?: boolean;
+  includeDiff?: boolean;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
   const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
   const fields = input.fieldSlug ? `-${slug(input.fieldSlug)}` : "";
-  const mode = input.diffOnly ? "-diff-only" : "";
+  const mode = input.diffOnly ? "-diff-only" : input.includeDiff === false ? "-no-diff" : "";
   return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}${mode}-${stamp}.csv`;
 }
+
 
 
 /** Printable statement of the full status history, ready to save as PDF. */
