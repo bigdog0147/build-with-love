@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { parseSkipReason } from "@/lib/dispatch-skip-reason";
 import { toast } from "sonner";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Download,
