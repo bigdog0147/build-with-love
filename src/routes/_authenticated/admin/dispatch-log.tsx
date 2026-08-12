@@ -435,20 +435,43 @@ function DispatchLogPage() {
               ? "Loading dispatch history…"
               : counts
                 ? `${counts.total} job${counts.total === 1 ? "" : "s"} — ${counts.sent} sent, ${counts.skipped} skipped, ${counts.failed} failed${
-                    log.data?.hasMore ? " (showing the most recent page)" : ""
+                    totalRows > 0
+                      ? ` · showing ${firstRow}–${lastRow} (page ${currentPage} of ${totalPages})`
+                      : ""
                   }`
                 : ""}
           </p>
-          {filtered ? (
-            <button
-              type="button"
-              onClick={clearAll}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
-            >
-              <X className="h-3 w-3" /> Clear filters
-            </button>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+              Rows per page
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                  setExpanded({});
+                }}
+                className="rounded-lg border border-border bg-transparent px-2 py-1 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
+              >
+                {DISPATCH_PAGE_SIZES.map((size) => (
+                  <option key={size} value={size} className="bg-background">
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {filtered ? (
+              <button
+                type="button"
+                onClick={clearAll}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+              >
+                <X className="h-3 w-3" /> Clear filters
+              </button>
+            ) : null}
+          </div>
         </div>
+
       </section>
 
       <section className="mt-4 overflow-x-auto rounded-xl border border-border">
