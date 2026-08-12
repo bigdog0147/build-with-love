@@ -245,6 +245,7 @@ export function buildRaiseHistoryExportPreview(
       { label: "Event types", value: input.filterLabel ?? "All event types" },
       { label: "Changed fields", value: input.fieldLabel ?? "All changed fields" },
       { label: "Export mode", value: modeLabel(input.diffOnly) },
+      { label: "Diff columns", value: diffColumnsLabel(input) },
       { label: "Currency", value: input.currency },
     ],
     rowCount: rows.length,
@@ -255,7 +256,9 @@ export function buildRaiseHistoryExportPreview(
       filterSlug: input.filterSlug,
       fieldSlug: input.fieldSlug,
       diffOnly: input.diffOnly,
+      includeDiff: diffColumnsIncluded(input),
     }),
+
     pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
       /\.html$/,
       ".pdf",
