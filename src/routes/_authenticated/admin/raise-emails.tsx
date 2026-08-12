@@ -1,15 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Code2, Eye, Mail, Search, Table2 } from "lucide-react";
+import { ArrowLeft, Code2, Eye, Mail, Search, Send, Table2 } from "lucide-react";
 
-import { renderRaiseAdvanceEmailPreview } from "@/lib/raise-email-preview.functions";
+import {
+  renderRaiseAdvanceEmailPreview,
+  sendRaiseAdvanceEmailTest,
+} from "@/lib/raise-email-preview.functions";
 import {
   RAISE_EMAIL_EVENTS,
   RAISE_EMAIL_EVENT_LABEL,
   type RaiseEmailEvent,
 } from "@/lib/raise-email-scenarios";
+
 
 export const Route = createFileRoute("/_authenticated/admin/raise-emails")({
   component: RaiseEmailPreviewPage,
@@ -30,6 +34,11 @@ type View = "rendered" | "text" | "variables";
 
 function RaiseEmailPreviewPage() {
   const renderPreview = useServerFn(renderRaiseAdvanceEmailPreview);
+  const sendTest = useServerFn(sendRaiseAdvanceEmailTest);
+  const testSend = useMutation({
+    mutationFn: (e: RaiseEmailEvent) => sendTest({ data: { event: e } }),
+  });
+
   const [event, setEvent] = useState<RaiseEmailEvent>("interest_submitted");
   const [view, setView] = useState<View>("rendered");
   const [query, setQuery] = useState("");
@@ -139,6 +148,37 @@ function RaiseEmailPreviewPage() {
             : `${RAISE_EMAIL_EVENTS.length} scenarios. Currently previewing ${RAISE_EMAIL_EVENT_LABEL[event]}.`}
         </p>
       </section>
+      <section className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-4">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Test delivery</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sends a live dry-run of{" "}
+            <span className="text-foreground">{RAISE_EMAIL_EVENT_LABEL[event]}</span> to your own
+            admin inbox. No other recipient can be targeted.
+          </p>
+          <p aria-live="polite" className="mt-2 text-xs">
+            {testSend.isPending ? (
+              <span className="text-muted-foreground">Sending the test email…</span>
+            ) : testSend.data?.ok ? (
+              <span className="text-[var(--gold)]">Test email sent to {testSend.data.email}.</span>
+            ) : testSend.data && !testSend.data.ok ? (
+              <span className="text-[var(--danger)]">{testSend.data.reason}</span>
+            ) : testSend.error ? (
+              <span className="text-[var(--danger)]">{(testSend.error as Error).message}</span>
+            ) : null}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => testSend.mutate(event)}
+          disabled={testSend.isPending}
+          className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)] px-3 py-1.5 text-xs text-[var(--gold)] transition hover:bg-[var(--gold)]/10 disabled:opacity-50"
+        >
+          <Send className="h-3.5 w-3.5" />
+          {testSend.isPending ? "Sending…" : "Send test to me"}
+        </button>
+      </section>
+
 
 
       <section className="mt-4 rounded-xl border border-border">
