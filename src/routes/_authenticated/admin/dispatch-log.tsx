@@ -588,7 +588,9 @@ function DispatchLogPage() {
                       ) : (
                         <Send className="h-3 w-3" />
                       )}
+                      Resend
                     </button>
+
                     <button
                       type="button"
                       onClick={() => setDetailId(r.id)}
