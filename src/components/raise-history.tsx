@@ -213,7 +213,9 @@ export function RaiseHistoryTimeline({
     filterSlug: raiseHistoryFilterSlug(active),
     fieldLabel: raiseHistoryFieldLabel(fields),
     fieldSlug: raiseHistoryFieldSlug(fields),
+    diffOnly,
   };
+
 
   const toggleField = (field: string) =>
     setFields((prev) => (prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]));
