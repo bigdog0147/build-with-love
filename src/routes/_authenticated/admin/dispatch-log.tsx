@@ -207,6 +207,8 @@ function DispatchLogPage() {
   });
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [detailId, setDetailId] = useState<string | null>(null);
+
   const toggleRow = (id: string) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
