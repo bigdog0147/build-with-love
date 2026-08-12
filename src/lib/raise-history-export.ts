@@ -119,6 +119,19 @@ const HEADERS = [
 /** Ordered column names of the export, matching HEADERS. */
 export const RAISE_HISTORY_EXPORT_COLUMNS: readonly string[] = HEADERS;
 
+/** Diff columns that the include/exclude toggle controls. */
+export const RAISE_HISTORY_DIFF_COLUMN_NAMES: readonly string[] = [
+  "Changed fields",
+  "Before",
+  "After",
+  "Change summary",
+];
+
+/** Full-history columns with the before/after diff columns removed. */
+export const RAISE_HISTORY_EXPORT_COLUMNS_NO_DIFF: readonly string[] = HEADERS.filter(
+  (header) => !RAISE_HISTORY_DIFF_COLUMN_NAMES.includes(header),
+);
+
 const DIFF_HEADERS = [
   "Stage",
   "Timestamp (ISO 8601)",
@@ -132,8 +145,24 @@ const DIFF_HEADERS = [
 /** Ordered column names of the diff-only export (one row per changed field). */
 export const RAISE_HISTORY_DIFF_COLUMNS: readonly string[] = DIFF_HEADERS;
 
+/** True when the before/after diff columns and visuals should be written. */
+export const diffColumnsIncluded = (input: RaiseHistoryExportInput) =>
+  input.includeDiff !== false;
+
 /** One export row: the exact cell values written to CSV, in column order. */
-export function historyRowCells(event: RaiseHistoryEvent, currency: string): string[] {
+export function historyRowCells(
+  event: RaiseHistoryEvent,
+  currency: string,
+  includeDiff = true,
+): string[] {
+  const diffCells = includeDiff
+    ? [
+        (event.changes ?? []).map((c) => c.field).join("; "),
+        (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
+        (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
+        formatChangeSummary(event.changes),
+      ]
+    : [];
   return [
     event.label,
     event.at ?? "",
@@ -144,10 +173,7 @@ export function historyRowCells(event: RaiseHistoryEvent, currency: string): str
     event.amount === null || event.amount === undefined ? "" : currency,
     event.detail,
     event.note ?? "",
-    (event.changes ?? []).map((c) => c.field).join("; "),
-    (event.changes ?? []).map((c) => c.from ?? "—").join("; "),
-    (event.changes ?? []).map((c) => c.to ?? "—").join("; "),
-    formatChangeSummary(event.changes),
+    ...diffCells,
     event.reference ?? "",
   ];
 }
@@ -170,17 +196,26 @@ export function historyDiffRowCells(event: RaiseHistoryEvent): string[][] {
 
 /** Column list for the requested export mode. */
 export function exportColumns(input: RaiseHistoryExportInput): readonly string[] {
-  return input.diffOnly ? RAISE_HISTORY_DIFF_COLUMNS : RAISE_HISTORY_EXPORT_COLUMNS;
+  if (input.diffOnly) return RAISE_HISTORY_DIFF_COLUMNS;
+  return diffColumnsIncluded(input)
+    ? RAISE_HISTORY_EXPORT_COLUMNS
+    : RAISE_HISTORY_EXPORT_COLUMNS_NO_DIFF;
 }
 
 /** Data rows for the requested export mode, oldest event first. */
 export function exportRows(input: RaiseHistoryExportInput): string[][] {
   if (input.diffOnly) return input.events.flatMap((event) => historyDiffRowCells(event));
-  return input.events.map((event) => historyRowCells(event, input.currency));
+  return input.events.map((event) =>
+    historyRowCells(event, input.currency, diffColumnsIncluded(input)),
+  );
 }
 
 const modeLabel = (diffOnly?: boolean) =>
   diffOnly ? "Changed fields only" : "Full history";
+
+const diffColumnsLabel = (input: RaiseHistoryExportInput) =>
+  input.diffOnly ? "Included (one row per change)" : diffColumnsIncluded(input) ? "Included" : "Excluded";
+
 
 export interface RaiseHistoryExportPreview {
   columns: readonly string[];
