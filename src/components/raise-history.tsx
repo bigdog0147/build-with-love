@@ -177,7 +177,15 @@ export function RaiseHistoryTimeline({
 
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [presets, setPresets] = useState<RaiseFieldPreset[]>([]);
+  const [presetName, setPresetName] = useState("");
   const focusedRef = useRef<HTMLLIElement | null>(null);
+
+  // Presets live in localStorage, so they load after hydration.
+  useEffect(() => {
+    setPresets(loadRaiseFieldPresets());
+  }, []);
+
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
   const fieldOptions = useMemo(() => raiseHistoryFields(events), [events]);
