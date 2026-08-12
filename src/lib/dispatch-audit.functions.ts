@@ -3,6 +3,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireAdminPermission, serviceClient } from "./admin-guard.server";
 import { resendIdempotencyKey } from "./dispatch-resend";
 import { normalizeAttemptTrail, type DispatchAttemptRow } from "./dispatch-attempts";
+import {
+  DISPATCH_LOG_COLUMNS,
+  applyDispatchFilters,
+  mapDispatchLogRow,
+  parseDispatchFilters,
+} from "./dispatch-audit-query";
 
 /**
  * Admin-gated read of `notification_dispatch_log` — the append-only audit trail
