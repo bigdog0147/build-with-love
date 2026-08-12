@@ -245,14 +245,30 @@ function DispatchLogPage() {
   const counts = log.data?.counts;
   const filtered = Boolean(template || status || from || to || idempotencyKey);
 
-  const clearAll = () => {
-    setTemplate("");
-    setStatus("");
-    setFrom("");
-    setTo("");
-    setKeyInput("");
-    setIdempotencyKey("");
+  // Any filter change re-opens the audit trail from the newest page.
+  const currentPage = log.data?.page ?? page;
+  const totalPages = log.data?.totalPages ?? 1;
+  const totalRows = log.data?.totalRows ?? 0;
+  const firstRow = rows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const lastRow = rows.length === 0 ? 0 : firstRow + rows.length - 1;
+
+  const applyFilter = (fn: () => void) => {
+    fn();
+    setPage(1);
+    setExpanded({});
   };
+
+  const clearAll = () => {
+    applyFilter(() => {
+      setTemplate("");
+      setStatus("");
+      setFrom("");
+      setTo("");
+      setKeyInput("");
+      setIdempotencyKey("");
+    });
+  };
+
 
   const exportCsv = () => {
     if (!rows.length) return;
