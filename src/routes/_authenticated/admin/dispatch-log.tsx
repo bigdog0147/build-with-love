@@ -328,12 +328,27 @@ function DispatchLogPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={exportCsv}
+            onClick={() => downloadCsv(rows, "page")}
             disabled={rows.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Download className="h-3.5 w-3.5" /> This page{rows.length ? ` (${rows.length})` : ""}
+          </button>
+          <button
+            type="button"
+            onClick={exportFiltered}
+            disabled={totalRows === 0 || exportingAll}
+            title="Download every row matching the current filters, across all pages"
             className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/50 px-3 py-2 text-xs text-[var(--gold)] transition hover:bg-[var(--gold)]/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground disabled:hover:bg-transparent"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV{rows.length ? ` (${rows.length})` : ""}
+            {exportingAll ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}{" "}
+            Export filtered CSV{totalRows ? ` (${totalRows})` : ""}
           </button>
+
           <button
             type="button"
             onClick={() => log.refetch()}
