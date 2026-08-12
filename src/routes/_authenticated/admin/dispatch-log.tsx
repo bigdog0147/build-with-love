@@ -199,10 +199,22 @@ function DispatchLogPage() {
   const [to, setTo] = useState("");
   const [keyInput, setKeyInput] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(50);
 
   const log = useQuery({
-    queryKey: ["admin-dispatch-log", template, status, from, to, idempotencyKey],
-    queryFn: () => fetchLog({ data: { template, status, from, to, idempotencyKey } }),
+    queryKey: [
+      "admin-dispatch-log",
+      template,
+      status,
+      from,
+      to,
+      idempotencyKey,
+      page,
+      pageSize,
+    ],
+    queryFn: () =>
+      fetchLog({ data: { template, status, from, to, idempotencyKey, page, pageSize } }),
     retry: false,
   });
 
@@ -211,6 +223,7 @@ function DispatchLogPage() {
 
   const toggleRow = (id: string) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+
 
   const resendFn = useServerFn(resendDispatchJob);
   const [resendingId, setResendingId] = useState<string | null>(null);
