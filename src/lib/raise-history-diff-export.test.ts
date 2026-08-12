@@ -4,6 +4,8 @@ import {
   buildRaiseHistoryCsv,
   buildRaiseHistoryExportPreview,
   buildRaiseHistoryReportHtml,
+  exportColumns,
+  exportRows,
   historyDiffRowCells,
   raiseHistoryCsvFileName,
 } from "./raise-history-export";
