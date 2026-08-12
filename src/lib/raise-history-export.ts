@@ -485,7 +485,7 @@ export function buildRaiseHistoryReportHtml(
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
     }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
       input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
-    }${input.diffOnly ? "-diff-only" : ""}-${generatedAt.slice(0, 10)}.html`,
+    }${input.diffOnly ? "-diff-only" : showDiff ? "" : "-no-diff"}-${generatedAt.slice(0, 10)}.html`,
 
     title,
     html,
