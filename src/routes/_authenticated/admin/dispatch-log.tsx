@@ -173,6 +173,8 @@ function csv(rows: DispatchLogRow[]) {
       r.idempotencyKey ?? "",
       r.detail ?? "",
       r.userId ?? "",
+      [...r.attemptTrail].reverse().find((a) => a.error)?.error ?? "",
+      r.attemptTrail.reduce((sum, a) => sum + (a.durationMs ?? 0), 0),
     ]
       .map(cell)
       .join(","),
