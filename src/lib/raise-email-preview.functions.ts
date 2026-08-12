@@ -12,15 +12,69 @@ export type RaiseEmailPreview = {
   html: string;
   text: string;
   variables: RaiseEmailVariables;
+  overridden: string[];
 };
+
+/** Variables an admin may tweak in the preview editor panel. */
+export const RAISE_EMAIL_VARIABLE_KEYS = [
+  "stageLabel",
+  "nextStep",
+  "roundName",
+  "currency",
+  "amount",
+  "ended",
+  "note",
+  "name",
+  "confirmationUrl",
+  "confirmationTitle",
+] as const satisfies readonly (keyof RaiseEmailVariables)[];
+
+export type RaiseEmailVariableKey = (typeof RAISE_EMAIL_VARIABLE_KEYS)[number];
+
+type PreviewInput = { event: string; overrides?: Record<string, string> };
+
+function normalizeOverrides(overrides: Record<string, string> | undefined) {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(overrides ?? {})) {
+    if (!(RAISE_EMAIL_VARIABLE_KEYS as readonly string[]).includes(key)) continue;
+    if (typeof value !== "string") continue;
+    out[key] = value.slice(0, 2000);
+  }
+  return out;
+}
+
+function applyOverrides(
+  variables: RaiseEmailVariables,
+  overrides: Record<string, string>,
+): { variables: RaiseEmailVariables; overridden: string[] } {
+  const next = { ...variables } as Record<string, unknown>;
+  const overridden: string[] = [];
+  for (const [key, raw] of Object.entries(overrides)) {
+    if (key === "amount") {
+      const n = Number(raw);
+      if (raw.trim() === "" || !Number.isFinite(n)) continue;
+      if (n === variables.amount) continue;
+      next.amount = n;
+      overridden.push(key);
+      continue;
+    }
+    if (raw === (variables as Record<string, unknown>)[key]) continue;
+    next[key] = raw;
+    overridden.push(key);
+  }
+  return { variables: next as RaiseEmailVariables, overridden };
+}
 
 /** Render the "Raise timeline advance" email for one event with sample data. */
 export const renderRaiseAdvanceEmailPreview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { event: string }) => {
+  .inputValidator((input: PreviewInput) => {
     if (!RAISE_EMAIL_EVENTS.includes(input.event as RaiseEmailEvent))
       throw new Error("Unknown capital raise event");
-    return { event: input.event as RaiseEmailEvent };
+    return {
+      event: input.event as RaiseEmailEvent,
+      overrides: normalizeOverrides(input.overrides),
+    };
   })
   .handler(async ({ data, context }): Promise<RaiseEmailPreview> => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
@@ -37,7 +91,10 @@ export const renderRaiseAdvanceEmailPreview = createServerFn({ method: "POST" })
     const entry = TEMPLATES["raise-timeline-advance"];
     if (!entry) throw new Error("The raise timeline advance template is not registered.");
 
-    const variables = raiseEmailTemplateData(data.event);
+    const { variables, overridden } = applyOverrides(
+      raiseEmailTemplateData(data.event),
+      data.overrides,
+    );
     const templateData: Record<string, unknown> = Object.fromEntries(
       Object.entries(variables).filter(([, v]) => v !== "" && v !== undefined),
     );
@@ -48,8 +105,9 @@ export const renderRaiseAdvanceEmailPreview = createServerFn({ method: "POST" })
     const subject =
       typeof entry.subject === "function" ? entry.subject(templateData as never) : entry.subject;
 
-    return { event: data.event, subject, html, text, variables };
+    return { event: data.event, subject, html, text, variables, overridden };
   });
+
 
 export type RaiseTestSendResult = { ok: true; email: string } | { ok: false; reason: string };
 
