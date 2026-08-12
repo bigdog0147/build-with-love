@@ -155,6 +155,7 @@ export function buildRaiseHistoryExportPreview(
       { label: "Investor", value: input.investorName },
       { label: "Date range", value: input.rangeLabel ?? "All dates" },
       { label: "Event types", value: input.filterLabel ?? "All event types" },
+      { label: "Changed fields", value: input.fieldLabel ?? "All changed fields" },
       { label: "Currency", value: input.currency },
     ],
     rowCount: input.events.length,
@@ -163,6 +164,7 @@ export function buildRaiseHistoryExportPreview(
       generatedAt,
       rangeSlug: input.rangeSlug,
       filterSlug: input.filterSlug,
+      fieldSlug: input.fieldSlug,
     }),
     pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
       /\.html$/,
