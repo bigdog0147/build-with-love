@@ -18,6 +18,9 @@ import {
   ChevronRight,
   Check,
   ScrollText,
+  Pause,
+  Play,
+  Radio,
 
   Search,
   Send,
