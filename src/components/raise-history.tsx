@@ -330,6 +330,34 @@ export function RaiseHistoryTimeline({
         </button>
         <button
           type="button"
+          onClick={() => setIncludeDiff((v) => !v)}
+          disabled={diffOnly}
+          aria-pressed={includeDiff}
+          aria-label={
+            diffOnly
+              ? "Before and after columns are always included in a diff-only export"
+              : includeDiff
+                ? "Exclude the before and after diff columns and visuals from exports"
+                : "Include the before and after diff columns and visuals in exports"
+          }
+          title={
+            diffOnly ? "Diff-only exports always show before and after values" : undefined
+          }
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            includeDiff && !diffOnly
+              ? "border-[var(--gold)]/60 bg-[var(--gold)]/10 text-[var(--gold)]"
+              : "border-border text-muted-foreground hover:border-[var(--gold)]/50 hover:text-foreground"
+          }`}
+        >
+          {includeDiff ? (
+            <Columns3 className="h-3.5 w-3.5" aria-hidden />
+          ) : (
+            <Columns2 className="h-3.5 w-3.5" aria-hidden />
+          )}
+          {includeDiff ? "Diff columns on" : "Diff columns off"}
+        </button>
+        <button
+          type="button"
           onClick={() => setPreviewOpen(true)}
           aria-haspopup="dialog"
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
@@ -349,7 +377,9 @@ export function RaiseHistoryTimeline({
                 filterSlug: exportInput.filterSlug,
                 fieldSlug: exportInput.fieldSlug,
                 diffOnly: exportInput.diffOnly,
+                includeDiff: exportInput.includeDiff,
               }),
+
 
               buildRaiseHistoryCsv(exportInput),
               "text/csv",
