@@ -105,8 +105,11 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
     ]);
 
     const byStatus: Record<DispatchStatus, number> = { sent, skipped, failed };
-    const selected = data.statuses.length ? data.statuses : DISPATCH_STATUSES;
-    const totalRows = selected.reduce((sum, s) => sum + byStatus[s], 0);
+    const selected: DispatchStatus[] = data.statuses.length
+      ? data.statuses
+      : [...DISPATCH_STATUSES];
+    const totalRows = selected.reduce<number>((sum, s) => sum + byStatus[s], 0);
+
     const totalPages = Math.max(Math.ceil(totalRows / data.pageSize), 1);
     const page = Math.min(data.page, totalPages);
     const offset = (page - 1) * data.pageSize;
