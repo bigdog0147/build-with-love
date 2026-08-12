@@ -13,9 +13,12 @@ import {
   ChevronDown,
   ChevronRight,
   ScrollText,
+  Search,
   Send,
   X,
 } from "lucide-react";
+import { DispatchLogDetailSheet } from "@/components/admin/dispatch-log-detail";
+
 
 import {
   DISPATCH_STATUSES,
