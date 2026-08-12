@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireAdminPermission, serviceClient } from "./admin-guard.server";
 import { resendIdempotencyKey } from "./dispatch-resend";
+import { normalizeAttemptTrail, type DispatchAttemptRow } from "./dispatch-attempts";
 
 /**
  * Admin-gated read of `notification_dispatch_log` — the append-only audit trail
@@ -12,15 +13,8 @@ import { resendIdempotencyKey } from "./dispatch-resend";
 export const DISPATCH_STATUSES = ["sent", "skipped", "failed"] as const;
 export type DispatchStatus = (typeof DISPATCH_STATUSES)[number];
 
-export type DispatchAttemptRow = {
-  attempt: number;
-  startedAt: string | null;
-  durationMs: number | null;
-  outcome: string;
-  error: string | null;
-  retryable: boolean;
-  backoffMs: number | null;
-};
+export type { DispatchAttemptRow };
+
 
 export type DispatchLogRow = {
   id: string;
