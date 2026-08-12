@@ -35,10 +35,21 @@ export type DispatchLogRow = {
 
 export type DispatchFilters = {
   template: string;
-  status: DispatchStatus | "";
+  /** Multi-select outcomes; empty means "all outcomes". */
+  statuses: DispatchStatus[];
   from: string | null;
   to: string | null;
   idempotencyKey: string;
+};
+
+export type DispatchFilterInput = {
+  template?: string;
+  /** Legacy single-select outcome, still accepted. */
+  status?: string;
+  statuses?: string[];
+  from?: string;
+  to?: string;
+  idempotencyKey?: string;
 };
 
 /** Normalizes a `YYYY-MM-DD` input into an ISO instant, or null when unusable. */
@@ -50,39 +61,40 @@ export function isoDayBoundary(value: string | undefined, endOfDay: boolean) {
 }
 
 /** Validates raw client filter input into the shared filter shape. */
-export function parseDispatchFilters(input: {
-  template?: string;
-  status?: string;
-  from?: string;
-  to?: string;
-  idempotencyKey?: string;
-}): DispatchFilters {
+export function parseDispatchFilters(input: DispatchFilterInput): DispatchFilters {
+  const raw = [...(input.statuses ?? []), ...(input.status ? [input.status] : [])];
+  const statuses = DISPATCH_STATUSES.filter((s) => raw.includes(s));
   return {
     template: (input.template ?? "").trim().slice(0, 120),
-    status: DISPATCH_STATUSES.includes(input.status as DispatchStatus)
-      ? (input.status as DispatchStatus)
-      : "",
+    statuses,
     from: isoDayBoundary(input.from, false),
     to: isoDayBoundary(input.to, true),
     idempotencyKey: (input.idempotencyKey ?? "").trim().slice(0, 200),
   };
 }
 
-/** Applies the active filters to any PostgREST builder for this table. */
-export function applyDispatchFilters<T>(builder: T, f: DispatchFilters): T {
+/**
+ * Applies the active filters to any PostgREST builder for this table.
+ * Pass `skipStatus` when the caller already constrains the outcome itself
+ * (used by the per-outcome count queries).
+ */
+export function applyDispatchFilters<T>(builder: T, f: DispatchFilters, skipStatus = false): T {
   let q = builder as never as {
     eq: (c: string, v: unknown) => typeof q;
+    in: (c: string, v: unknown[]) => typeof q;
     gte: (c: string, v: unknown) => typeof q;
     lte: (c: string, v: unknown) => typeof q;
     ilike: (c: string, v: string) => typeof q;
   };
   if (f.template) q = q.eq("template", f.template);
-  if (f.status) q = q.eq("status", f.status);
+  if (!skipStatus && f.statuses.length && f.statuses.length < DISPATCH_STATUSES.length)
+    q = q.in("status", f.statuses);
   if (f.from) q = q.gte("created_at", f.from);
   if (f.to) q = q.lte("created_at", f.to);
   if (f.idempotencyKey) q = q.ilike("idempotency_key", `%${f.idempotencyKey}%`);
   return q as never as T;
 }
+
 
 export function mapDispatchLogRow(r: Record<string, unknown>): DispatchLogRow {
   return {

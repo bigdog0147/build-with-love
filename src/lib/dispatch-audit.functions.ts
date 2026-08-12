@@ -8,6 +8,7 @@ import {
   applyDispatchFilters,
   mapDispatchLogRow,
   parseDispatchFilters,
+  type DispatchFilterInput,
 } from "./dispatch-audit-query";
 
 /**
@@ -56,12 +57,7 @@ export type DispatchLogResult = {
   totalPages: number;
 };
 
-type Input = {
-  template?: string;
-  status?: string;
-  from?: string;
-  to?: string;
-  idempotencyKey?: string;
+type Input = DispatchFilterInput & {
   page?: number;
   pageSize?: number;
 };
@@ -73,25 +69,10 @@ const MAX_PAGE_SIZE = 200;
 
 const normalizeTrail = normalizeAttemptTrail;
 
-
-
-function isoOrNull(value: string | undefined, endOfDay: boolean) {
-  const raw = (value ?? "").trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
-  const d = new Date(`${raw}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString();
-}
-
 export const listDispatchAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: Input) => ({
-    template: (input.template ?? "").trim().slice(0, 120),
-    status: DISPATCH_STATUSES.includes(input.status as DispatchStatus)
-      ? (input.status as DispatchStatus)
-      : "",
-    from: isoOrNull(input.from, false),
-    to: isoOrNull(input.to, true),
-    idempotencyKey: (input.idempotencyKey ?? "").trim().slice(0, 200),
+    ...parseDispatchFilters(input),
     page: Math.max(Math.trunc(Number(input.page) || 1), 1),
     pageSize: Math.min(
       Math.max(Math.trunc(Number(input.pageSize) || DEFAULT_PAGE_SIZE), 10),
@@ -102,30 +83,18 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
     await requireAdminPermission(context as never, "notifications");
     const db = await serviceClient();
 
-    /** Applies the active filters to any query builder for this table. */
-    const applyFilters = <T extends { eq: unknown }>(builder: T): T => {
-      let q = builder as never as {
-        eq: (c: string, v: unknown) => typeof q;
-        gte: (c: string, v: unknown) => typeof q;
-        lte: (c: string, v: unknown) => typeof q;
-        ilike: (c: string, v: string) => typeof q;
-      };
-      if (data.template) q = q.eq("template", data.template);
-      if (data.status) q = q.eq("status", data.status);
-      if (data.from) q = q.gte("created_at", data.from);
-      if (data.to) q = q.lte("created_at", data.to);
-      if (data.idempotencyKey) q = q.ilike("idempotency_key", `%${data.idempotencyKey}%`);
-      return q as never as T;
-    };
+    const applyFilters = <T,>(builder: T): T => applyDispatchFilters(builder, data);
 
-    // Outcome counts across the whole filtered set, so the summary line and the
-    // page navigation describe the same universe of rows.
+    // Outcome counts across the whole filtered set (ignoring the outcome filter
+    // itself), so the chips always show how many rows each outcome would yield.
     const statusCount = async (status: DispatchStatus) => {
-      const { count } = await applyFilters(
+      const { count } = await applyDispatchFilters(
         db
           .from("notification_dispatch_log")
           .select("id", { count: "exact", head: true })
           .eq("status", status),
+        data,
+        true,
       );
       return count ?? 0;
     };
@@ -135,16 +104,16 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       statusCount("failed"),
     ]);
 
-    const totalRows = data.status
-      ? data.status === "sent"
-        ? sent
-        : data.status === "failed"
-          ? failed
-          : skipped
-      : sent + skipped + failed;
+    const byStatus: Record<DispatchStatus, number> = { sent, skipped, failed };
+    const selected: DispatchStatus[] = data.statuses.length
+      ? data.statuses
+      : [...DISPATCH_STATUSES];
+    const totalRows = selected.reduce<number>((sum, s) => sum + byStatus[s], 0);
+
     const totalPages = Math.max(Math.ceil(totalRows / data.pageSize), 1);
     const page = Math.min(data.page, totalPages);
     const offset = (page - 1) * data.pageSize;
+
 
     const { data: raw, error } = await applyFilters(
       db
