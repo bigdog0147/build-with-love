@@ -308,6 +308,7 @@ export function buildRaiseHistoryReportHtml(
       ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
       Date range: ${escape(input.rangeLabel ?? "All dates")}.
       Event types: ${escape(input.filterLabel ?? "All event types")}.
+      Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
       All timestamps are shown in UTC.
     </p>
     <table>
