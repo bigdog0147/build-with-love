@@ -145,17 +145,25 @@ export function RaiseHistoryTimeline({
 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+  const [fields, setFields] = useState<string[]>([]);
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const [previewOpen, setPreviewOpen] = useState(false);
   const focusedRef = useRef<HTMLLIElement | null>(null);
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
+  const fieldOptions = useMemo(() => raiseHistoryFields(events), [events]);
+  const fieldCounts = useMemo(() => raiseHistoryFieldCounts(events), [events]);
   const visible = useMemo(
-    () => filterRaiseHistoryByRange(filterRaiseHistory(events, active), range),
-    [events, active, range],
+    () =>
+      filterRaiseHistoryByFields(
+        filterRaiseHistoryByRange(filterRaiseHistory(events, active), range),
+        fields,
+      ),
+    [events, active, range, fields],
   );
   const rangeActive = hasRaiseHistoryRange(range);
   const rangeLabel = raiseHistoryRangeLabel(range);
+  const fieldsActive = hasRaiseFieldFilter(fields);
 
   const deepLinked =
     roundId && target && target.roundId === roundId && raiseEventExists(events, target.eventKey)
@@ -168,6 +176,7 @@ export function RaiseHistoryTimeline({
     if (!deepLinked) return;
     setOpen(true);
     setActive([]);
+    setFields([]);
     setRange(EMPTY_RAISE_HISTORY_RANGE);
   }, [deepLinked]);
 
@@ -192,7 +201,13 @@ export function RaiseHistoryTimeline({
     rangeSlug: raiseHistoryRangeSlug(range),
     filterLabel: raiseHistoryFilterLabel(active),
     filterSlug: raiseHistoryFilterSlug(active),
+    fieldLabel: raiseHistoryFieldLabel(fields),
+    fieldSlug: raiseHistoryFieldSlug(fields),
   };
+
+  const toggleField = (field: string) =>
+    setFields((prev) => (prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]));
+
 
   const confirmationCount = downloadableRaiseEvents(events).length;
 
