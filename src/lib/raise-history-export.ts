@@ -32,6 +32,12 @@ export interface RaiseHistoryExportInput {
   fieldSlug?: string | null;
   /** When true, export only the changed fields of each transition. */
   diffOnly?: boolean;
+  /**
+   * When false, the full-history export drops the before/after diff columns
+   * and the inline diff visuals from the printable statement. Defaults to true.
+   */
+  includeDiff?: boolean;
+
 
 }
 
