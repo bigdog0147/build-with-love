@@ -388,10 +388,15 @@ export function buildRaiseHistoryReportHtml(
     <h1>${escape(title)}</h1>
     <p class="lede">
       ${escape(input.roundName)} — prepared for ${escape(input.investorName)}.
-      ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
+      ${
+        input.diffOnly
+          ? `${diffEvents.length} ${diffEvents.length === 1 ? "transition" : "transitions"} with recorded changes, oldest first.`
+          : `${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.`
+      }
       Date range: ${escape(input.rangeLabel ?? "All dates")}.
       Event types: ${escape(input.filterLabel ?? "All event types")}.
       Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
+      Export mode: ${escape(modeLabel(input.diffOnly))}.
       All timestamps are shown in UTC.
     </p>
     <table>
@@ -399,12 +404,19 @@ export function buildRaiseHistoryReportHtml(
         <tr>
           <th>Stage</th>
           <th>Timestamp</th>
-          <th>Recorded by</th>
-          <th class="num">Amount</th>
+          <th>${input.diffOnly ? "Field" : "Recorded by"}</th>
+          ${input.diffOnly ? `<th>Before &rarr; After</th>` : `<th class="num">Amount</th>`}
         </tr>
       </thead>
       <tbody>
-        ${rows || `<tr><td colspan="4">No status events recorded yet.</td></tr>`}
+        ${
+          rows ||
+          `<tr><td colspan="4">${
+            input.diffOnly
+              ? "No field changes were recorded for the selected transitions."
+              : "No status events recorded yet."
+          }</td></tr>`
+        }
       </tbody>
     </table>
     <footer>
@@ -421,7 +433,8 @@ export function buildRaiseHistoryReportHtml(
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
     }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
       input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
-    }-${generatedAt.slice(0, 10)}.html`,
+    }${input.diffOnly ? "-diff-only" : ""}-${generatedAt.slice(0, 10)}.html`,
+
     title,
     html,
   };
