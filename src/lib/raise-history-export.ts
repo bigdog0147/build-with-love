@@ -30,6 +30,9 @@ export interface RaiseHistoryExportInput {
   fieldLabel?: string | null;
   /** Compact changed-field slug appended to export file names. */
   fieldSlug?: string | null;
+  /** When true, export only the changed fields of each transition. */
+  diffOnly?: boolean;
+
 }
 
 export interface RaiseHistoryExportDocument {
@@ -110,6 +113,19 @@ const HEADERS = [
 /** Ordered column names of the export, matching HEADERS. */
 export const RAISE_HISTORY_EXPORT_COLUMNS: readonly string[] = HEADERS;
 
+const DIFF_HEADERS = [
+  "Stage",
+  "Timestamp (ISO 8601)",
+  "Timestamp (UTC)",
+  "Actor",
+  "Field",
+  "Before",
+  "After",
+] as const;
+
+/** Ordered column names of the diff-only export (one row per changed field). */
+export const RAISE_HISTORY_DIFF_COLUMNS: readonly string[] = DIFF_HEADERS;
+
 /** One export row: the exact cell values written to CSV, in column order. */
 export function historyRowCells(event: RaiseHistoryEvent, currency: string): string[] {
   return [
@@ -130,6 +146,36 @@ export function historyRowCells(event: RaiseHistoryEvent, currency: string): str
   ];
 }
 
+/**
+ * Diff-only rows: one row per changed field, so transitions that recorded no
+ * change are dropped entirely from the export.
+ */
+export function historyDiffRowCells(event: RaiseHistoryEvent): string[][] {
+  return (event.changes ?? []).map((change) => [
+    event.label,
+    event.at ?? "",
+    formatHistoryStamp(event.at),
+    event.actor,
+    change.field,
+    change.from ?? "—",
+    change.to ?? "—",
+  ]);
+}
+
+/** Column list for the requested export mode. */
+export function exportColumns(input: RaiseHistoryExportInput): readonly string[] {
+  return input.diffOnly ? RAISE_HISTORY_DIFF_COLUMNS : RAISE_HISTORY_EXPORT_COLUMNS;
+}
+
+/** Data rows for the requested export mode, oldest event first. */
+export function exportRows(input: RaiseHistoryExportInput): string[][] {
+  if (input.diffOnly) return input.events.flatMap((event) => historyDiffRowCells(event));
+  return input.events.map((event) => historyRowCells(event, input.currency));
+}
+
+const modeLabel = (diffOnly?: boolean) =>
+  diffOnly ? "Changed fields only" : "Full history";
+
 export interface RaiseHistoryExportPreview {
   columns: readonly string[];
   rows: string[][];
@@ -147,24 +193,27 @@ export function buildRaiseHistoryExportPreview(
   input: RaiseHistoryExportInput,
 ): RaiseHistoryExportPreview {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const rows = exportRows(input);
   return {
-    columns: RAISE_HISTORY_EXPORT_COLUMNS,
-    rows: input.events.map((event) => historyRowCells(event, input.currency)),
+    columns: exportColumns(input),
+    rows,
     meta: [
       { label: "Round", value: input.roundName },
       { label: "Investor", value: input.investorName },
       { label: "Date range", value: input.rangeLabel ?? "All dates" },
       { label: "Event types", value: input.filterLabel ?? "All event types" },
       { label: "Changed fields", value: input.fieldLabel ?? "All changed fields" },
+      { label: "Export mode", value: modeLabel(input.diffOnly) },
       { label: "Currency", value: input.currency },
     ],
-    rowCount: input.events.length,
+    rowCount: rows.length,
     csvFileName: raiseHistoryCsvFileName({
       roundName: input.roundName,
       generatedAt,
       rangeSlug: input.rangeSlug,
       filterSlug: input.filterSlug,
       fieldSlug: input.fieldSlug,
+      diffOnly: input.diffOnly,
     }),
     pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
       /\.html$/,
@@ -176,6 +225,7 @@ export function buildRaiseHistoryExportPreview(
 /** Full status history as CSV, oldest event first. */
 export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
+  const rows = exportRows(input);
   const lines: string[] = [];
 
   lines.push(["Round", input.roundName].map(csvCell).join(","));
@@ -184,12 +234,14 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Date range", input.rangeLabel ?? "All dates"].map(csvCell).join(","));
   lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
   lines.push(["Changed fields", input.fieldLabel ?? "All changed fields"].map(csvCell).join(","));
+  lines.push(["Export mode", modeLabel(input.diffOnly)].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
+  if (input.diffOnly) lines.push(["Changes", rows.length].map(csvCell).join(","));
   lines.push("");
-  lines.push(HEADERS.map(csvCell).join(","));
+  lines.push(exportColumns(input).map(csvCell).join(","));
 
-  for (const event of input.events) {
-    lines.push(historyRowCells(event, input.currency).map(csvCell).join(","));
+  for (const row of rows) {
+    lines.push(row.map(csvCell).join(","));
   }
 
   return lines.join("\r\n");
@@ -202,13 +254,16 @@ export function raiseHistoryCsvFileName(input: {
   rangeSlug?: string | null;
   filterSlug?: string | null;
   fieldSlug?: string | null;
+  diffOnly?: boolean;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
   const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
   const fields = input.fieldSlug ? `-${slug(input.fieldSlug)}` : "";
-  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}-${stamp}.csv`;
+  const mode = input.diffOnly ? "-diff-only" : "";
+  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}${mode}-${stamp}.csv`;
 }
+
 
 /** Printable statement of the full status history, ready to save as PDF. */
 export function buildRaiseHistoryReportHtml(
@@ -217,9 +272,36 @@ export function buildRaiseHistoryReportHtml(
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const title = "Capital Raising — Status History";
 
-  const rows = input.events
-    .map(
-      (event) => `<tr>
+  const diffEvents = input.diffOnly
+    ? input.events.filter((event) => (event.changes ?? []).length > 0)
+    : [];
+
+  const rows = input.diffOnly
+    ? diffEvents
+        .flatMap((event) =>
+          (event.changes ?? []).map(
+            (c) => `<tr>
+          <td>
+            <strong>${escape(event.label)}</strong>
+            <div class="ref">${escape(event.actor)}</div>
+          </td>
+          <td>
+            ${escape(formatHistoryStamp(event.at))}
+            ${event.at ? `<div class="ref">${escape(event.at)}</div>` : ""}
+          </td>
+          <td>${escape(c.field)}</td>
+          <td>
+            <span class="was">${escape(c.from ?? "—")}</span>
+            <span class="arrow">&rarr;</span>
+            <span class="now">${escape(c.to ?? "—")}</span>
+          </td>
+        </tr>`,
+          ),
+        )
+        .join("\n        ")
+    : input.events
+        .map(
+          (event) => `<tr>
           <td>
             <strong>${escape(event.label)}</strong>
             <div class="detail">${escape(event.detail)}</div>
@@ -246,8 +328,9 @@ export function buildRaiseHistoryReportHtml(
           <td>${escape(event.actor)}</td>
           <td class="num">${escape(formatMoney(event.amount ?? null, input.currency))}</td>
         </tr>`,
-    )
-    .join("\n        ");
+        )
+        .join("\n        ");
+
 
   const html = `<!doctype html>
 <html lang="en">
@@ -305,10 +388,15 @@ export function buildRaiseHistoryReportHtml(
     <h1>${escape(title)}</h1>
     <p class="lede">
       ${escape(input.roundName)} — prepared for ${escape(input.investorName)}.
-      ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
+      ${
+        input.diffOnly
+          ? `${diffEvents.length} ${diffEvents.length === 1 ? "transition" : "transitions"} with recorded changes, oldest first.`
+          : `${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.`
+      }
       Date range: ${escape(input.rangeLabel ?? "All dates")}.
       Event types: ${escape(input.filterLabel ?? "All event types")}.
       Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
+      Export mode: ${escape(modeLabel(input.diffOnly))}.
       All timestamps are shown in UTC.
     </p>
     <table>
@@ -316,12 +404,19 @@ export function buildRaiseHistoryReportHtml(
         <tr>
           <th>Stage</th>
           <th>Timestamp</th>
-          <th>Recorded by</th>
-          <th class="num">Amount</th>
+          <th>${input.diffOnly ? "Field" : "Recorded by"}</th>
+          ${input.diffOnly ? `<th>Before &rarr; After</th>` : `<th class="num">Amount</th>`}
         </tr>
       </thead>
       <tbody>
-        ${rows || `<tr><td colspan="4">No status events recorded yet.</td></tr>`}
+        ${
+          rows ||
+          `<tr><td colspan="4">${
+            input.diffOnly
+              ? "No field changes were recorded for the selected transitions."
+              : "No status events recorded yet."
+          }</td></tr>`
+        }
       </tbody>
     </table>
     <footer>
@@ -338,7 +433,8 @@ export function buildRaiseHistoryReportHtml(
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
     }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
       input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
-    }-${generatedAt.slice(0, 10)}.html`,
+    }${input.diffOnly ? "-diff-only" : ""}-${generatedAt.slice(0, 10)}.html`,
+
     title,
     html,
   };
