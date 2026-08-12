@@ -210,7 +210,11 @@ function DispatchLogPage() {
   const fetchLog = useServerFn(listDispatchAuditLog);
 
   const [template, setTemplate] = useState("");
-  const [status, setStatus] = useState("");
+  const [statuses, setStatuses] = useState<DispatchStatus[]>([]);
+
+  /** Adds/removes one outcome from the multi-select chip filter. */
+  const toggleStatus = (s: DispatchStatus) =>
+    setStatuses((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [keyInput, setKeyInput] = useState("");
@@ -222,7 +226,7 @@ function DispatchLogPage() {
     queryKey: [
       "admin-dispatch-log",
       template,
-      status,
+      statuses.join(","),
       from,
       to,
       idempotencyKey,
@@ -230,7 +234,7 @@ function DispatchLogPage() {
       pageSize,
     ],
     queryFn: () =>
-      fetchLog({ data: { template, status, from, to, idempotencyKey, page, pageSize } }),
+      fetchLog({ data: { template, statuses, from, to, idempotencyKey, page, pageSize } }),
     retry: false,
   });
 
@@ -259,7 +263,7 @@ function DispatchLogPage() {
 
   const rows = log.data?.rows ?? [];
   const counts = log.data?.counts;
-  const filtered = Boolean(template || status || from || to || idempotencyKey);
+  const filtered = Boolean(template || statuses.length || from || to || idempotencyKey);
 
   // Any filter change re-opens the audit trail from the newest page.
   const currentPage = log.data?.page ?? page;
@@ -277,7 +281,7 @@ function DispatchLogPage() {
   const clearAll = () => {
     applyFilter(() => {
       setTemplate("");
-      setStatus("");
+      setStatuses([]);
       setFrom("");
       setTo("");
       setKeyInput("");
@@ -300,7 +304,7 @@ function DispatchLogPage() {
       "dispatch-audit",
       scope,
       template || null,
-      status || null,
+      statuses.length ? statuses.join("+") : null,
       from || null,
       to || null,
       idempotencyKey ? "key" : null,
@@ -318,7 +322,7 @@ function DispatchLogPage() {
     setExportingAll(true);
     try {
       const result = await fetchExport({
-        data: { template, status, from, to, idempotencyKey },
+        data: { template, statuses, from, to, idempotencyKey },
       });
       if (!result.rows.length) {
         toast.info("Nothing to export", { description: "No rows match the current filters." });
