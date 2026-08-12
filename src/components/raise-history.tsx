@@ -223,6 +223,8 @@ export function RaiseHistoryTimeline({
     fieldLabel: raiseHistoryFieldLabel(fields),
     fieldSlug: raiseHistoryFieldSlug(fields),
     diffOnly,
+    includeDiff,
+
   };
 
 
