@@ -183,6 +183,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Generated", generatedAt].map(csvCell).join(","));
   lines.push(["Date range", input.rangeLabel ?? "All dates"].map(csvCell).join(","));
   lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
+  lines.push(["Changed fields", input.fieldLabel ?? "All changed fields"].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   lines.push("");
   lines.push(HEADERS.map(csvCell).join(","));
@@ -200,11 +201,13 @@ export function raiseHistoryCsvFileName(input: {
   generatedAt?: string;
   rangeSlug?: string | null;
   filterSlug?: string | null;
+  fieldSlug?: string | null;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
   const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
-  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}-${stamp}.csv`;
+  const fields = input.fieldSlug ? `-${slug(input.fieldSlug)}` : "";
+  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}-${stamp}.csv`;
 }
 
 /** Printable statement of the full status history, ready to save as PDF. */
