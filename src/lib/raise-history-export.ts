@@ -26,6 +26,10 @@ export interface RaiseHistoryExportInput {
   filterLabel?: string | null;
   /** Compact filter slug appended to export file names. */
   filterSlug?: string | null;
+  /** Human label for the active changed-field filter, when any is applied. */
+  fieldLabel?: string | null;
+  /** Compact changed-field slug appended to export file names. */
+  fieldSlug?: string | null;
 }
 
 export interface RaiseHistoryExportDocument {
