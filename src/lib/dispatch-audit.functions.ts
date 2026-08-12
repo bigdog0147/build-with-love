@@ -40,8 +40,14 @@ export type DispatchLogRow = {
 export type DispatchLogResult = {
   rows: DispatchLogRow[];
   templates: string[];
+  /** Counts across every row matching the filters, not just the current page. */
   counts: { sent: number; skipped: number; failed: number; total: number };
   hasMore: boolean;
+  page: number;
+  pageSize: number;
+  /** Total matching rows (capped at the audit read ceiling). */
+  totalRows: number;
+  totalPages: number;
 };
 
 type Input = {
@@ -50,12 +56,17 @@ type Input = {
   from?: string;
   to?: string;
   idempotencyKey?: string;
-  limit?: number;
+  page?: number;
+  pageSize?: number;
 };
 
-const MAX_ROWS = 300;
+/** Selectable rows per page in the audit viewer. */
+export const DISPATCH_PAGE_SIZES = [25, 50, 100, 200] as const;
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 200;
 
 const normalizeTrail = normalizeAttemptTrail;
+
 
 
 function isoOrNull(value: string | undefined, endOfDay: boolean) {
