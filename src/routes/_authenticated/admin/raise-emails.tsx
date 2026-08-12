@@ -99,10 +99,13 @@ function RaiseEmailPreviewPage() {
     retry: false,
   });
 
-  const baseVariables = useMemo(
-    () => preview.data?.variables ?? ({} as Record<string, unknown>),
-    [preview.data],
-  );
+  // Defaults for the editor fields, always rendered from untouched sample data.
+  const defaults = useQuery({
+    queryKey: ["raise-email-preview", event, {}],
+    queryFn: () => renderPreview({ data: { event, overrides: {} } }),
+    retry: false,
+  });
+  const baseVariables = (defaults.data?.variables ?? {}) as Record<string, unknown>;
 
   const views: { key: View; label: string; icon: typeof Eye }[] = [
     { key: "rendered", label: "Rendered", icon: Eye },
