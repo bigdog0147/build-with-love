@@ -9,13 +9,23 @@ import {
   Columns2,
   Columns3,
   GitCompareArrows,
-
-
+  Bookmark,
+  BookmarkPlus,
+  Trash2,
   Link2,
   SlidersHorizontal,
   Table2,
   X,
 } from "lucide-react";
+import {
+  loadRaiseFieldPresets,
+  presetFieldsMatch,
+  presetSummary,
+  removeRaiseFieldPreset,
+  saveRaiseFieldPresets,
+  upsertRaiseFieldPreset,
+  type RaiseFieldPreset,
+} from "@/lib/raise-field-presets";
 import {
   RAISE_TRANSITION_STATEMENT_TITLE,
   downloadRaiseTransitionStatement,
@@ -167,7 +177,15 @@ export function RaiseHistoryTimeline({
 
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [presets, setPresets] = useState<RaiseFieldPreset[]>([]);
+  const [presetName, setPresetName] = useState("");
   const focusedRef = useRef<HTMLLIElement | null>(null);
+
+  // Presets live in localStorage, so they load after hydration.
+  useEffect(() => {
+    setPresets(loadRaiseFieldPresets());
+  }, []);
+
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
   const fieldOptions = useMemo(() => raiseHistoryFields(events), [events]);
@@ -527,6 +545,101 @@ export function RaiseHistoryTimeline({
           )}
         </div>
       )}
+
+      {fieldOptions.length > 0 && (
+        <div className="mt-3 rounded-lg border border-border/70 bg-muted/10 p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground">
+              <Bookmark className="h-3.5 w-3.5" aria-hidden />
+              Saved field filters
+            </span>
+            {presets.length === 0 && (
+              <span className="text-xs text-muted-foreground">
+                Pick changed fields above, then save the combination to reuse it later.
+              </span>
+            )}
+            {presets.map((preset) => {
+              const on = presetFieldsMatch(preset.fields, fields);
+              return (
+                <span
+                  key={preset.id}
+                  className={`inline-flex items-center gap-1 rounded-full border pl-2.5 pr-1 py-0.5 text-[11px] transition-colors ${
+                    on
+                      ? "border-[var(--gold)]/60 bg-[var(--gold)]/12 text-[var(--gold)]"
+                      : "border-border text-muted-foreground"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setFields(preset.fields)}
+                    aria-pressed={on}
+                    title={presetSummary(preset)}
+                    className="uppercase tracking-widest hover:text-foreground"
+                  >
+                    {preset.name}
+                    <span className="ml-1.5 opacity-70">{preset.fields.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = removeRaiseFieldPreset(presets, preset.id);
+                      setPresets(next);
+                      saveRaiseFieldPresets(next);
+                      toast.success(`Removed the “${preset.name}” filter preset.`);
+                    }}
+                    aria-label={`Delete the ${preset.name} field filter preset`}
+                    className="rounded-full p-1 text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Trash2 className="h-3 w-3" aria-hidden />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <label className="sr-only" htmlFor="raise-field-preset-name">
+              Preset name
+            </label>
+            <input
+              id="raise-field-preset-name"
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              maxLength={48}
+              placeholder={fieldsActive ? "Name this field selection" : "Select fields first"}
+              disabled={!fieldsActive}
+              className="w-52 rounded-lg border border-border bg-background px-2.5 py-1 text-xs outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-[var(--gold)]/60 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              disabled={!fieldsActive || presetName.trim().length === 0}
+              onClick={() => {
+                const { presets: next, preset, replaced } = upsertRaiseFieldPreset(presets, {
+                  name: presetName,
+                  fields,
+                });
+                setPresets(next);
+                saveRaiseFieldPresets(next);
+                setPresetName("");
+                toast.success(
+                  replaced
+                    ? `Updated the “${preset.name}” filter preset.`
+                    : `Saved “${preset.name}” with ${preset.fields.length} ${
+                        preset.fields.length === 1 ? "field" : "fields"
+                      }.`,
+                );
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs text-[var(--gold)] transition-colors hover:border-[var(--gold)]/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <BookmarkPlus className="h-3.5 w-3.5" aria-hidden />
+              Save current fields
+            </button>
+            <span className="text-xs text-muted-foreground">
+              Presets stay on this device and reapply the changed-field filter used by exports.
+            </span>
+          </div>
+        </div>
+      )}
+
 
 
 
