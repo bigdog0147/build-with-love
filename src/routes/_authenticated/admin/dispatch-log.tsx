@@ -157,6 +157,8 @@ function csv(rows: DispatchLogRow[]) {
     "User",
     "Last failure",
     "Total attempt ms",
+    "Skip event",
+    "Skip preference",
   ];
   const cell = (v: string | number | boolean | null) => {
     const s = v === null || v === undefined ? "" : String(v);
@@ -176,6 +178,8 @@ function csv(rows: DispatchLogRow[]) {
       r.userId ?? "",
       [...r.attemptTrail].reverse().find((a) => a.error)?.error ?? "",
       r.attemptTrail.reduce((sum, a) => sum + (a.durationMs ?? 0), 0),
+      parseSkipReason(r.detail)?.event ?? "",
+      parseSkipReason(r.detail)?.source ?? "",
     ]
       .map(cell)
       .join(","),
