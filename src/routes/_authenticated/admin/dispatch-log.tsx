@@ -11,7 +11,11 @@ import {
   Loader2,
   RefreshCw,
   ChevronDown,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
   ChevronRight,
+
   ScrollText,
   Search,
   Send,
@@ -21,12 +25,14 @@ import { DispatchLogDetailSheet } from "@/components/admin/dispatch-log-detail";
 
 
 import {
+  DISPATCH_PAGE_SIZES,
   DISPATCH_STATUSES,
   listDispatchAuditLog,
   resendDispatchJob,
   type DispatchAttemptRow,
   type DispatchLogRow,
 } from "@/lib/dispatch-audit.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/dispatch-log")({
   component: DispatchLogPage,
@@ -199,10 +205,22 @@ function DispatchLogPage() {
   const [to, setTo] = useState("");
   const [keyInput, setKeyInput] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(50);
 
   const log = useQuery({
-    queryKey: ["admin-dispatch-log", template, status, from, to, idempotencyKey],
-    queryFn: () => fetchLog({ data: { template, status, from, to, idempotencyKey } }),
+    queryKey: [
+      "admin-dispatch-log",
+      template,
+      status,
+      from,
+      to,
+      idempotencyKey,
+      page,
+      pageSize,
+    ],
+    queryFn: () =>
+      fetchLog({ data: { template, status, from, to, idempotencyKey, page, pageSize } }),
     retry: false,
   });
 
@@ -211,6 +229,7 @@ function DispatchLogPage() {
 
   const toggleRow = (id: string) =>
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+
 
   const resendFn = useServerFn(resendDispatchJob);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -232,14 +251,30 @@ function DispatchLogPage() {
   const counts = log.data?.counts;
   const filtered = Boolean(template || status || from || to || idempotencyKey);
 
-  const clearAll = () => {
-    setTemplate("");
-    setStatus("");
-    setFrom("");
-    setTo("");
-    setKeyInput("");
-    setIdempotencyKey("");
+  // Any filter change re-opens the audit trail from the newest page.
+  const currentPage = log.data?.page ?? page;
+  const totalPages = log.data?.totalPages ?? 1;
+  const totalRows = log.data?.totalRows ?? 0;
+  const firstRow = rows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const lastRow = rows.length === 0 ? 0 : firstRow + rows.length - 1;
+
+  const applyFilter = (fn: () => void) => {
+    fn();
+    setPage(1);
+    setExpanded({});
   };
+
+  const clearAll = () => {
+    applyFilter(() => {
+      setTemplate("");
+      setStatus("");
+      setFrom("");
+      setTo("");
+      setKeyInput("");
+      setIdempotencyKey("");
+    });
+  };
+
 
   const exportCsv = () => {
     if (!rows.length) return;
@@ -317,14 +352,14 @@ function DispatchLogPage() {
       <section className="mt-6 space-y-4 rounded-xl border border-border p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Status</span>
-          <button type="button" onClick={() => setStatus("")} className={chip(status === "")}>
+          <button type="button" onClick={() => applyFilter(() => setStatus(""))} className={chip(status === "")}>
             All outcomes
           </button>
           {DISPATCH_STATUSES.map((s) => (
             <button
               key={s}
               type="button"
-              onClick={() => setStatus(s)}
+              onClick={() => applyFilter(() => setStatus(s))}
               aria-pressed={status === s}
               className={chip(status === s)}
             >
@@ -337,14 +372,14 @@ function DispatchLogPage() {
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
             Template
           </span>
-          <button type="button" onClick={() => setTemplate("")} className={chip(template === "")}>
+          <button type="button" onClick={() => applyFilter(() => setTemplate(""))} className={chip(template === "")}>
             All templates
           </button>
           {(log.data?.templates ?? []).map((t) => (
             <button
               key={t}
               type="button"
-              onClick={() => setTemplate(t)}
+              onClick={() => applyFilter(() => setTemplate(t))}
               aria-pressed={template === t}
               className={`${chip(template === t)} font-mono`}
             >
@@ -365,7 +400,7 @@ function DispatchLogPage() {
               type="date"
               value={from}
               max={to || undefined}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => applyFilter(() => setFrom(e.target.value))}
               className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
             />
           </label>
@@ -375,14 +410,14 @@ function DispatchLogPage() {
               type="date"
               value={to}
               min={from || undefined}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => applyFilter(() => setTo(e.target.value))}
               className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
             />
           </label>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setIdempotencyKey(keyInput.trim());
+              applyFilter(() => setIdempotencyKey(keyInput.trim()));
             }}
             className="text-[11px] uppercase tracking-wider text-muted-foreground"
           >
@@ -406,20 +441,43 @@ function DispatchLogPage() {
               ? "Loading dispatch history…"
               : counts
                 ? `${counts.total} job${counts.total === 1 ? "" : "s"} — ${counts.sent} sent, ${counts.skipped} skipped, ${counts.failed} failed${
-                    log.data?.hasMore ? " (showing the most recent page)" : ""
+                    totalRows > 0
+                      ? ` · showing ${firstRow}–${lastRow} (page ${currentPage} of ${totalPages})`
+                      : ""
                   }`
                 : ""}
           </p>
-          {filtered ? (
-            <button
-              type="button"
-              onClick={clearAll}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
-            >
-              <X className="h-3 w-3" /> Clear filters
-            </button>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+              Rows per page
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setPage(1);
+                  setExpanded({});
+                }}
+                className="rounded-lg border border-border bg-transparent px-2 py-1 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
+              >
+                {DISPATCH_PAGE_SIZES.map((size) => (
+                  <option key={size} value={size} className="bg-background">
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {filtered ? (
+              <button
+                type="button"
+                onClick={clearAll}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+              >
+                <X className="h-3 w-3" /> Clear filters
+              </button>
+            ) : null}
+          </div>
         </div>
+
       </section>
 
       <section className="mt-4 overflow-x-auto rounded-xl border border-border">
@@ -534,7 +592,9 @@ function DispatchLogPage() {
                       ) : (
                         <Send className="h-3 w-3" />
                       )}
+                      Resend
                     </button>
+
                     <button
                       type="button"
                       onClick={() => setDetailId(r.id)}
@@ -565,7 +625,70 @@ function DispatchLogPage() {
         )}
       </section>
 
+      {totalRows > 0 ? (
+        <nav
+          aria-label="Dispatch log pages"
+          className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-3"
+        >
+          <p className="text-[11px] text-muted-foreground">
+            Showing {firstRow}–{lastRow} of {totalRows} job{totalRows === 1 ? "" : "s"}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setPage(1);
+                setExpanded({});
+              }}
+              disabled={currentPage <= 1 || log.isFetching}
+              className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              aria-label="First page"
+            >
+              <ChevronsLeft className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(Math.max(currentPage - 1, 1));
+                setExpanded({});
+              }}
+              disabled={currentPage <= 1 || log.isFetching}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+            >
+              <ChevronLeft className="h-3 w-3" /> Previous
+            </button>
+            <span aria-live="polite" className="px-1 text-[11px] text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(Math.min(currentPage + 1, totalPages));
+                setExpanded({});
+              }}
+              disabled={currentPage >= totalPages || log.isFetching}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+            >
+              Next <ChevronRight className="h-3 w-3" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPage(totalPages);
+                setExpanded({});
+              }}
+              disabled={currentPage >= totalPages || log.isFetching}
+              className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border disabled:hover:text-muted-foreground"
+              aria-label="Last page"
+            >
+              <ChevronsRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </nav>
+      ) : null}
+
       <DispatchLogDetailSheet id={detailId} onClose={() => setDetailId(null)} />
+
     </main>
 
   );
