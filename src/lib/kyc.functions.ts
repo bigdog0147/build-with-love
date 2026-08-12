@@ -47,7 +47,14 @@ export const saveKyc = createServerFn({ method: "POST" })
   .inputValidator((input: Partial<KycProfile>) => input)
   .handler(async ({ data, context }): Promise<KycProfile> => {
     const { supabase, userId } = context;
-    const { user_id: _ignore, ...patch } = data as Partial<KycProfile> & { user_id?: string };
+    const {
+      user_id: _ignore,
+      // Verification outcome fields are decided by compliance, never by the customer.
+      id_status: _status,
+      email_verified: _email,
+      phone_verified: _phone,
+      ...patch
+    } = data as Partial<KycProfile> & { user_id?: string };
     const res = await supabase
       .from("kyc_profiles")
       .update(patch)
@@ -62,8 +69,27 @@ export const submitKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<KycProfile> => {
     const { supabase, userId, claims } = context;
-    // Move from submitted -> under_review immediately for demo UX.
-    const res = await supabase
+    // Only a submission from a not-yet-decided record may enter review; a
+    // verified/rejected decision can never be set by the customer.
+    const current = await supabase
+      .from("kyc_profiles")
+      .select("id_status, doc_type, doc_front_path, selfie_path, full_legal_name")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (current.error) throw new Error(current.error.message);
+    if (!current.data) throw new Error("Verification record not found.");
+    const currentStatus = current.data.id_status as string;
+    if (currentStatus === "verified" || currentStatus === "under_review") {
+      throw new Error("Your verification is already in review.");
+    }
+    if (!current.data.full_legal_name || !current.data.doc_type || !current.data.doc_front_path) {
+      throw new Error("Complete your details and upload your ID before submitting.");
+    }
+
+    // Status is a protected column; the transition runs through the privileged
+    // client after the server-side checks above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const res = await supabaseAdmin
       .from("kyc_profiles")
       .update({ id_status: "under_review", current_step: 6 })
       .eq("user_id", userId)
