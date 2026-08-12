@@ -244,6 +244,49 @@ function DispatchLogPage() {
     retry: false,
   });
 
+  // ---- live updates ----------------------------------------------------
+  const [live, setLive] = useState(true);
+  const [pendingLive, setPendingLive] = useState(0);
+  const [liveStatus, setLiveStatus] = useState<"connecting" | "live" | "paused">("connecting");
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const refetchRef = useRef(log.refetch);
+  refetchRef.current = log.refetch;
+  const onFirstPage = page === 1;
+
+  useEffect(() => {
+    if (!live) {
+      setLiveStatus("paused");
+      return;
+    }
+    setLiveStatus("connecting");
+    const channel = supabase
+      .channel("admin-dispatch-log-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notification_dispatch_log" },
+        () => {
+          if (!liveRef.current) return;
+          if (onFirstPage) {
+            void refetchRef.current();
+            setPendingLive((n) => n + 1);
+          } else {
+            setPendingLive((n) => n + 1);
+          }
+        },
+      )
+      .subscribe((status) => {
+        setLiveStatus(status === "SUBSCRIBED" ? "live" : "connecting");
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [live, onFirstPage]);
+
+  useEffect(() => {
+    if (live) setPendingLive(0);
+  }, [live, page, template, statuses.join(","), from, to, idempotencyKey]);
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [detailId, setDetailId] = useState<string | null>(null);
 
