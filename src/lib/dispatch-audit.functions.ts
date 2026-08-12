@@ -12,6 +12,16 @@ import { resendIdempotencyKey } from "./dispatch-resend";
 export const DISPATCH_STATUSES = ["sent", "skipped", "failed"] as const;
 export type DispatchStatus = (typeof DISPATCH_STATUSES)[number];
 
+export type DispatchAttemptRow = {
+  attempt: number;
+  startedAt: string | null;
+  durationMs: number | null;
+  outcome: string;
+  error: string | null;
+  retryable: boolean;
+  backoffMs: number | null;
+};
+
 export type DispatchLogRow = {
   id: string;
   createdAt: string;
@@ -29,6 +39,8 @@ export type DispatchLogRow = {
   /** Set when this row was itself queued by an admin resend. */
   resentFrom: string | null;
   resentAt: string | null;
+  /** Per-attempt trail: timings, backoff waited, and failure reasons. */
+  attemptTrail: DispatchAttemptRow[];
 };
 
 export type DispatchLogResult = {
@@ -48,6 +60,22 @@ type Input = {
 };
 
 const MAX_ROWS = 300;
+
+function normalizeTrail(raw: unknown): DispatchAttemptRow[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((e): e is Record<string, unknown> => Boolean(e) && typeof e === "object")
+    .map((e, index) => ({
+      attempt: Number(e.attempt ?? index + 1),
+      startedAt: typeof e.startedAt === "string" ? e.startedAt : null,
+      durationMs: e.durationMs === null || e.durationMs === undefined ? null : Number(e.durationMs),
+      outcome: String(e.outcome ?? "unknown"),
+      error: typeof e.error === "string" ? e.error : null,
+      retryable: Boolean(e.retryable),
+      backoffMs: e.backoffMs === null || e.backoffMs === undefined ? null : Number(e.backoffMs),
+    }))
+    .sort((a, b) => a.attempt - b.attempt);
+}
 
 function isoOrNull(value: string | undefined, endOfDay: boolean) {
   const raw = (value ?? "").trim();
@@ -75,7 +103,7 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
     let query = db
       .from("notification_dispatch_log")
       .select(
-        "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable, payload, resent_from, resent_at",
+        "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable, payload, resent_from, resent_at, attempt_trail",
       )
       .order("created_at", { ascending: false })
       .limit(data.limit + 1);
@@ -106,6 +134,7 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       resendable: Boolean(r.payload && typeof r.payload === "object" && r.user_id),
       resentFrom: (r.resent_from as string | null) ?? null,
       resentAt: (r.resent_at as string | null) ?? null,
+      attemptTrail: normalizeTrail(r.attempt_trail),
     }));
 
     const counts = { sent: 0, skipped: 0, failed: 0, total: rows.length };
