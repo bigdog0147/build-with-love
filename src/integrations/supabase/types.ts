@@ -2372,6 +2372,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_privileged_writer: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
