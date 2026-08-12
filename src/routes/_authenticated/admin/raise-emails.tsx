@@ -66,9 +66,30 @@ function RaiseEmailPreviewPage() {
       </header>
 
       <section className="mt-6 rounded-xl border border-border p-4">
-        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Event type</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Event type</p>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && matches[0]) {
+                  setEvent(matches[0]);
+                } else if (e.key === "Escape") {
+                  setQuery("");
+                }
+              }}
+              placeholder="Search scenarios (⌘K)"
+              aria-label="Search raise timeline event types"
+              className="w-56 rounded-lg border border-border bg-transparent py-1.5 pl-8 pr-3 text-xs outline-none placeholder:text-muted-foreground focus:border-[var(--gold)]"
+            />
+          </div>
+        </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {RAISE_EMAIL_EVENTS.map((e) => (
+          {matches.map((e) => (
             <button
               key={e}
               type="button"
@@ -84,7 +105,15 @@ function RaiseEmailPreviewPage() {
             </button>
           ))}
         </div>
+        <p aria-live="polite" className="mt-3 text-[11px] text-muted-foreground">
+          {query
+            ? `${matches.length} of ${RAISE_EMAIL_EVENTS.length} scenarios match "${query}"${
+                matches.length ? " — press Enter to jump to the first match" : ""
+              }`
+            : `${RAISE_EMAIL_EVENTS.length} scenarios. Currently previewing ${RAISE_EMAIL_EVENT_LABEL[event]}.`}
+        </p>
       </section>
+
 
       <section className="mt-4 rounded-xl border border-border">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
