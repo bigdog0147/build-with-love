@@ -156,6 +156,8 @@ export function RaiseHistoryTimeline({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
   const [fields, setFields] = useState<string[]>([]);
+  const [diffOnly, setDiffOnly] = useState(false);
+
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const [previewOpen, setPreviewOpen] = useState(false);
   const focusedRef = useRef<HTMLLIElement | null>(null);
