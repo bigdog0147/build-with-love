@@ -7,6 +7,7 @@ import {
   Code2,
   Eye,
   Mail,
+  Download,
   RotateCcw,
   Search,
   Send,
@@ -106,6 +107,24 @@ function RaiseEmailPreviewPage() {
     retry: false,
   });
   const baseVariables = (defaults.data?.variables ?? {}) as Record<string, unknown>;
+
+  const downloadFile = (kind: "html" | "txt") => {
+    const body = kind === "html" ? preview.data?.html : preview.data?.text;
+    if (!body) return;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const suffix = preview.data?.overridden.length ? "-edited" : "";
+    const blob = new Blob([body], {
+      type: kind === "html" ? "text/html;charset=utf-8" : "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `raise-advance-${event}${suffix}-${stamp}.${kind}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const views: { key: View; label: string; icon: typeof Eye }[] = [
     { key: "rendered", label: "Rendered", icon: Eye },
@@ -310,6 +329,23 @@ function RaiseEmailPreviewPage() {
                 <Icon className="h-3.5 w-3.5" /> {label}
               </button>
             ))}
+            <span aria-hidden className="mx-1 w-px self-stretch bg-border" />
+            <button
+              type="button"
+              onClick={() => downloadFile("html")}
+              disabled={!preview.data?.html}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:opacity-40"
+            >
+              <Download className="h-3.5 w-3.5" /> HTML
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadFile("txt")}
+              disabled={!preview.data?.text}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-[var(--gold)]/60 hover:text-[var(--gold)] disabled:opacity-40"
+            >
+              <Download className="h-3.5 w-3.5" /> Plain text
+            </button>
           </div>
         </div>
 
