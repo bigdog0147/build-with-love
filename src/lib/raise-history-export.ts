@@ -447,6 +447,8 @@ export function buildRaiseHistoryReportHtml(
       Event types: ${escape(input.filterLabel ?? "All event types")}.
       Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
       Export mode: ${escape(modeLabel(input.diffOnly))}.
+      Diff columns: ${escape(diffColumnsLabel(input))}.
+
       All timestamps are shown in UTC.
     </p>
     <table>
