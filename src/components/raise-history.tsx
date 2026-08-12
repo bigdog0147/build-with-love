@@ -6,7 +6,10 @@ import {
   Download,
   FileArchive,
   FileDiff,
+  Columns2,
+  Columns3,
   GitCompareArrows,
+
 
   Link2,
   SlidersHorizontal,
