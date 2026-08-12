@@ -6,6 +6,8 @@ import {
   Download,
   FileArchive,
   FileDiff,
+  GitCompareArrows,
+
   Link2,
   SlidersHorizontal,
   Table2,
