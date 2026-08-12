@@ -490,7 +490,35 @@ export function RaiseHistoryTimeline({
                       Download {raiseConfirmationTitle(event.key).toLowerCase()}
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const fileName = downloadRaiseTransitionStatement({
+                        event,
+                        roundName: roundName ?? "Capital raise",
+                        currency,
+                        investorName,
+                      });
+                      if (!fileName) return;
+                      toast.success("Change statement downloaded.");
+                      onDownload?.({
+                        roundId: roundId ?? null,
+                        roundName: roundName ?? "Capital raise",
+                        eventKey: event.key,
+                        documentTitle: `${RAISE_TRANSITION_STATEMENT_TITLE} — ${event.label}`,
+                        reference: event.reference ?? null,
+                        source: "portal",
+                        documentCount: 1,
+                      });
+                    }}
+                    className="mt-2 ml-2 inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-[var(--gold)]/50 hover:text-foreground"
+                    aria-label={`Download the change statement PDF for ${event.label}`}
+                  >
+                    <FileDiff className="h-3.5 w-3.5" aria-hidden />
+                    Diff statement (PDF)
+                  </button>
                   {roundId && (
+
                     <button
                       type="button"
                       onClick={() =>
