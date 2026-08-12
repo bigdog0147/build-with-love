@@ -7,6 +7,7 @@ import {
   updateNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/notification-preferences.functions";
+import { RAISE_EVENT_PREFS } from "@/lib/raise-event-preferences";
 
 const CATEGORIES: { key: "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports" | "raise"; label: string; sub: string }[] = [
   { key: "kyc", label: "Identity verification", sub: "Submission receipts, review progress and decisions." },
@@ -120,6 +121,50 @@ export function NotificationPreferencesPanel() {
           );
         })}
       </ul>
+
+      <div className="mt-6 border-t border-white/6 pt-6">
+        <h3 className="font-display text-lg">Capital raising events</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Silence emails for individual raise timeline advances. These switches only narrow the Capital
+          raising category above — in-app notices are unaffected.
+        </p>
+
+        <ul className="mt-4 divide-y divide-white/6">
+          {RAISE_EVENT_PREFS.map((event) => {
+            const on = Boolean(prefs?.[event.key]) && Boolean(prefs?.raise_email);
+            const categoryOff = prefs ? !prefs.raise_email : false;
+            return (
+              <li
+                key={event.key}
+                className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm">{event.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {categoryOff ? "Capital raising emails are switched off above." : event.sub}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={on}
+                  aria-label={`${event.label} email`}
+                  disabled={categoryOff}
+                  onClick={() => toggle(event.key)}
+                  className={
+                    "rounded-lg border px-3 py-1.5 text-xs transition-colors disabled:opacity-40 " +
+                    (on
+                      ? "border-[var(--gold)]/50 bg-[var(--gold)]/10 text-foreground"
+                      : "border-border text-muted-foreground hover:text-foreground")
+                  }
+                >
+                  Email {on ? "on" : "off"}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
       <div className="mt-6 border-t border-white/6 pt-6">
         <h3 className="font-display text-lg">Delivery timing</h3>
