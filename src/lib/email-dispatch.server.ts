@@ -12,7 +12,25 @@ import { computeBackoffMs, isRetryableEmailError } from "./email-retry.server";
 import type { DispatchFailureReport } from "./email-dispatch-report.server";
 import type { DispatchAuditRecord } from "./email-dispatch-audit.server";
 
-export type DispatchJob = DispatchInput & { label?: string };
+export type DispatchJob = DispatchInput & {
+  label?: string;
+  /** Set when this job was queued by an admin resend from the audit log. */
+  resend?: { fromId: string; by?: string | null } | null;
+};
+
+/** Snapshot stored on the audit row so a later resend can replay the notice. */
+function auditPayload(job: DispatchJob): Record<string, unknown> {
+  return {
+    category: job.category,
+    title: job.title,
+    detail: job.detail,
+    tone: job.tone ?? null,
+    template: job.template ?? null,
+    templateData: job.templateData ?? null,
+    roundId: job.roundId ?? null,
+    raiseEvent: job.raiseEvent ?? null,
+  };
+}
 
 export type JobOutcome =
   | { ok: true; label: string; result: DispatchResult; attempts: number }
@@ -124,6 +142,9 @@ export async function runDispatchJobs(
             template: job.template,
             idempotencyKey: job.idempotencyKey,
             status: emailFailed ? "failed" : result.email ? "sent" : "skipped",
+            payload: auditPayload(job),
+            resentFrom: job.resend?.fromId ?? null,
+            resentBy: job.resend?.by ?? null,
             attempts: attempt,
             detail: result.email
               ? null
@@ -160,6 +181,9 @@ export async function runDispatchJobs(
             attempts: attempt,
             detail: lastError,
             retryable,
+            payload: auditPayload(job),
+            resentFrom: job.resend?.fromId ?? null,
+            resentBy: job.resend?.by ?? null,
           });
           break;
 
