@@ -154,6 +154,8 @@ function csv(rows: DispatchLogRow[]) {
     "Idempotency key",
     "Detail",
     "User",
+    "Last failure",
+    "Total attempt ms",
   ];
   const cell = (v: string | number | boolean | null) => {
     const s = v === null || v === undefined ? "" : String(v);
