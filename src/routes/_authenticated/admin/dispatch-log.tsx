@@ -346,14 +346,14 @@ function DispatchLogPage() {
       <section className="mt-6 space-y-4 rounded-xl border border-border p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Status</span>
-          <button type="button" onClick={() => setStatus("")} className={chip(status === "")}>
+          <button type="button" onClick={() => applyFilter(() => setStatus(""))} className={chip(status === "")}>
             All outcomes
           </button>
           {DISPATCH_STATUSES.map((s) => (
             <button
               key={s}
               type="button"
-              onClick={() => setStatus(s)}
+              onClick={() => applyFilter(() => setStatus(s))}
               aria-pressed={status === s}
               className={chip(status === s)}
             >
@@ -366,14 +366,14 @@ function DispatchLogPage() {
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
             Template
           </span>
-          <button type="button" onClick={() => setTemplate("")} className={chip(template === "")}>
+          <button type="button" onClick={() => applyFilter(() => setTemplate(""))} className={chip(template === "")}>
             All templates
           </button>
           {(log.data?.templates ?? []).map((t) => (
             <button
               key={t}
               type="button"
-              onClick={() => setTemplate(t)}
+              onClick={() => applyFilter(() => setTemplate(t))}
               aria-pressed={template === t}
               className={`${chip(template === t)} font-mono`}
             >
@@ -394,7 +394,7 @@ function DispatchLogPage() {
               type="date"
               value={from}
               max={to || undefined}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => applyFilter(() => setFrom(e.target.value))}
               className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
             />
           </label>
@@ -404,14 +404,14 @@ function DispatchLogPage() {
               type="date"
               value={to}
               min={from || undefined}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => applyFilter(() => setTo(e.target.value))}
               className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs normal-case tracking-normal text-foreground outline-none focus:border-[var(--gold)]"
             />
           </label>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              setIdempotencyKey(keyInput.trim());
+              applyFilter(() => setIdempotencyKey(keyInput.trim()));
             }}
             className="text-[11px] uppercase tracking-wider text-muted-foreground"
           >
