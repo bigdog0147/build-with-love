@@ -30,6 +30,9 @@ export interface RaiseHistoryExportInput {
   fieldLabel?: string | null;
   /** Compact changed-field slug appended to export file names. */
   fieldSlug?: string | null;
+  /** When true, export only the changed fields of each transition. */
+  diffOnly?: boolean;
+
 }
 
 export interface RaiseHistoryExportDocument {
