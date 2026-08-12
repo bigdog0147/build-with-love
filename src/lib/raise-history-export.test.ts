@@ -85,10 +85,10 @@ describe("buildRaiseHistoryCsv", () => {
   });
 
   it("writes one row per event with ISO and readable timestamps", () => {
-    const header = lines[9]!.split(",");
+    const header = lines[8]!.split(",");
     expect(header[0]).toBe("Stage");
     expect(header[1]).toBe("Timestamp (ISO 8601)");
-    expect(lines).toHaveLength(8 + events.length);
+    expect(lines).toHaveLength(9 + events.length);
     expect(lines[9]).toContain("2026-01-05T09:00:00.000Z");
     expect(lines[11]).toContain("Not recorded");
   });
