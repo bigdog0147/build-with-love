@@ -25,10 +25,13 @@ export const getKyc = createServerFn({ method: "GET" })
       if (ins.error) throw new Error(ins.error.message);
       data = ins.data;
     }
-    // Mirror auth email confirmation onto the KYC row if needed.
+    // Mirror auth email confirmation onto the KYC row if needed. Verified flags
+    // are protected columns, so this must go through the privileged client after
+    // the claim has been checked server-side.
     const emailConfirmed = Boolean((claims as { email_verified?: boolean })?.email_verified);
     if (emailConfirmed && data && !data.email_verified) {
-      const upd = await supabase
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const upd = await supabaseAdmin
         .from("kyc_profiles")
         .update({ email_verified: true })
         .eq("user_id", userId)
