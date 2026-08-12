@@ -7,6 +7,7 @@
  */
 import { serviceClient } from "./admin-guard.server";
 import { sendTemplateEmailWithRetry } from "./email-retry.server";
+import { raiseEventEmailAllowed } from "./raise-event-preferences";
 import { scheduleDelivery, type DeliveryWindow } from "./notification-schedule";
 
 export type NotificationCategory = "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports" | "raise";
@@ -24,6 +25,8 @@ export type DispatchInput = {
   idempotencyKey?: string;
   /** Capital raising only: applies the investor's per-round opt-in/opt-out. */
   roundId?: string;
+  /** Capital raising only: event id (e.g. "interest-withdrawn-1") for per-event email switches. */
+  raiseEvent?: string;
 };
 
 export type DispatchResult = {
@@ -102,6 +105,12 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
 
   if (!allows(prefs, input.category, "email")) {
     result.emailSkippedReason = "customer_opted_out";
+    return result;
+  }
+
+  // Per-event switches narrow the Capital raising category further.
+  if (input.category === "raise" && !raiseEventEmailAllowed(prefs, input.raiseEvent)) {
+    result.emailSkippedReason = "event_opted_out";
     return result;
   }
 

@@ -240,6 +240,8 @@ export async function notifyInvestor(input: {
   category?: "announcements" | "reports" | "raise";
   /** Capital raising only: lets the investor's per-round opt-out apply. */
   roundId?: string;
+  /** Capital raising only: event id so per-event email switches apply. */
+  raiseEvent?: string;
   /**
    * Capital raising only: the confirmation document for this decision. The
    * platform cannot attach files, so a signed download link for the identical
@@ -277,6 +279,7 @@ export async function notifyInvestor(input: {
     templateData,
     idempotencyKey: input.idempotencyKey,
     roundId: input.roundId,
+    raiseEvent: input.raiseEvent,
   };
 
   if (!input.awaitDelivery) {

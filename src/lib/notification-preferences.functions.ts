@@ -17,6 +17,10 @@ export type NotificationPreferences = {
   reports_inapp: boolean;
   raise_email: boolean;
   raise_inapp: boolean;
+  /** Per-event email switches, narrowing the Capital raising category. */
+  raise_event_interest_email: boolean;
+  raise_event_withdrawn_email: boolean;
+  raise_event_cancelled_email: boolean;
   locale: string | null;
   /** Hold emails between the quiet start/end hours (customer's time zone). */
   quiet_hours_enabled: boolean;
@@ -43,6 +47,9 @@ const DEFAULTS: NotificationPreferences = {
   reports_inapp: true,
   raise_email: true,
   raise_inapp: true,
+  raise_event_interest_email: true,
+  raise_event_withdrawn_email: true,
+  raise_event_cancelled_email: true,
   locale: null,
   quiet_hours_enabled: false,
   quiet_hours_start: 21,
@@ -59,7 +66,7 @@ export const getNotificationPreferences = createServerFn({ method: "GET" })
     const { data } = await context.supabase
       .from("notification_preferences")
       .select(
-        "kyc_email, kyc_inapp, deposits_email, deposits_inapp, withdrawals_email, withdrawals_inapp, security_email, security_inapp, announcements_email, announcements_inapp, reports_email, reports_inapp, raise_email, raise_inapp, locale, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, time_zone, raise_digest, digest_hour",
+        "kyc_email, kyc_inapp, deposits_email, deposits_inapp, withdrawals_email, withdrawals_inapp, security_email, security_inapp, announcements_email, announcements_inapp, reports_email, reports_inapp, raise_email, raise_inapp, raise_event_interest_email, raise_event_withdrawn_email, raise_event_cancelled_email, locale, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, time_zone, raise_digest, digest_hour",
       )
       .eq("user_id", context.userId)
       .maybeSingle();
