@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireAdminPermission, serviceClient } from "./admin-guard.server";
+import { resendIdempotencyKey } from "./dispatch-resend";
 
 /**
  * Admin-gated read of `notification_dispatch_log` — the append-only audit trail
@@ -23,6 +24,11 @@ export type DispatchLogRow = {
   attempts: number;
   detail: string | null;
   retryable: boolean;
+  /** True when the original notice content was captured and can be replayed. */
+  resendable: boolean;
+  /** Set when this row was itself queued by an admin resend. */
+  resentFrom: string | null;
+  resentAt: string | null;
 };
 
 export type DispatchLogResult = {
@@ -69,7 +75,7 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
     let query = db
       .from("notification_dispatch_log")
       .select(
-        "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable",
+        "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable, payload, resent_from, resent_at",
       )
       .order("created_at", { ascending: false })
       .limit(data.limit + 1);
@@ -97,6 +103,9 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       attempts: Number(r.attempts ?? 0),
       detail: (r.detail as string | null) ?? null,
       retryable: Boolean(r.retryable),
+      resendable: Boolean(r.payload && typeof r.payload === "object" && r.user_id),
+      resentFrom: (r.resent_from as string | null) ?? null,
+      resentAt: (r.resent_at as string | null) ?? null,
     }));
 
     const counts = { sent: 0, skipped: 0, failed: 0, total: rows.length };
@@ -120,4 +129,64 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       .sort();
 
     return { rows, templates, counts, hasMore };
+  });
+
+export type ResendDispatchResult = {
+  ok: boolean;
+  idempotencyKey: string;
+  message: string;
+};
+
+/**
+ * Queues a fresh dispatch of an audited notice.
+ *
+ * The replayed job carries a resend-scoped idempotency key derived from the
+ * source row (`<original>:resend:<logId>`): it is distinct from the original —
+ * so the provider does not dedupe it away — yet stable per audit row, so
+ * clicking Resend twice on the same entry can never deliver two emails.
+ */
+export const resendDispatchJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => ({ id: String(input.id ?? "").trim() }))
+  .handler(async ({ data, context }): Promise<ResendDispatchResult> => {
+    await requireAdminPermission(context as never, "notifications");
+    if (!/^[0-9a-f-]{36}$/i.test(data.id)) throw new Error("A valid log entry id is required.");
+
+    const db = await serviceClient();
+    const { data: row, error } = await db
+      .from("notification_dispatch_log")
+      .select("id, user_id, category, template, idempotency_key, label, payload")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("That dispatch log entry no longer exists.");
+
+    const payload = (row.payload ?? null) as Record<string, unknown> | null;
+    if (!payload || !row.user_id)
+      throw new Error(
+        "This entry was recorded before notice snapshots were stored, so it cannot be replayed.",
+      );
+
+    const idempotencyKey = resendIdempotencyKey(row.idempotency_key, String(row.id));
+    const { dispatchInBackground } = await import("./email-dispatch.server");
+    dispatchInBackground({
+      userId: String(row.user_id),
+      category: (payload.category as never) ?? (row.category as never),
+      title: String(payload.title ?? row.label ?? "Notice"),
+      detail: String(payload.detail ?? ""),
+      tone: (payload.tone as never) ?? undefined,
+      template: (payload.template as string | null) ?? undefined,
+      templateData: (payload.templateData as Record<string, unknown> | null) ?? undefined,
+      roundId: (payload.roundId as string | null) ?? undefined,
+      raiseEvent: (payload.raiseEvent as string | null) ?? undefined,
+      idempotencyKey,
+      label: `${row.label ?? "notice"} (resend)`,
+      resend: { fromId: String(row.id), by: context.userId },
+    });
+
+    return {
+      ok: true,
+      idempotencyKey,
+      message: "Resend queued. Delivery runs in the background with retries.",
+    };
   });
