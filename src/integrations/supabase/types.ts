@@ -1341,6 +1341,7 @@ export type Database = {
       }
       notification_dispatch_log: {
         Row: {
+          attempt_trail: Json
           attempts: number
           category: string
           created_at: string
@@ -1358,6 +1359,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          attempt_trail?: Json
           attempts?: number
           category: string
           created_at?: string
@@ -1375,6 +1377,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          attempt_trail?: Json
           attempts?: number
           category?: string
           created_at?: string
