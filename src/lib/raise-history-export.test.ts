@@ -80,30 +80,31 @@ describe("buildRaiseHistoryCsv", () => {
     expect(lines[2]).toBe("Generated,2026-03-01T10:00:00.000Z");
     expect(lines[3]).toBe("Date range,All dates");
     expect(lines[4]).toBe("Event types,All event types");
-    expect(lines[5]).toBe("Events,3");
+    expect(lines[5]).toBe("Changed fields,All changed fields");
+    expect(lines[6]).toBe("Events,3");
   });
 
   it("writes one row per event with ISO and readable timestamps", () => {
-    const header = lines[7]!.split(",");
+    const header = lines[8]!.split(",");
     expect(header[0]).toBe("Stage");
     expect(header[1]).toBe("Timestamp (ISO 8601)");
-    expect(lines).toHaveLength(8 + events.length);
-    expect(lines[8]).toContain("2026-01-05T09:00:00.000Z");
-    expect(lines[10]).toContain("Not recorded");
+    expect(lines).toHaveLength(9 + events.length);
+    expect(lines[9]).toContain("2026-01-05T09:00:00.000Z");
+    expect(lines[11]).toContain("Not recorded");
   });
 
   it("keeps actor labels and amounts with currency", () => {
-    expect(lines[9]).toContain("Capital markets desk");
-    expect(lines[9]).toContain("250000,USD");
-    expect(lines[10]).toContain("System");
+    expect(lines[10]).toContain("Capital markets desk");
+    expect(lines[10]).toContain("250000,USD");
+    expect(lines[11]).toContain("System");
   });
 
   it("escapes quotes and commas in detail copy", () => {
-    expect(lines[9]).toContain('"Accepted, ""fully"" funded"');
+    expect(lines[10]).toContain('"Accepted, ""fully"" funded"');
   });
 
   it("leaves currency blank when no amount was involved", () => {
-    expect(lines[8]).not.toContain("USD");
+    expect(lines[9]).not.toContain("USD");
   });
 });
 
@@ -184,6 +185,7 @@ describe("buildRaiseHistoryExportPreview", () => {
       "Investor",
       "Date range",
       "Event types",
+      "Changed fields",
       "Currency",
     ]);
     expect(preview.meta[2]!.value).toBe("1–31 January 2026");

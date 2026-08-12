@@ -26,6 +26,10 @@ export interface RaiseHistoryExportInput {
   filterLabel?: string | null;
   /** Compact filter slug appended to export file names. */
   filterSlug?: string | null;
+  /** Human label for the active changed-field filter, when any is applied. */
+  fieldLabel?: string | null;
+  /** Compact changed-field slug appended to export file names. */
+  fieldSlug?: string | null;
 }
 
 export interface RaiseHistoryExportDocument {
@@ -151,6 +155,7 @@ export function buildRaiseHistoryExportPreview(
       { label: "Investor", value: input.investorName },
       { label: "Date range", value: input.rangeLabel ?? "All dates" },
       { label: "Event types", value: input.filterLabel ?? "All event types" },
+      { label: "Changed fields", value: input.fieldLabel ?? "All changed fields" },
       { label: "Currency", value: input.currency },
     ],
     rowCount: input.events.length,
@@ -159,6 +164,7 @@ export function buildRaiseHistoryExportPreview(
       generatedAt,
       rangeSlug: input.rangeSlug,
       filterSlug: input.filterSlug,
+      fieldSlug: input.fieldSlug,
     }),
     pdfFileName: buildRaiseHistoryReportHtml({ ...input, generatedAt }).fileName.replace(
       /\.html$/,
@@ -177,6 +183,7 @@ export function buildRaiseHistoryCsv(input: RaiseHistoryExportInput): string {
   lines.push(["Generated", generatedAt].map(csvCell).join(","));
   lines.push(["Date range", input.rangeLabel ?? "All dates"].map(csvCell).join(","));
   lines.push(["Event types", input.filterLabel ?? "All event types"].map(csvCell).join(","));
+  lines.push(["Changed fields", input.fieldLabel ?? "All changed fields"].map(csvCell).join(","));
   lines.push(["Events", input.events.length].map(csvCell).join(","));
   lines.push("");
   lines.push(HEADERS.map(csvCell).join(","));
@@ -194,11 +201,13 @@ export function raiseHistoryCsvFileName(input: {
   generatedAt?: string;
   rangeSlug?: string | null;
   filterSlug?: string | null;
+  fieldSlug?: string | null;
 }) {
   const stamp = (input.generatedAt ?? new Date().toISOString()).slice(0, 10);
   const range = input.rangeSlug ? `-${slug(input.rangeSlug)}` : "";
   const filters = input.filterSlug ? `-${slug(input.filterSlug)}` : "";
-  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}-${stamp}.csv`;
+  const fields = input.fieldSlug ? `-${slug(input.fieldSlug)}` : "";
+  return `gf3x-${slug(input.roundName)}-status-history${range}${filters}${fields}-${stamp}.csv`;
 }
 
 /** Printable statement of the full status history, ready to save as PDF. */
@@ -299,6 +308,7 @@ export function buildRaiseHistoryReportHtml(
       ${input.events.length} recorded ${input.events.length === 1 ? "stage" : "stages"}, oldest first.
       Date range: ${escape(input.rangeLabel ?? "All dates")}.
       Event types: ${escape(input.filterLabel ?? "All event types")}.
+      Changed fields: ${escape(input.fieldLabel ?? "All changed fields")}.
       All timestamps are shown in UTC.
     </p>
     <table>
@@ -326,7 +336,9 @@ export function buildRaiseHistoryReportHtml(
   return {
     fileName: `gf3x-${slug(input.roundName)}-status-history${
       input.rangeSlug ? `-${slug(input.rangeSlug)}` : ""
-    }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}-${generatedAt.slice(0, 10)}.html`,
+    }${input.filterSlug ? `-${slug(input.filterSlug)}` : ""}${
+      input.fieldSlug ? `-${slug(input.fieldSlug)}` : ""
+    }-${generatedAt.slice(0, 10)}.html`,
     title,
     html,
   };

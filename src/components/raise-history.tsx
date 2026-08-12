@@ -7,6 +7,7 @@ import {
   FileArchive,
   FileDiff,
   Link2,
+  SlidersHorizontal,
   Table2,
   X,
 } from "lucide-react";
@@ -14,6 +15,15 @@ import {
   RAISE_TRANSITION_STATEMENT_TITLE,
   downloadRaiseTransitionStatement,
 } from "@/lib/raise-history-statement";
+import {
+  filterRaiseHistoryByFields,
+  hasRaiseFieldFilter,
+  raiseFieldKey,
+  raiseHistoryFieldCounts,
+  raiseHistoryFieldLabel,
+  raiseHistoryFieldSlug,
+  raiseHistoryFields,
+} from "@/lib/raise-history-fields";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -145,17 +155,25 @@ export function RaiseHistoryTimeline({
 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<RaiseHistoryCategory[]>([]);
+  const [fields, setFields] = useState<string[]>([]);
   const [range, setRange] = useState<RaiseHistoryRange>(EMPTY_RAISE_HISTORY_RANGE);
   const [previewOpen, setPreviewOpen] = useState(false);
   const focusedRef = useRef<HTMLLIElement | null>(null);
 
   const counts = useMemo(() => raiseHistoryCounts(events), [events]);
+  const fieldOptions = useMemo(() => raiseHistoryFields(events), [events]);
+  const fieldCounts = useMemo(() => raiseHistoryFieldCounts(events), [events]);
   const visible = useMemo(
-    () => filterRaiseHistoryByRange(filterRaiseHistory(events, active), range),
-    [events, active, range],
+    () =>
+      filterRaiseHistoryByFields(
+        filterRaiseHistoryByRange(filterRaiseHistory(events, active), range),
+        fields,
+      ),
+    [events, active, range, fields],
   );
   const rangeActive = hasRaiseHistoryRange(range);
   const rangeLabel = raiseHistoryRangeLabel(range);
+  const fieldsActive = hasRaiseFieldFilter(fields);
 
   const deepLinked =
     roundId && target && target.roundId === roundId && raiseEventExists(events, target.eventKey)
@@ -168,6 +186,7 @@ export function RaiseHistoryTimeline({
     if (!deepLinked) return;
     setOpen(true);
     setActive([]);
+    setFields([]);
     setRange(EMPTY_RAISE_HISTORY_RANGE);
   }, [deepLinked]);
 
@@ -192,7 +211,13 @@ export function RaiseHistoryTimeline({
     rangeSlug: raiseHistoryRangeSlug(range),
     filterLabel: raiseHistoryFilterLabel(active),
     filterSlug: raiseHistoryFilterSlug(active),
+    fieldLabel: raiseHistoryFieldLabel(fields),
+    fieldSlug: raiseHistoryFieldSlug(fields),
   };
+
+  const toggleField = (field: string) =>
+    setFields((prev) => (prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]));
+
 
   const confirmationCount = downloadableRaiseEvents(events).length;
 
@@ -390,6 +415,60 @@ export function RaiseHistoryTimeline({
           );
         })}
       </div>
+
+      {fieldOptions.length > 0 && (
+        <div
+          className="mt-3 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Export only transitions where these fields changed"
+        >
+          <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-muted-foreground">
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
+            Changed fields
+          </span>
+          <button
+            type="button"
+            onClick={() => setFields([])}
+            aria-pressed={!fieldsActive}
+            className={`rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-widest transition-colors ${
+              !fieldsActive
+                ? "border-[var(--gold)]/60 bg-[var(--gold)]/12 text-[var(--gold)]"
+                : "border-border text-muted-foreground hover:border-[var(--gold)]/40 hover:text-foreground"
+            }`}
+          >
+            Any
+          </button>
+          {fieldOptions.map((field) => {
+            const count = fieldCounts[raiseFieldKey(field)] ?? 0;
+            const on = fields.includes(field);
+            return (
+              <button
+                key={field}
+                type="button"
+                onClick={() => toggleField(field)}
+                aria-pressed={on}
+                aria-label={`Export only transitions where ${field} changed (${count})`}
+                className={`rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-widest transition-colors ${
+                  on
+                    ? "border-[var(--gold)]/60 bg-[var(--gold)]/12 text-[var(--gold)]"
+                    : "border-border text-muted-foreground hover:border-[var(--gold)]/40 hover:text-foreground"
+                }`}
+              >
+                {field}
+                <span className="ml-1.5 opacity-70">{count}</span>
+              </button>
+            );
+          })}
+          {fieldsActive && (
+            <span className="text-xs text-muted-foreground">
+              Exports include {visible.length} of {events.length}{" "}
+              {events.length === 1 ? "event" : "events"}
+            </span>
+          )}
+        </div>
+      )}
+
+
 
       {events.length > 0 && (
         <div className="mt-4 flex items-center gap-3 rounded-lg border border-[var(--gold)]/20 bg-[var(--gold)]/5 px-3 py-2">
