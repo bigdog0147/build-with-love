@@ -10,7 +10,7 @@
 import type { DispatchInput, DispatchResult } from "./notification-dispatcher.server";
 import { computeBackoffMs, isRetryableEmailError } from "./email-retry.server";
 import type { DispatchFailureReport } from "./email-dispatch-report.server";
-import type { DispatchAuditRecord } from "./email-dispatch-audit.server";
+import type { DispatchAttempt, DispatchAuditRecord } from "./email-dispatch-audit.server";
 
 export type DispatchJob = DispatchInput & {
   label?: string;
@@ -106,9 +106,22 @@ export async function runDispatchJobs(
     let lastError = "The notice was not delivered.";
     let retryable = true;
     let attempt = 0;
+    // One entry per attempt: outcome, duration, failure reason and the backoff
+    // that was waited before the next pass — surfaced in the admin audit viewer.
+    const trail: DispatchAttempt[] = [];
+    let attemptStart = 0;
+    const trace = (entry: Omit<DispatchAttempt, "attempt" | "startedAt" | "durationMs">) => {
+      trail.push({
+        attempt,
+        startedAt: new Date(attemptStart).toISOString(),
+        durationMs: Math.max(0, Date.now() - attemptStart),
+        ...entry,
+      });
+    };
 
     while (attempt < maxAttempts) {
       attempt += 1;
+      attemptStart = Date.now();
       let waitMs: number | null = null;
       try {
         const result = await dispatch(job);
@@ -120,9 +133,16 @@ export async function runDispatchJobs(
           lastError = result.emailSkippedReason ?? lastError;
           retryable = true;
           waitMs = computeBackoffMs(attempt, { baseDelayMs, maxDelayMs });
+          trace({ outcome: "retry", error: lastError, retryable: true, backoffMs: waitMs });
         } else {
-          outcomes.push({ ok: true, label, result, attempts: attempt });
           const emailFailed = Boolean(result.emailRetryable && !result.email);
+          trace({
+            outcome: emailFailed ? "failed" : result.email ? "sent" : "skipped",
+            error: emailFailed || !result.email ? (result.emailSkippedReason ?? null) : null,
+            retryable: emailFailed,
+            backoffMs: null,
+          });
+          outcomes.push({ ok: true, label, result, attempts: attempt });
           if (emailFailed) {
             await reportFailure(options, {
               label,
@@ -150,6 +170,7 @@ export async function runDispatchJobs(
               ? null
               : (result.emailSkippedReason ?? (job.template ? lastError : "in_app_only")),
             retryable: emailFailed,
+            trail,
           });
           break;
 
@@ -160,6 +181,7 @@ export async function runDispatchJobs(
         retryable = isRetryableEmailError(error);
         log(`[dispatch] attempt ${attempt}/${maxAttempts} failed for ${label}`, lastError);
         if (!retryable || attempt === maxAttempts) {
+          trace({ outcome: "failed", error: lastError, retryable, backoffMs: null });
           outcomes.push({ ok: false, label, error: lastError, attempts: attempt, retryable });
           await reportFailure(options, {
             label,
@@ -181,6 +203,7 @@ export async function runDispatchJobs(
             attempts: attempt,
             detail: lastError,
             retryable,
+            trail,
             payload: auditPayload(job),
             resentFrom: job.resend?.fromId ?? null,
             resentBy: job.resend?.by ?? null,
@@ -197,6 +220,7 @@ export async function runDispatchJobs(
               (error as { retryAfterSeconds?: number | null } | null)?.retryAfterSeconds ?? null,
           },
         );
+        trace({ outcome: "retry", error: lastError, retryable, backoffMs: waitMs });
       }
 
       if (waitMs !== null) {
