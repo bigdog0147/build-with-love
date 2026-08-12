@@ -1,22 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth.server";
 
 /**
  * Retry sweep for document-published notifications, called by the scheduled job.
  * Picks up deliveries parked as "retrying" whose next attempt is due, so a
  * transient provider outage never turns into a missed investor notification.
- * Callers must present the project anon key.
+ * Callers must present the CRON_SECRET shared secret.
  */
 export const Route = createFileRoute("/api/public/document-notification-retry")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key =
-          request.headers.get("apikey") ??
-          request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
-          "";
-        const expected =
-          process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"] ?? "";
-        if (!expected || key !== expected) {
+        if (!isAuthorizedCronRequest(request)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
