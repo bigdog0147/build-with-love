@@ -14,6 +14,14 @@ import {
   RAISE_TRANSITION_STATEMENT_TITLE,
   downloadRaiseTransitionStatement,
 } from "@/lib/raise-history-statement";
+import {
+  filterRaiseHistoryByFields,
+  hasRaiseFieldFilter,
+  raiseHistoryFieldCounts,
+  raiseHistoryFieldLabel,
+  raiseHistoryFieldSlug,
+  raiseHistoryFields,
+} from "@/lib/raise-history-fields";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
