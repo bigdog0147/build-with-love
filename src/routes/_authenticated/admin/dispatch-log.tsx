@@ -237,7 +237,16 @@ function DispatchLogPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `dispatch-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    const parts = [
+      "dispatch-audit",
+      template || null,
+      status || null,
+      from || null,
+      to || null,
+      idempotencyKey ? "key" : null,
+      new Date().toISOString().slice(0, 10),
+    ].filter(Boolean) as string[];
+    a.download = `${parts.join("-").replace(/[^a-zA-Z0-9._-]+/g, "-")}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
