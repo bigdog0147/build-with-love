@@ -7,7 +7,8 @@
  */
 import { serviceClient } from "./admin-guard.server";
 import { sendTemplateEmailWithRetry } from "./email-retry.server";
-import { raiseEventEmailAllowed } from "./raise-event-preferences";
+import { raiseEventEmailAllowed, raiseEventPrefKey } from "./raise-event-preferences";
+import { encodeSkipReason } from "./dispatch-skip-reason";
 import { scheduleDelivery, type DeliveryWindow } from "./notification-schedule";
 
 export type NotificationCategory = "kyc" | "deposits" | "withdrawals" | "security" | "announcements" | "reports" | "raise";
@@ -37,6 +38,10 @@ export type DispatchResult = {
   emailAttempts?: number;
   /** True when the failure was transient and another attempt could succeed. */
   emailRetryable?: boolean;
+  /** Raise timeline event id when a per-event switch caused the skip. */
+  emailSkippedEvent?: string | null;
+  /** Preference column that caused the skip, when attributable. */
+  emailSkippedSource?: string | null;
   /** Set when quiet hours or a digest cadence pushed the email into the future. */
   emailDeferredUntil?: string;
 };
@@ -110,7 +115,15 @@ export async function dispatchNotification(input: DispatchInput): Promise<Dispat
 
   // Per-event switches narrow the Capital raising category further.
   if (input.category === "raise" && !raiseEventEmailAllowed(prefs, input.raiseEvent)) {
-    result.emailSkippedReason = "event_opted_out";
+    // Record which event was muted and which preference silenced it, so the
+    // audit log explains the skip without a second lookup.
+    result.emailSkippedReason = encodeSkipReason({
+      code: "event_opted_out",
+      event: input.raiseEvent ?? null,
+      source: raiseEventPrefKey(input.raiseEvent) ?? "raise_event_email",
+    });
+    result.emailSkippedEvent = input.raiseEvent ?? null;
+    result.emailSkippedSource = raiseEventPrefKey(input.raiseEvent) ?? "raise_event_email";
     return result;
   }
 
