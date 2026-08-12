@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { parseSkipReason } from "@/lib/dispatch-skip-reason";
 import { toast } from "sonner";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Download,
@@ -17,6 +18,9 @@ import {
   ChevronRight,
   Check,
   ScrollText,
+  Pause,
+  Play,
+  Radio,
 
   Search,
   Send,
@@ -240,6 +244,44 @@ function DispatchLogPage() {
     retry: false,
   });
 
+  // ---- live updates ----------------------------------------------------
+  const [live, setLive] = useState(true);
+  const [pendingLive, setPendingLive] = useState(0);
+  const [connected, setConnected] = useState(false);
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const firstPageRef = useRef(page === 1);
+  firstPageRef.current = page === 1;
+  const refetchRef = useRef(log.refetch);
+  refetchRef.current = log.refetch;
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-dispatch-log-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notification_dispatch_log" },
+        () => {
+          if (liveRef.current && firstPageRef.current) {
+            void refetchRef.current();
+          } else {
+            setPendingLive((n) => n + 1);
+          }
+        },
+      )
+      .subscribe((status) => setConnected(status === "SUBSCRIBED"));
+    return () => {
+      setConnected(false);
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const resumeLive = () => {
+    setLive(true);
+    setPendingLive(0);
+    void log.refetch();
+  };
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -407,6 +449,45 @@ function DispatchLogPage() {
             )}
             Refresh
           </button>
+
+          <button
+            type="button"
+            onClick={() => (live ? setLive(false) : resumeLive())}
+            aria-pressed={live}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
+              live
+                ? "border-[var(--gold)]/60 text-[var(--gold)]"
+                : "border-border text-muted-foreground hover:border-[var(--gold)]/60 hover:text-[var(--gold)]"
+            }`}
+          >
+            {live ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {live ? "Pause live updates" : "Resume live updates"}
+          </button>
+
+          <span
+            className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground"
+            aria-live="polite"
+          >
+            <Radio
+              className={`h-3.5 w-3.5 ${
+                live && connected ? "animate-pulse text-emerald-400" : "text-muted-foreground"
+              }`}
+            />
+            {live ? (connected ? "Live" : "Connecting…") : "Paused"}
+          </span>
+
+          {pendingLive > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setPage(1);
+                resumeLive();
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]"
+            >
+              {pendingLive} new {pendingLive === 1 ? "entry" : "entries"} — show latest
+            </button>
+          ) : null}
         </div>
       </header>
 
