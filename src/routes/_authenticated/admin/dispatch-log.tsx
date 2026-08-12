@@ -405,22 +405,41 @@ function DispatchLogPage() {
 
       <section className="mt-6 space-y-4 rounded-xl border border-border p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Status</span>
-          <button type="button" onClick={() => applyFilter(() => setStatus(""))} className={chip(status === "")}>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Outcome</span>
+          <button
+            type="button"
+            onClick={() => applyFilter(() => setStatuses([]))}
+            aria-pressed={statuses.length === 0}
+            className={chip(statuses.length === 0)}
+          >
             All outcomes
           </button>
-          {DISPATCH_STATUSES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => applyFilter(() => setStatus(s))}
-              aria-pressed={status === s}
-              className={chip(status === s)}
-            >
-              {STATUS_LABEL[s]}
-            </button>
-          ))}
+          {DISPATCH_STATUSES.map((s) => {
+            const active = statuses.includes(s);
+            const count = counts?.[s];
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => applyFilter(() => toggleStatus(s))}
+                aria-pressed={active}
+                className={chip(active)}
+              >
+                {active ? <Check className="mr-1 inline h-3 w-3" /> : null}
+                {STATUS_LABEL[s]}
+                {typeof count === "number" ? (
+                  <span className="ml-1 text-muted-foreground">({count})</span>
+                ) : null}
+              </button>
+            );
+          })}
+          {statuses.length > 1 ? (
+            <span className="text-[11px] text-muted-foreground">
+              {statuses.length} outcomes selected
+            </span>
+          ) : null}
         </div>
+
 
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
