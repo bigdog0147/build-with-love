@@ -179,6 +179,75 @@ function RaiseEmailPreviewPage() {
         </button>
       </section>
 
+      <section className="mt-4 rounded-xl border border-border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <SlidersHorizontal className="h-3.5 w-3.5" /> Sample variable editor
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tweak any value and the email re-renders instantly. Edits are preview-only and reset
+              when you switch events.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDrafts({})}
+            disabled={Object.keys(drafts).length === 0}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-[var(--gold)]/60 disabled:opacity-40"
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Reset to sample
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {RAISE_EMAIL_VARIABLE_KEYS.map((key) => {
+            const sample = baseVariables[key];
+            const value = drafts[key] ?? (sample === undefined || sample === null ? "" : String(sample));
+            const changed = key in drafts;
+            const long = key === "nextStep" || key === "note" || key === "confirmationUrl";
+            return (
+              <label key={key} className={long ? "sm:col-span-2" : undefined}>
+                <span className="flex items-center gap-2 font-mono text-[11px] text-[var(--gold)]">
+                  {key}
+                  {changed ? (
+                    <span className="rounded bg-[var(--gold)]/15 px-1.5 py-0.5 font-sans text-[10px] uppercase tracking-wider">
+                      edited
+                    </span>
+                  ) : null}
+                </span>
+                {long ? (
+                  <textarea
+                    rows={2}
+                    value={value}
+                    onChange={(e) => setDrafts((d) => ({ ...d, [key]: e.target.value }))}
+                    className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs outline-none focus:border-[var(--gold)]"
+                  />
+                ) : (
+                  <input
+                    type={key === "amount" ? "number" : "text"}
+                    value={value}
+                    onChange={(e) => setDrafts((d) => ({ ...d, [key]: e.target.value }))}
+                    className="mt-1 w-full rounded-lg border border-border bg-transparent px-3 py-2 text-xs outline-none focus:border-[var(--gold)]"
+                  />
+                )}
+              </label>
+            );
+          })}
+        </div>
+
+        <p aria-live="polite" className="mt-3 text-[11px] text-muted-foreground">
+          {preview.isFetching
+            ? "Re-rendering the email…"
+            : preview.data?.overridden.length
+              ? `Rendering with ${preview.data.overridden.length} edited variable${
+                  preview.data.overridden.length === 1 ? "" : "s"
+                }: ${preview.data.overridden.join(", ")}`
+              : "Rendering with the default sample data."}
+        </p>
+      </section>
+
+
 
 
       <section className="mt-4 rounded-xl border border-border">
