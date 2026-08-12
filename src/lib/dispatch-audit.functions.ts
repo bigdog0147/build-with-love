@@ -86,32 +86,72 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
     from: isoOrNull(input.from, false),
     to: isoOrNull(input.to, true),
     idempotencyKey: (input.idempotencyKey ?? "").trim().slice(0, 200),
-    limit: Math.min(Math.max(Number(input.limit) || 100, 10), MAX_ROWS),
+    page: Math.max(Math.trunc(Number(input.page) || 1), 1),
+    pageSize: Math.min(
+      Math.max(Math.trunc(Number(input.pageSize) || DEFAULT_PAGE_SIZE), 10),
+      MAX_PAGE_SIZE,
+    ),
   }))
   .handler(async ({ data, context }): Promise<DispatchLogResult> => {
     await requireAdminPermission(context as never, "notifications");
     const db = await serviceClient();
 
-    let query = db
-      .from("notification_dispatch_log")
-      .select(
-        "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable, payload, resent_from, resent_at, attempt_trail",
-      )
-      .order("created_at", { ascending: false })
-      .limit(data.limit + 1);
+    /** Applies the active filters to any query builder for this table. */
+    const applyFilters = <T extends { eq: unknown }>(builder: T): T => {
+      let q = builder as never as {
+        eq: (c: string, v: unknown) => typeof q;
+        gte: (c: string, v: unknown) => typeof q;
+        lte: (c: string, v: unknown) => typeof q;
+        ilike: (c: string, v: string) => typeof q;
+      };
+      if (data.template) q = q.eq("template", data.template);
+      if (data.status) q = q.eq("status", data.status);
+      if (data.from) q = q.gte("created_at", data.from);
+      if (data.to) q = q.lte("created_at", data.to);
+      if (data.idempotencyKey) q = q.ilike("idempotency_key", `%${data.idempotencyKey}%`);
+      return q as never as T;
+    };
 
-    if (data.template) query = query.eq("template", data.template);
-    if (data.status) query = query.eq("status", data.status);
-    if (data.from) query = query.gte("created_at", data.from);
-    if (data.to) query = query.lte("created_at", data.to);
-    if (data.idempotencyKey) query = query.ilike("idempotency_key", `%${data.idempotencyKey}%`);
+    // Outcome counts across the whole filtered set, so the summary line and the
+    // page navigation describe the same universe of rows.
+    const statusCount = async (status: DispatchStatus) => {
+      const { count } = await applyFilters(
+        db
+          .from("notification_dispatch_log")
+          .select("id", { count: "exact", head: true })
+          .eq("status", status),
+      );
+      return count ?? 0;
+    };
+    const [sent, skipped, failed] = await Promise.all([
+      statusCount("sent"),
+      statusCount("skipped"),
+      statusCount("failed"),
+    ]);
 
-    const { data: raw, error } = await query;
+    const totalRows = data.status
+      ? data.status === "sent"
+        ? sent
+        : data.status === "failed"
+          ? failed
+          : skipped
+      : sent + skipped + failed;
+    const totalPages = Math.max(Math.ceil(totalRows / data.pageSize), 1);
+    const page = Math.min(data.page, totalPages);
+    const offset = (page - 1) * data.pageSize;
+
+    const { data: raw, error } = await applyFilters(
+      db
+        .from("notification_dispatch_log")
+        .select(
+          "id, created_at, user_id, category, template, idempotency_key, label, status, attempts, detail, retryable, payload, resent_from, resent_at, attempt_trail",
+        )
+        .order("created_at", { ascending: false })
+        .range(offset, offset + data.pageSize - 1),
+    );
     if (error) throw new Error(error.message);
 
-    const all = (raw ?? []) as Record<string, unknown>[];
-    const hasMore = all.length > data.limit;
-    const rows: DispatchLogRow[] = all.slice(0, data.limit).map((r) => ({
+    const rows: DispatchLogRow[] = ((raw ?? []) as Record<string, unknown>[]).map((r) => ({
       id: String(r.id),
       createdAt: String(r.created_at),
       userId: (r.user_id as string | null) ?? null,
@@ -129,12 +169,7 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       attemptTrail: normalizeTrail(r.attempt_trail),
     }));
 
-    const counts = { sent: 0, skipped: 0, failed: 0, total: rows.length };
-    for (const row of rows) {
-      if (row.status === "sent") counts.sent += 1;
-      else if (row.status === "failed") counts.failed += 1;
-      else counts.skipped += 1;
-    }
+    const counts = { sent, skipped, failed, total: totalRows };
 
     // Distinct template names for the filter chips (recent activity only).
     const { data: recent } = await db
@@ -149,8 +184,18 @@ export const listDispatchAuditLog = createServerFn({ method: "POST" })
       .filter(Boolean)
       .sort();
 
-    return { rows, templates, counts, hasMore };
+    return {
+      rows,
+      templates,
+      counts,
+      hasMore: page < totalPages,
+      page,
+      pageSize: data.pageSize,
+      totalRows,
+      totalPages,
+    };
   });
+
 
 export type ResendDispatchResult = {
   ok: boolean;
