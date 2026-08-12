@@ -32,6 +32,31 @@ function RaiseEmailPreviewPage() {
   const renderPreview = useServerFn(renderRaiseAdvanceEmailPreview);
   const [event, setEvent] = useState<RaiseEmailEvent>("interest_submitted");
   const [view, setView] = useState<View>("rendered");
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const matches = useMemo<RaiseEmailEvent[]>(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [...RAISE_EMAIL_EVENTS];
+    return RAISE_EMAIL_EVENTS.filter(
+      (e) =>
+        RAISE_EMAIL_EVENT_LABEL[e].toLowerCase().includes(q) || e.toLowerCase().includes(q),
+    );
+  }, [query]);
+
+  useEffect(() => {
+    const onKey = (ev: KeyboardEvent) => {
+      if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "k") {
+        ev.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+
 
   const preview = useQuery({
     queryKey: ["raise-email-preview", event],
