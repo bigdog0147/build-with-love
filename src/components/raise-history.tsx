@@ -5,10 +5,15 @@ import {
   ChevronDown,
   Download,
   FileArchive,
+  FileDiff,
   Link2,
   Table2,
   X,
 } from "lucide-react";
+import {
+  RAISE_TRANSITION_STATEMENT_TITLE,
+  downloadRaiseTransitionStatement,
+} from "@/lib/raise-history-statement";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
