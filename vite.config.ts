@@ -13,6 +13,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 const serverEnv = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 Object.assign(process.env, serverEnv);
 
+// Ensure Nitro builds as a standalone Node.js server for Render deployment
+process.env.NITRO_PRESET = process.env.NITRO_PRESET || "node-server";
+process.env.HOST = process.env.HOST || "0.0.0.0";
+process.env.NITRO_HOST = process.env.NITRO_HOST || "0.0.0.0";
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
