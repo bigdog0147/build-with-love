@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",
+    "postinstall": "node -e \"if(process.platform!=='win32'){const fs=require('fs');try{fs.writeFileSync('node_modules/.bin/Yarn','#!/bin/sh\\nexec yarn \\\"$@\\\"\\n',{mode:0o755})}catch{}}\" && vite build",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

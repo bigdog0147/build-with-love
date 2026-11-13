@@ -7,8 +7,8 @@ services:
   repo: https://github.com/gigafactoryx3/build-with-love
   plan: free
   region: oregon
-  buildCommand: bun install && bun run build
-  startCommand: yarn start
+  buildCommand: bun install
+  startCommand: 'Yarn start '
   domains:
   - gf3x.space
   - www.gf3x.space
