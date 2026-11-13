@@ -1,0 +1,12 @@
+# Exported from Render on 2026-11-13T13:38:41Z
+version: "1"
+services:
+- type: web
+  name: G-F-3-X
+  runtime: node
+  repo: https://github.com/gigafactoryx3/build-with-love
+  plan: free
+  region: oregon
+  buildCommand: bun install && bun run build
+  startCommand: 'yarn start'
+  autoDeployTrigger: commit
