@@ -15,6 +15,17 @@ if (typeof globalThis.addEventListener === "function") {
   );
 }
 
+if (typeof process !== "undefined" && typeof process.on === "function") {
+  process.on("uncaughtException", (err) => {
+    console.error("DEBUG UNCAUGHT EXCEPTION:", err);
+    record(err);
+  });
+  process.on("unhandledRejection", (reason) => {
+    console.error("DEBUG UNHANDLED REJECTION:", reason);
+    record(reason);
+  });
+}
+
 export function consumeLastCapturedError(): unknown {
   if (!lastCapturedError) return undefined;
   if (Date.now() - lastCapturedError.at > TTL_MS) {

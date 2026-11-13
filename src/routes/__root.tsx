@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { AerodynamicSmokeMotion } from "@/components/aerodynamic-smoke-motion";
 
 function NotFoundComponent() {
   return (
@@ -78,20 +79,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gigafactory 3X | Building the Future" },
-      { name: "description", content: "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry." },
-      { name: "keywords", content: "Gigafactory 3X, AI, Technology, Manufacturing, Robotics, Automation, Innovation, Infrastructure, Smart Factory, Industrial Technology, Engineering" },
-      { name: "author", content: "Gigafactory 3X" },
+      { title: "X3 — High-Performance & Intelligent Engineering" },
+      { name: "description", content: "X3 engineers next-generation robotics, clean energy infrastructure, and high-performance engineering." },
+      { name: "keywords", content: "X3, AI, Technology, Engineering, Robotics, Energy Storage, High Performance, Innovation" },
+      { name: "author", content: "X3" },
       { name: "theme-color", content: "#0a0a0a" },
-      { property: "og:title", content: "Gigafactory 3X | Building the Future" },
-      { property: "og:description", content: "AI-powered industrial automation, intelligent infrastructure, sustainable manufacturing, and next-generation innovation." },
+      { property: "og:title", content: "X3 — High-Performance Engineering" },
+      { property: "og:description", content: "Next-generation robotics, clean energy infrastructure, and high-performance engineering." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Gigafactory 3X" },
+      { property: "og:site_name", content: "X3" },
       { property: "og:url", content: "https://gf3x.space" },
       { property: "og:image", content: "https://gf3x.space/og-image.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Gigafactory 3X | Building the Future" },
-      { name: "twitter:description", content: "AI-powered industrial automation, intelligent infrastructure, and next-generation innovation." },
+      { name: "twitter:title", content: "X3 — High-Performance Engineering" },
+      { name: "twitter:description", content: "Next-generation robotics, clean energy infrastructure, and high-performance engineering." },
       { name: "twitter:image", content: "https://gf3x.space/og-image.jpg" },
     ],
     links: [
@@ -103,7 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" },
     ],
     scripts: [
       {
@@ -111,11 +112,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
-          name: "Gigafactory 3X",
+          name: "X3",
           url: "https://www.gf3x.space/",
           logo: "https://www.gf3x.space/favicon.png",
           description:
-            "Gigafactory 3X engineers AI-powered industrial automation, robotics and sustainable manufacturing for global industry.",
+            "X3 engineers next-generation robotics, clean energy infrastructure, and high-performance engineering.",
         }),
       },
     ],
@@ -160,6 +161,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AerodynamicSmokeMotion />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster />

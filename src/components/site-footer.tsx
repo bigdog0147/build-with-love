@@ -1,6 +1,6 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
-import logo from "@/assets/g3-logo.png";
 import { SocialLinksBar } from "@/components/social-links-bar";
+import { X3Logo3D } from "@/components/x3-logo-3d";
 
 export function SiteFooter() {
   return (
@@ -8,14 +8,10 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
-            <img src={logo} alt="Gigafactory 3 logo" width={32} height={32} className="h-8 w-8 object-contain" />
-            <div className="font-display text-base tracking-wide">
-              GIGAFACTORY <span className="gold-text">3</span>
-            </div>
+            <X3Logo3D size="sm" />
           </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-            Engineering the future of intelligent industry — AI-powered manufacturing,
-            clean energy and digital infrastructure at global scale.
+            High-performance engineering, advanced electric powertrains, renewable energy infrastructure, and precision computing systems.
           </p>
           <div className="mt-6">
             <SocialLinksBar />
@@ -54,8 +50,8 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-2 px-6 py-6 text-xs text-muted-foreground md:flex-row md:items-center">
-          <div>© {new Date().getFullYear()} Gigafactory 3 Industries. All rights reserved.</div>
-          <div className="uppercase tracking-[0.24em]">Engineering Tomorrow's Intelligent Infrastructure</div>
+          <div>© {new Date().getFullYear()} X3. All rights reserved.</div>
+          <div className="uppercase tracking-[0.24em]">High-Performance Engineering & Systems</div>
         </div>
       </div>
     </footer>
