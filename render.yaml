@@ -1,4 +1,4 @@
-# Exported from Render on 2026-11-13T13:38:41Z
+# Exported from Render on 2026-11-13T14:47:56Z
 version: "1"
 services:
 - type: web
@@ -8,5 +8,10 @@ services:
   plan: free
   region: oregon
   buildCommand: bun install && bun run build
-  startCommand: 'yarn start'
+  startCommand: yarn start
+  domains:
+  - gf3x.space
+  - www.gf3x.space
   autoDeployTrigger: commit
+  previews:
+    generation: automatic
